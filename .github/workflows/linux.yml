@@ -94,11 +94,20 @@ jobs:
       - name: Package deb
         run: cpack --config build-ci/CPackConfig.cmake -G DEB
 
+      - name: Locate deb
+        run: |
+          package_path="$(find . -maxdepth 1 -type f -name 'cappy_*.deb' | sort | tail -n 1)"
+          if [ -z "$package_path" ]; then
+            echo "No .deb package found in workspace root." >&2
+            exit 1
+          fi
+          echo "CAPPY_DEB_PATH=$package_path" >> "$GITHUB_ENV"
+
       - name: Verify package
-        run: ./scripts/verify-deb-package.sh ./cappy_0.1.0_amd64.deb
+        run: ./scripts/verify-deb-package.sh "${{ env.CAPPY_DEB_PATH }}"
 
       - name: Upload deb artifact
         uses: actions/upload-artifact@v4
         with:
           name: cappy-linux-deb
-          path: ./cappy_0.1.0_amd64.deb
+          path: ${{ env.CAPPY_DEB_PATH }}

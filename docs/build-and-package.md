@@ -221,6 +221,7 @@ Additional verification completed on 2026-06-24:
 - Windows CI now installs NSIS explicitly and prints the resolved Qt toolchain to simplify packaging diagnostics
 - Windows CI now uses Qt `6.8.3` because `win64_msvc2022_64` is only supported by the install action on Qt `6.8+`
 - Windows CI now installs `ninja` explicitly and resolves `windeployqt` from `QT_ROOT_DIR/bin`
+- Windows CI now uses newer `aqtinstall` settings with external `7z` extraction to reduce Qt archive install failures on the runner
 
 Important note:
 

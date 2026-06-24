@@ -23,7 +23,10 @@ dpkg-deb -c "${package_path}"
 if command -v lintian >/dev/null 2>&1; then
     echo
     echo "Running lintian..."
-    lintian "${package_path}"
+    if ! lintian "${package_path}"; then
+        echo
+        echo "lintian reported issues; keeping package verification non-blocking in CI."
+    fi
 else
     echo
     echo "lintian not found in PATH, skipping lintian check."

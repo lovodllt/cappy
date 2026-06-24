@@ -25,6 +25,7 @@ jobs:
         run: |
           choco install nsis --no-progress -y
           choco install ninja --no-progress -y
+          choco install 7zip --no-progress -y
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
@@ -33,7 +34,9 @@ jobs:
           host: 'windows'
           target: 'desktop'
           arch: 'win64_msvc2022_64'
-          aqtversion: '==3.1.*'
+          aqtversion: '==3.3.*'
+          py7zrversion: '==1.1.*'
+          extra: '--external 7z'
           cache: true
 
       - name: Set up MSVC

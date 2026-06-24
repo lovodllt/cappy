@@ -27,6 +27,7 @@ The workflow executes:
    - install into a staging directory
    - validate the installed `.desktop` file
    - generate a Debian package with `cpack`
+   - resolve the generated `.deb` path dynamically
    - inspect the package metadata and file list
    - run `lintian`
    - upload the `.deb` artifact
@@ -34,6 +35,7 @@ The workflow executes:
    - install Qt 6 desktop runtime/tooling with a Windows-supported MSVC package tuple
    - install NSIS for CPack-based `.exe` generation
    - install Ninja explicitly on the runner
+   - install `7zip` and use external extraction for Qt archives
    - configure a Release build with Ninja
    - build the project with MSVC
    - run the Windows packaging script
@@ -54,6 +56,7 @@ The workflow executes:
 - the workflow now prints the resolved Qt toolchain and NSIS version to reduce opaque runner failures
 - the workflow now pins Windows Qt to `6.8.3` because the `win64_msvc2022_64` package family is not available for `6.7.x`
 - the workflow now resolves `windeployqt` from `QT_ROOT_DIR/bin` instead of inferring it from `qmake`
+- Linux package verification now resolves the generated `.deb` path dynamically instead of hardcoding a filename
 
 ## Current exclusions
 
