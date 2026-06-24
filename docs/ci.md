@@ -57,6 +57,7 @@ The workflow executes:
 - the workflow now pins Windows Qt to `6.8.3` because the `win64_msvc2022_64` package family is not available for `6.7.x`
 - the workflow now resolves `windeployqt` from `QT_ROOT_DIR/bin` instead of inferring it from `qmake`
 - Linux package verification now resolves the generated `.deb` path dynamically instead of hardcoding a filename
+- Windows package verification now resolves generated `.exe` and `.zip` artifacts dynamically instead of assuming they live directly under the build root
 
 ## Current exclusions
 

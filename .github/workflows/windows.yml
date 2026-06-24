@@ -79,10 +79,23 @@ jobs:
         shell: pwsh
         run: ./scripts/verify-windows-package.ps1 -BuildDir build-win-ci
 
+      - name: Locate Windows artifacts
+        shell: pwsh
+        run: |
+          $artifacts = Get-ChildItem -Path $PWD -Include *.exe,*.zip -File -Recurse | Where-Object {
+            $_.FullName -like "$PWD\\build-win-ci*" -or $_.DirectoryName -eq $PWD
+          }
+          if (-not $artifacts) {
+            throw "No Windows package artifacts found."
+          }
+          $artifacts | ForEach-Object { Write-Host "Artifact: $($_.FullName)" }
+
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
           name: cappy-windows-packages
           path: |
-            build-win-ci/*.zip
-            build-win-ci/*.exe
+            ./*.zip
+            ./*.exe
+            build-win-ci/**/*.zip
+            build-win-ci/**/*.exe
