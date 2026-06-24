@@ -15,6 +15,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install packaging tools
+        shell: pwsh
+        run: |
+          choco install nsis --no-progress -y
+
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
         with:
@@ -22,10 +32,19 @@ jobs:
           host: 'windows'
           target: 'desktop'
           arch: 'win64_msvc2022_64'
+          aqtversion: '==3.1.*'
           cache: true
 
       - name: Set up MSVC
         uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Print Qt toolchain
+        shell: pwsh
+        run: |
+          python --version
+          qmake -query
+          Get-Command windeployqt
+          makensis /VERSION
 
       - name: Configure
         run: cmake -S . -B build-win-ci -G Ninja -DCMAKE_BUILD_TYPE=Release

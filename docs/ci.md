@@ -32,6 +32,7 @@ The workflow executes:
    - upload the `.deb` artifact
 3. run a Windows build job:
    - install Qt 6 desktop runtime/tooling
+   - install NSIS for CPack-based `.exe` generation
    - configure a Release build with Ninja
    - build the project with MSVC
    - run the Windows packaging script
@@ -49,6 +50,7 @@ The workflow executes:
 - `lintian` catches common Debian packaging mistakes before release
 - artifact upload makes every successful run produce an installable Debian package
 - Windows CI verifies that the Win32 platform code and packaging script at least build on a real MSVC toolchain
+- the workflow now prints the resolved Qt toolchain and NSIS version to reduce opaque runner failures
 
 ## Current exclusions
 
