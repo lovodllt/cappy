@@ -1,0 +1,57 @@
+name: windows
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+jobs:
+  build:
+    runs-on: windows-2022
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.7.2'
+          host: 'windows'
+          target: 'desktop'
+          arch: 'win64_msvc2022_64'
+          cache: true
+
+      - name: Set up MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Configure
+        run: cmake -S . -B build-win-ci -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build-win-ci --config Release -j2
+
+      - name: Locate Qt bin
+        shell: pwsh
+        run: |
+          $qmakePath = (Get-Command qmake).Source
+          $qtBinDir = Split-Path $qmakePath -Parent
+          "QT_BIN_DIR=$qtBinDir" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Package
+        shell: pwsh
+        run: ./scripts/package-windows.ps1 -BuildDir build-win-ci -QtBinDir "$env:QT_BIN_DIR"
+
+      - name: Verify Windows package
+        shell: pwsh
+        run: ./scripts/verify-windows-package.ps1 -BuildDir build-win-ci
+
+      - name: Upload Windows artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: cappy-windows-packages
+          path: |
+            build-win-ci/*.zip
+            build-win-ci/*.exe

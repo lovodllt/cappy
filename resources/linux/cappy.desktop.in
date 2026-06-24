@@ -1,0 +1,15 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Cappy
+GenericName=Screenshot Tool
+GenericName[zh_CN]=截图工具
+Comment=Lightweight screenshot and pinning tool
+Comment[zh_CN]=轻量截图与贴图工具
+Exec=cappy
+Icon=cappy
+Terminal=false
+Categories=Graphics;
+Keywords=screenshot;capture;pin;ocr;
+Keywords[zh_CN]=截图;贴图;OCR;
+StartupNotify=false

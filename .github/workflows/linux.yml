@@ -1,0 +1,104 @@
+name: linux
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install quality tools
+        run: |
+          sudo apt update
+          sudo apt install -y \
+            clang-format \
+            clang-tidy \
+            build-essential \
+            cmake \
+            ninja-build \
+            pkg-config \
+            qt6-base-dev \
+            qt6-base-dev-tools \
+            libx11-dev \
+            libxfixes-dev \
+            libxtst-dev \
+            libxcb1-dev
+
+      - name: Check formatting
+        run: ./scripts/format-cpp.sh check
+
+      - name: Configure
+        run: cmake -S . -B build-quality -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+      - name: Run clang-tidy
+        run: ./scripts/run-clang-tidy.sh build-quality "${{ github.workspace }}/clang-tidy-report.txt"
+        continue-on-error: true
+
+      - name: Upload clang-tidy report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cappy-clang-tidy-report
+          path: ${{ github.workspace }}/clang-tidy-report.txt
+
+  build-test-package:
+    runs-on: ubuntu-24.04
+    needs: quality
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y \
+            build-essential \
+            cmake \
+            ninja-build \
+            pkg-config \
+            qt6-base-dev \
+            qt6-base-dev-tools \
+            libx11-dev \
+            libxfixes-dev \
+            libxtst-dev \
+            libxcb1-dev \
+            dpkg-dev \
+            fakeroot \
+            desktop-file-utils \
+            lintian
+
+      - name: Configure
+        run: cmake -S . -B build-ci -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build-ci -j2
+
+      - name: Test
+        run: QT_QPA_PLATFORM=offscreen ctest --test-dir build-ci --output-on-failure
+
+      - name: Install stage
+        run: cmake --install build-ci --prefix "${{ github.workspace }}/build-ci/stage"
+
+      - name: Validate desktop entry
+        run: desktop-file-validate "${{ github.workspace }}/build-ci/stage/share/applications/cappy.desktop"
+
+      - name: Package deb
+        run: cpack --config build-ci/CPackConfig.cmake -G DEB
+
+      - name: Verify package
+        run: ./scripts/verify-deb-package.sh ./cappy_0.1.0_amd64.deb
+
+      - name: Upload deb artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cappy-linux-deb
+          path: ./cappy_0.1.0_amd64.deb
