@@ -25,12 +25,8 @@ namespace {
 
 #if defined(Q_OS_LINUX)
 xcb_atom_t internAtom(xcb_connection_t* connection, const char* name) {
-    const xcb_intern_atom_cookie_t cookie = xcb_intern_atom(
-        connection,
-        0,
-        static_cast<uint16_t>(std::strlen(name)),
-        name
-    );
+    const xcb_intern_atom_cookie_t cookie =
+        xcb_intern_atom(connection, 0, static_cast<uint16_t>(std::strlen(name)), name);
     xcb_intern_atom_reply_t* reply = xcb_intern_atom_reply(connection, cookie, nullptr);
     if (reply == nullptr) {
         return XCB_ATOM_NONE;
@@ -41,29 +37,15 @@ xcb_atom_t internAtom(xcb_connection_t* connection, const char* name) {
     return atom;
 }
 
-bool windowHasProperty(
-    xcb_connection_t* connection,
-    xcb_window_t window,
-    xcb_atom_t propertyAtom
-) {
+bool windowHasProperty(xcb_connection_t* connection, xcb_window_t window, xcb_atom_t propertyAtom) {
     if (connection == nullptr || window == XCB_WINDOW_NONE || propertyAtom == XCB_ATOM_NONE) {
         return false;
     }
 
-    const xcb_get_property_cookie_t propertyCookie = xcb_get_property(
-        connection,
-        0,
-        window,
-        propertyAtom,
-        XCB_GET_PROPERTY_TYPE_ANY,
-        0,
-        0
-    );
-    xcb_get_property_reply_t* propertyReply = xcb_get_property_reply(
-        connection,
-        propertyCookie,
-        nullptr
-    );
+    const xcb_get_property_cookie_t propertyCookie =
+        xcb_get_property(connection, 0, window, propertyAtom, XCB_GET_PROPERTY_TYPE_ANY, 0, 0);
+    xcb_get_property_reply_t* propertyReply =
+        xcb_get_property_reply(connection, propertyCookie, nullptr);
     if (propertyReply == nullptr) {
         return false;
     }
@@ -73,38 +55,24 @@ bool windowHasProperty(
     return hasProperty;
 }
 
-QRect geometryForWindow(
-    xcb_connection_t* connection,
-    xcb_window_t root,
-    xcb_window_t window
-) {
+QRect geometryForWindow(xcb_connection_t* connection, xcb_window_t root, xcb_window_t window) {
     if (connection == nullptr || window == XCB_WINDOW_NONE) {
         return {};
     }
 
     const xcb_get_geometry_cookie_t geometryCookie = xcb_get_geometry(connection, window);
-    xcb_get_geometry_reply_t* geometryReply = xcb_get_geometry_reply(
-        connection,
-        geometryCookie,
-        nullptr
-    );
+    xcb_get_geometry_reply_t* geometryReply =
+        xcb_get_geometry_reply(connection, geometryCookie, nullptr);
 
     const xcb_translate_coordinates_cookie_t translateCookie =
         xcb_translate_coordinates(connection, window, root, 0, 0);
-    xcb_translate_coordinates_reply_t* translateReply = xcb_translate_coordinates_reply(
-        connection,
-        translateCookie,
-        nullptr
-    );
+    xcb_translate_coordinates_reply_t* translateReply =
+        xcb_translate_coordinates_reply(connection, translateCookie, nullptr);
 
     QRect geometry;
     if (geometryReply != nullptr && translateReply != nullptr) {
-        geometry = QRect(
-            translateReply->dst_x,
-            translateReply->dst_y,
-            geometryReply->width,
-            geometryReply->height
-        );
+        geometry = QRect(translateReply->dst_x, translateReply->dst_y, geometryReply->width,
+                         geometryReply->height);
     }
 
     free(geometryReply);
@@ -112,12 +80,8 @@ QRect geometryForWindow(
     return geometry;
 }
 
-xcb_window_t findManagedClientWindow(
-    xcb_connection_t* connection,
-    xcb_window_t window,
-    xcb_atom_t wmStateAtom,
-    int depth = 3
-) {
+xcb_window_t findManagedClientWindow(xcb_connection_t* connection, xcb_window_t window,
+                                     xcb_atom_t wmStateAtom, int depth = 3) {
     if (connection == nullptr || window == XCB_WINDOW_NONE || depth < 0) {
         return XCB_WINDOW_NONE;
     }
@@ -136,12 +100,8 @@ xcb_window_t findManagedClientWindow(
     xcb_window_t* children = xcb_query_tree_children(treeReply);
     xcb_window_t managedWindow = XCB_WINDOW_NONE;
     for (int index = childCount - 1; index >= 0; --index) {
-        managedWindow = findManagedClientWindow(
-            connection,
-            children[index],
-            wmStateAtom,
-            depth - 1
-        );
+        managedWindow =
+            findManagedClientWindow(connection, children[index], wmStateAtom, depth - 1);
         if (managedWindow != XCB_WINDOW_NONE) {
             break;
         }
@@ -151,12 +111,8 @@ xcb_window_t findManagedClientWindow(
     return managedWindow;
 }
 
-xcb_window_t topLevelWindowAtPoint(
-    xcb_connection_t* connection,
-    xcb_window_t root,
-    const QPoint& point,
-    xcb_window_t excludedWindow
-) {
+xcb_window_t topLevelWindowAtPoint(xcb_connection_t* connection, xcb_window_t root,
+                                   const QPoint& point, xcb_window_t excludedWindow) {
     if (connection == nullptr || root == XCB_WINDOW_NONE) {
         return XCB_WINDOW_NONE;
     }
@@ -202,21 +158,14 @@ xcb_window_t topLevelWindowAtPoint(
     return selectedWindow;
 }
 
-QRect captureGeometryForWindow(
-    xcb_connection_t* connection,
-    xcb_window_t root,
-    xcb_window_t window
-) {
+QRect captureGeometryForWindow(xcb_connection_t* connection, xcb_window_t root,
+                               xcb_window_t window) {
     if (connection == nullptr || root == XCB_WINDOW_NONE || window == XCB_WINDOW_NONE) {
         return {};
     }
 
     const xcb_atom_t wmStateAtom = internAtom(connection, "WM_STATE");
-    const xcb_window_t managedWindow = findManagedClientWindow(
-        connection,
-        window,
-        wmStateAtom
-    );
+    const xcb_window_t managedWindow = findManagedClientWindow(connection, window, wmStateAtom);
     if (managedWindow != XCB_WINDOW_NONE) {
         const QRect managedGeometry = geometryForWindow(connection, root, managedWindow);
         if (!managedGeometry.isEmpty()) {
@@ -228,7 +177,7 @@ QRect captureGeometryForWindow(
 }
 #endif
 
-}  // namespace
+} // namespace
 
 QString QtScreenCaptureBackend::backendName() const {
     return "qt-screen";
@@ -271,12 +220,10 @@ cappy::domain::capture::DesktopFrame QtScreenCaptureBackend::captureVirtualDeskt
         const QPoint targetTopLeft = screenGeometry.topLeft() - virtualGeometry.topLeft();
         const QPixmap pixmap = screen->grabWindow(0);
         const QImage screenImage = pixmap.toImage();
-        frame.screenFragments.push_back(
-            cappy::domain::capture::ScreenFragment{
-                .image = screenImage,
-                .geometry = screenGeometry,
-            }
-        );
+        frame.screenFragments.push_back(cappy::domain::capture::ScreenFragment{
+            .image = screenImage,
+            .geometry = screenGeometry,
+        });
         painter.drawImage(QRect(targetTopLeft, screenGeometry.size()), screenImage);
     }
     painter.end();
@@ -290,7 +237,8 @@ QRect QtScreenCaptureBackend::activeWindowGeometry() const {
     return queryActiveWindowGeometry();
 }
 
-QRect QtScreenCaptureBackend::windowGeometryAtPoint(const QPoint& point, WId excludedWindowId) const {
+QRect QtScreenCaptureBackend::windowGeometryAtPoint(const QPoint& point,
+                                                    WId excludedWindowId) const {
 #if defined(Q_OS_LINUX)
     if (QGuiApplication::platformName() != "xcb") {
         return {};
@@ -313,12 +261,8 @@ QRect QtScreenCaptureBackend::windowGeometryAtPoint(const QPoint& point, WId exc
     }
 
     xcb_screen_t* screen = screenIterator.data;
-    const xcb_window_t window = topLevelWindowAtPoint(
-        connection,
-        screen->root,
-        point,
-        static_cast<xcb_window_t>(excludedWindowId)
-    );
+    const xcb_window_t window = topLevelWindowAtPoint(connection, screen->root, point,
+                                                      static_cast<xcb_window_t>(excludedWindowId));
     if (window == XCB_WINDOW_NONE) {
         return {};
     }
@@ -332,12 +276,7 @@ QRect QtScreenCaptureBackend::windowGeometryAtPoint(const QPoint& point, WId exc
         if (window != excludedWindow && IsWindowVisible(window)) {
             RECT rect{};
             if (GetWindowRect(window, &rect) != 0) {
-                return QRect(
-                    rect.left,
-                    rect.top,
-                    rect.right - rect.left,
-                    rect.bottom - rect.top
-                );
+                return QRect(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top);
             }
         }
         window = GetAncestor(window, GA_ROOTOWNER);
@@ -396,10 +335,8 @@ cappy::domain::capture::CaptureResult QtScreenCaptureBackend::captureActiveWindo
         return result;
     }
 
-    const QImage croppedImage = cappy::domain::capture::cropNormalizedImage(
-        frame,
-        activeWindowGeometry
-    );
+    const QImage croppedImage =
+        cappy::domain::capture::cropNormalizedImage(frame, activeWindowGeometry);
     if (croppedImage.isNull()) {
         return result;
     }
@@ -437,20 +374,10 @@ QRect QtScreenCaptureBackend::queryActiveWindowGeometry() const {
         return {};
     }
 
-    const xcb_get_property_cookie_t propertyCookie = xcb_get_property(
-        connection,
-        0,
-        screen->root,
-        activeWindowAtom,
-        XCB_ATOM_WINDOW,
-        0,
-        1
-    );
-    xcb_get_property_reply_t* propertyReply = xcb_get_property_reply(
-        connection,
-        propertyCookie,
-        nullptr
-    );
+    const xcb_get_property_cookie_t propertyCookie =
+        xcb_get_property(connection, 0, screen->root, activeWindowAtom, XCB_ATOM_WINDOW, 0, 1);
+    xcb_get_property_reply_t* propertyReply =
+        xcb_get_property_reply(connection, propertyCookie, nullptr);
     if (propertyReply == nullptr) {
         return {};
     }
@@ -478,15 +405,10 @@ QRect QtScreenCaptureBackend::queryActiveWindowGeometry() const {
         return {};
     }
 
-    return QRect(
-        rect.left,
-        rect.top,
-        rect.right - rect.left,
-        rect.bottom - rect.top
-    );
+    return QRect(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top);
 #else
     return {};
 #endif
 }
 
-}  // namespace cappy::platform::capture
+} // namespace cappy::platform::capture

@@ -7,7 +7,7 @@
 namespace cappy::platform::hotkey {
 
 class UnsupportedGlobalHotkeyBackend final : public IGlobalHotkeyBackend {
-public:
+  public:
     explicit UnsupportedGlobalHotkeyBackend(QString reason);
 
     QString backendName() const override;
@@ -18,9 +18,9 @@ public:
     bool registerHotkey(const GlobalHotkey& hotkey) override;
     void unregisterAll() override;
 
-private:
+  private:
     QString reason_;
     QString lastError_;
 };
 
-}  // namespace cappy::platform::hotkey
+} // namespace cappy::platform::hotkey

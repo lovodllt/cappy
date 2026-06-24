@@ -14,7 +14,7 @@
 class SettingsDialogTest final : public QObject {
     Q_OBJECT
 
-private slots:
+  private slots:
     void switchingLanguageKeepsUnsavedValuesAndUpdatesSettings();
     void ocrProviderSwitchesRelevantFields();
 };
@@ -28,16 +28,13 @@ void SettingsDialogTest::switchingLanguageKeepsUnsavedValuesAndUpdatesSettings()
     settings.startMinimized = true;
     settings.closeToTray = false;
 
-    SettingsDialog dialog(
-        settings,
-        SettingsDialog::Diagnostics{
-            .captureBackendSummary = "capture",
-            .hotkeyBackendSummary = "hotkey",
-            .hotkeyBindingsSummary = "bindings",
-            .hotkeyRegistrationErrors = {},
-            .logFilePath = "/tmp/cappy.log",
-        }
-    );
+    SettingsDialog dialog(settings, SettingsDialog::Diagnostics{
+                                        .captureBackendSummary = "capture",
+                                        .hotkeyBackendSummary = "hotkey",
+                                        .hotkeyBindingsSummary = "bindings",
+                                        .hotkeyRegistrationErrors = {},
+                                        .logFilePath = "/tmp/cappy.log",
+                                    });
     dialog.show();
     QCoreApplication::processEvents();
 
@@ -107,16 +104,13 @@ void SettingsDialogTest::ocrProviderSwitchesRelevantFields() {
     settings.ocr.cloudApiKey = "secret";
     settings.ocr.cloudPrompt = "prompt";
 
-    SettingsDialog dialog(
-        settings,
-        SettingsDialog::Diagnostics{
-            .captureBackendSummary = "capture",
-            .hotkeyBackendSummary = "hotkey",
-            .hotkeyBindingsSummary = "bindings",
-            .hotkeyRegistrationErrors = {},
-            .logFilePath = "/tmp/cappy.log",
-        }
-    );
+    SettingsDialog dialog(settings, SettingsDialog::Diagnostics{
+                                        .captureBackendSummary = "capture",
+                                        .hotkeyBackendSummary = "hotkey",
+                                        .hotkeyBindingsSummary = "bindings",
+                                        .hotkeyRegistrationErrors = {},
+                                        .logFilePath = "/tmp/cappy.log",
+                                    });
     dialog.show();
     QCoreApplication::processEvents();
 

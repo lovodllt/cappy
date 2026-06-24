@@ -17,7 +17,7 @@ namespace cappy::services::hotkey {
 class GlobalHotkeyService final : public QObject {
     Q_OBJECT
 
-public:
+  public:
     explicit GlobalHotkeyService(QObject* parent = nullptr);
     ~GlobalHotkeyService() override;
 
@@ -31,10 +31,10 @@ public:
     QString bindingsSummary() const;
     QStringList lastRegistrationErrors() const;
 
-signals:
+  signals:
     void hotkeyActivated(const QString& hotkeyId);
 
-private:
+  private:
     void reapplyBindings();
 
     QList<cappy::platform::hotkey::GlobalHotkey> bindings_;
@@ -44,4 +44,4 @@ private:
     std::unique_ptr<cappy::platform::hotkey::IGlobalHotkeyBackend> backend_;
 };
 
-}  // namespace cappy::services::hotkey
+} // namespace cappy::services::hotkey

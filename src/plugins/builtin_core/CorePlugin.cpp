@@ -8,5 +8,4 @@ cappy::plugin_api::PluginDescriptor CorePlugin::descriptor() const {
     return descriptor;
 }
 
-void CorePlugin::initialize() {
-}
+void CorePlugin::initialize() {}

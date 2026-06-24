@@ -9,7 +9,7 @@
 class QSettings;
 
 class AppSettings {
-public:
+  public:
     struct ShellSettings {
         bool startMinimized = false;
         bool closeToTray = true;
@@ -28,7 +28,7 @@ public:
     ShellSettings loadShellSettings() const;
     void saveShellSettings(const ShellSettings& settings);
 
-private:
+  private:
     QSettings& qsettings() const;
 
     QString defaultSaveDirectory_;

@@ -25,18 +25,14 @@ namespace cappy::features::ocr {
 class OcrResultWindow final : public QDialog {
     Q_OBJECT
 
-public:
-    explicit OcrResultWindow(
-        const QImage& image,
-        cappy::services::ocr::OcrSettings settings,
-        cappy::localization::AppLanguage language,
-        QString appearanceMode,
-        QWidget* parent = nullptr,
-        cappy::services::ocr::OcrResult initialResult = {},
-        bool autoRun = true
-    );
+  public:
+    explicit OcrResultWindow(const QImage& image, cappy::services::ocr::OcrSettings settings,
+                             cappy::localization::AppLanguage language, QString appearanceMode,
+                             QWidget* parent = nullptr,
+                             cappy::services::ocr::OcrResult initialResult = {},
+                             bool autoRun = true);
 
-private:
+  private:
     bool eventFilter(QObject* watched, QEvent* event) override;
     void buildUi();
     void refreshTexts();
@@ -87,4 +83,4 @@ private:
     bool autoRun_ = true;
 };
 
-}  // namespace cappy::features::ocr
+} // namespace cappy::features::ocr

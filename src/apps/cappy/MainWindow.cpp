@@ -82,14 +82,10 @@ QIcon drawHeaderIcon(const QString& id, const QSize& size = QSize(18, 18)) {
         painter.drawEllipse(center, 6.4, 6.4);
         for (int i = 0; i < 8; ++i) {
             const qreal angle = static_cast<qreal>(i) * M_PI / 4.0;
-            const QPointF inner(
-                center.x() + std::cos(angle) * 4.8,
-                center.y() + std::sin(angle) * 4.8
-            );
-            const QPointF outer(
-                center.x() + std::cos(angle) * 7.4,
-                center.y() + std::sin(angle) * 7.4
-            );
+            const QPointF inner(center.x() + std::cos(angle) * 4.8,
+                                center.y() + std::sin(angle) * 4.8);
+            const QPointF outer(center.x() + std::cos(angle) * 7.4,
+                                center.y() + std::sin(angle) * 7.4);
             painter.drawLine(inner, outer);
         }
     }
@@ -120,17 +116,17 @@ void applyActionShortcut(QAction* action, const QKeySequence& shortcut) {
     }
 
     action->setShortcut(shortcut);
-    const QString tooltip = shortcut.isEmpty()
-        ? action->text()
-        : QString("%1 (%2)").arg(action->text(), shortcut.toString(QKeySequence::NativeText));
+    const QString tooltip =
+        shortcut.isEmpty()
+            ? action->text()
+            : QString("%1 (%2)").arg(action->text(), shortcut.toString(QKeySequence::NativeText));
     action->setToolTip(tooltip);
     action->setStatusTip(tooltip);
 }
 
-}  // namespace
+} // namespace
 
-MainWindow::MainWindow(const QStringList& pluginIds, QWidget* parent)
-    : QMainWindow(parent) {
+MainWindow::MainWindow(const QStringList& pluginIds, QWidget* parent) : QMainWindow(parent) {
     Q_UNUSED(pluginIds);
 
     setWindowTitle("Cappy");
@@ -196,89 +192,54 @@ MainWindow::MainWindow(const QStringList& pluginIds, QWidget* parent)
     historyList_->setUniformItemSizes(true);
     historyList_->setSpacing(2);
 
-    regionCaptureAction_ = createWindowAction(
-        themedIcon(this, "transform-crop", QStyle::SP_FileDialogDetailedView),
-        "Region Capture",
-        QKeySequence("Ctrl+Shift+A")
-    );
-    fullscreenCaptureAction_ = createWindowAction(
-        themedIcon(this, "view-fullscreen", QStyle::SP_TitleBarMaxButton),
-        "Fullscreen Capture",
-        QKeySequence("Ctrl+Shift+F")
-    );
-    activeWindowCaptureAction_ = createWindowAction(
-        themedIcon(this, "window", QStyle::SP_ComputerIcon),
-        "Active Window",
-        QKeySequence("Ctrl+Shift+W")
-    );
+    regionCaptureAction_ =
+        createWindowAction(themedIcon(this, "transform-crop", QStyle::SP_FileDialogDetailedView),
+                           "Region Capture", QKeySequence("Ctrl+Shift+A"));
+    fullscreenCaptureAction_ =
+        createWindowAction(themedIcon(this, "view-fullscreen", QStyle::SP_TitleBarMaxButton),
+                           "Fullscreen Capture", QKeySequence("Ctrl+Shift+F"));
+    activeWindowCaptureAction_ =
+        createWindowAction(themedIcon(this, "window", QStyle::SP_ComputerIcon), "Active Window",
+                           QKeySequence("Ctrl+Shift+W"));
     windowFitCaptureAction_ = createWindowAction(
-        themedIcon(this, "selection-rectangular", QStyle::SP_DirIcon),
-        "Window Fit Capture"
-    );
-    pinLatestAction_ = createWindowAction(
-        themedIcon(this, "pin", QStyle::SP_DialogApplyButton),
-        "Pin Last Capture",
-        QKeySequence("Ctrl+Shift+P")
-    );
-    saveLatestAction_ = createWindowAction(
-        themedIcon(this, "document-save", QStyle::SP_DialogSaveButton),
-        "Save Last Capture",
-        QKeySequence::Save
-    );
-    closePinsAction_ = createWindowAction(
-        themedIcon(this, "window-close", QStyle::SP_DialogCloseButton),
-        "Close Pins",
-        QKeySequence("Ctrl+Alt+X")
-    );
-    restorePinInputAction_ = createWindowAction(
-        themedIcon(this, "input-mouse", QStyle::SP_BrowserReload),
-        "Restore Pin Input",
-        QKeySequence("Ctrl+Alt+R")
-    );
-    openFolderAction_ = createWindowAction(
-        themedIcon(this, "folder-open", QStyle::SP_DirOpenIcon),
-        "Open Capture Folder",
-        QKeySequence::Open
-    );
-    settingsAction_ = createWindowAction(
-        drawHeaderIcon("settings"),
-        "Settings",
-        QKeySequence("Ctrl+,")
-    );
-    trayAction_ = createWindowAction(
-        themedIcon(this, "window-minimize", QStyle::SP_TitleBarMinButton),
-        "Hide to Tray",
-        QKeySequence("Ctrl+H")
-    );
-    quitAction_ = createWindowAction(
-        themedIcon(this, "application-exit", QStyle::SP_DialogCloseButton),
-        "Quit",
-        QKeySequence::Quit
-    );
+        themedIcon(this, "selection-rectangular", QStyle::SP_DirIcon), "Window Fit Capture");
+    pinLatestAction_ = createWindowAction(themedIcon(this, "pin", QStyle::SP_DialogApplyButton),
+                                          "Pin Last Capture", QKeySequence("Ctrl+Shift+P"));
+    saveLatestAction_ =
+        createWindowAction(themedIcon(this, "document-save", QStyle::SP_DialogSaveButton),
+                           "Save Last Capture", QKeySequence::Save);
+    closePinsAction_ =
+        createWindowAction(themedIcon(this, "window-close", QStyle::SP_DialogCloseButton),
+                           "Close Pins", QKeySequence("Ctrl+Alt+X"));
+    restorePinInputAction_ =
+        createWindowAction(themedIcon(this, "input-mouse", QStyle::SP_BrowserReload),
+                           "Restore Pin Input", QKeySequence("Ctrl+Alt+R"));
+    openFolderAction_ = createWindowAction(themedIcon(this, "folder-open", QStyle::SP_DirOpenIcon),
+                                           "Open Capture Folder", QKeySequence::Open);
+    settingsAction_ =
+        createWindowAction(drawHeaderIcon("settings"), "Settings", QKeySequence("Ctrl+,"));
+    trayAction_ =
+        createWindowAction(themedIcon(this, "window-minimize", QStyle::SP_TitleBarMinButton),
+                           "Hide to Tray", QKeySequence("Ctrl+H"));
+    quitAction_ =
+        createWindowAction(themedIcon(this, "application-exit", QStyle::SP_DialogCloseButton),
+                           "Quit", QKeySequence::Quit);
 
     headerRow->addWidget(createToolButton(root, settingsAction_));
     headerRow->addWidget(createToolButton(root, quitAction_));
 
-    pinSelectedHistoryAction_ = createWindowAction(
-        themedIcon(this, "pin", QStyle::SP_DialogApplyButton),
-        "Pin Selected History Item",
-        QKeySequence(Qt::Key_Return)
-    );
-    copySelectedHistoryAction_ = createWindowAction(
-        themedIcon(this, "edit-copy", QStyle::SP_FileDialogListView),
-        "Copy Selected History Item",
-        QKeySequence::Copy
-    );
-    saveSelectedHistoryAction_ = createWindowAction(
-        themedIcon(this, "document-save", QStyle::SP_DialogSaveButton),
-        "Save Selected History Item",
-        QKeySequence("Ctrl+Shift+S")
-    );
-    removeSelectedHistoryAction_ = createWindowAction(
-        themedIcon(this, "edit-delete", QStyle::SP_TrashIcon),
-        "Remove Selected History Item",
-        QKeySequence::Delete
-    );
+    pinSelectedHistoryAction_ =
+        createWindowAction(themedIcon(this, "pin", QStyle::SP_DialogApplyButton),
+                           "Pin Selected History Item", QKeySequence(Qt::Key_Return));
+    copySelectedHistoryAction_ =
+        createWindowAction(themedIcon(this, "edit-copy", QStyle::SP_FileDialogListView),
+                           "Copy Selected History Item", QKeySequence::Copy);
+    saveSelectedHistoryAction_ =
+        createWindowAction(themedIcon(this, "document-save", QStyle::SP_DialogSaveButton),
+                           "Save Selected History Item", QKeySequence("Ctrl+Shift+S"));
+    removeSelectedHistoryAction_ =
+        createWindowAction(themedIcon(this, "edit-delete", QStyle::SP_TrashIcon),
+                           "Remove Selected History Item", QKeySequence::Delete);
 
     auto* historyPanel = createSectionSurface(splitter, "sectionSurface");
     auto* historyLayout = new QVBoxLayout(historyPanel);
@@ -327,60 +288,35 @@ MainWindow::MainWindow(const QStringList& pluginIds, QWidget* parent)
     applyLanguage(language_);
 
     connect(regionCaptureAction_, &QAction::triggered, this, &MainWindow::regionCaptureRequested);
-    connect(
-        fullscreenCaptureAction_,
-        &QAction::triggered,
-        this,
-        &MainWindow::fullscreenCaptureRequested
-    );
-    connect(
-        activeWindowCaptureAction_,
-        &QAction::triggered,
-        this,
-        &MainWindow::activeWindowCaptureRequested
-    );
-    connect(
-        windowFitCaptureAction_,
-        &QAction::triggered,
-        this,
-        &MainWindow::windowFitCaptureRequested
-    );
+    connect(fullscreenCaptureAction_, &QAction::triggered, this,
+            &MainWindow::fullscreenCaptureRequested);
+    connect(activeWindowCaptureAction_, &QAction::triggered, this,
+            &MainWindow::activeWindowCaptureRequested);
+    connect(windowFitCaptureAction_, &QAction::triggered, this,
+            &MainWindow::windowFitCaptureRequested);
     connect(pinLatestAction_, &QAction::triggered, this, &MainWindow::pinLatestCaptureRequested);
     connect(saveLatestAction_, &QAction::triggered, this, &MainWindow::saveLatestCaptureRequested);
     connect(closePinsAction_, &QAction::triggered, this, &MainWindow::closeAllPinsRequested);
-    connect(
-        restorePinInputAction_,
-        &QAction::triggered,
-        this,
-        &MainWindow::restorePinInputRequested
-    );
-    connect(
-        openFolderAction_,
-        &QAction::triggered,
-        this,
-        &MainWindow::openCapturesDirectoryRequested
-    );
+    connect(restorePinInputAction_, &QAction::triggered, this,
+            &MainWindow::restorePinInputRequested);
+    connect(openFolderAction_, &QAction::triggered, this,
+            &MainWindow::openCapturesDirectoryRequested);
     connect(settingsAction_, &QAction::triggered, this, &MainWindow::settingsRequested);
     connect(trayAction_, &QAction::triggered, this, &MainWindow::hideToTrayRequested);
     connect(quitAction_, &QAction::triggered, this, &MainWindow::quitRequested);
     connect(historyList_, &QListWidget::itemDoubleClicked, this, [this](QListWidgetItem* item) {
         emit historyPinRequested(item->data(ImageRole).value<QImage>());
     });
-    connect(pinSelectedHistoryAction_, &QAction::triggered, this, &MainWindow::pinSelectedHistoryItem);
-    connect(copySelectedHistoryAction_, &QAction::triggered, this, &MainWindow::copySelectedHistoryItem);
-    connect(saveSelectedHistoryAction_, &QAction::triggered, this, &MainWindow::saveSelectedHistoryItem);
-    connect(
-        removeSelectedHistoryAction_,
-        &QAction::triggered,
-        this,
-        &MainWindow::removeSelectedHistoryItem
-    );
-    connect(
-        historyList_,
-        &QListWidget::customContextMenuRequested,
-        this,
-        &MainWindow::showHistoryContextMenu
-    );
+    connect(pinSelectedHistoryAction_, &QAction::triggered, this,
+            &MainWindow::pinSelectedHistoryItem);
+    connect(copySelectedHistoryAction_, &QAction::triggered, this,
+            &MainWindow::copySelectedHistoryItem);
+    connect(saveSelectedHistoryAction_, &QAction::triggered, this,
+            &MainWindow::saveSelectedHistoryItem);
+    connect(removeSelectedHistoryAction_, &QAction::triggered, this,
+            &MainWindow::removeSelectedHistoryItem);
+    connect(historyList_, &QListWidget::customContextMenuRequested, this,
+            &MainWindow::showHistoryContextMenu);
     connect(historyList_, &QListWidget::itemSelectionChanged, this, [this]() {
         updateHistoryActionState();
         syncPreviewToCurrentContext();
@@ -424,73 +360,47 @@ void MainWindow::applyLanguage(cappy::localization::AppLanguage language) {
 }
 
 void MainWindow::applyShortcutSettings(
-    const cappy::shortcuts::MainWindowShortcutSettings& shortcuts
-) {
+    const cappy::shortcuts::MainWindowShortcutSettings& shortcuts) {
     mainWindowShortcuts_ = shortcuts;
-    applyActionShortcut(
-        regionCaptureAction_,
-        QKeySequence::fromString(shortcuts.regionCapture, QKeySequence::PortableText)
-    );
+    applyActionShortcut(regionCaptureAction_, QKeySequence::fromString(shortcuts.regionCapture,
+                                                                       QKeySequence::PortableText));
     applyActionShortcut(
         fullscreenCaptureAction_,
-        QKeySequence::fromString(shortcuts.fullscreenCapture, QKeySequence::PortableText)
-    );
+        QKeySequence::fromString(shortcuts.fullscreenCapture, QKeySequence::PortableText));
     applyActionShortcut(
         activeWindowCaptureAction_,
-        QKeySequence::fromString(shortcuts.activeWindowCapture, QKeySequence::PortableText)
-    );
+        QKeySequence::fromString(shortcuts.activeWindowCapture, QKeySequence::PortableText));
     applyActionShortcut(
         windowFitCaptureAction_,
-        QKeySequence::fromString(shortcuts.windowFitCapture, QKeySequence::PortableText)
-    );
-    applyActionShortcut(
-        pinLatestAction_,
-        QKeySequence::fromString(shortcuts.pinLatest, QKeySequence::PortableText)
-    );
-    applyActionShortcut(
-        saveLatestAction_,
-        QKeySequence::fromString(shortcuts.saveLatest, QKeySequence::PortableText)
-    );
-    applyActionShortcut(
-        closePinsAction_,
-        QKeySequence::fromString(shortcuts.closePins, QKeySequence::PortableText)
-    );
+        QKeySequence::fromString(shortcuts.windowFitCapture, QKeySequence::PortableText));
+    applyActionShortcut(pinLatestAction_,
+                        QKeySequence::fromString(shortcuts.pinLatest, QKeySequence::PortableText));
+    applyActionShortcut(saveLatestAction_,
+                        QKeySequence::fromString(shortcuts.saveLatest, QKeySequence::PortableText));
+    applyActionShortcut(closePinsAction_,
+                        QKeySequence::fromString(shortcuts.closePins, QKeySequence::PortableText));
     applyActionShortcut(
         restorePinInputAction_,
-        QKeySequence::fromString(shortcuts.restorePinInput, QKeySequence::PortableText)
-    );
-    applyActionShortcut(
-        openFolderAction_,
-        QKeySequence::fromString(shortcuts.openCaptureFolder, QKeySequence::PortableText)
-    );
-    applyActionShortcut(
-        settingsAction_,
-        QKeySequence::fromString(shortcuts.settings, QKeySequence::PortableText)
-    );
-    applyActionShortcut(
-        trayAction_,
-        QKeySequence::fromString(shortcuts.hideToTray, QKeySequence::PortableText)
-    );
-    applyActionShortcut(
-        quitAction_,
-        QKeySequence::fromString(shortcuts.quit, QKeySequence::PortableText)
-    );
-    applyActionShortcut(
-        pinSelectedHistoryAction_,
-        QKeySequence::fromString(shortcuts.historyPin, QKeySequence::PortableText)
-    );
+        QKeySequence::fromString(shortcuts.restorePinInput, QKeySequence::PortableText));
+    applyActionShortcut(openFolderAction_, QKeySequence::fromString(shortcuts.openCaptureFolder,
+                                                                    QKeySequence::PortableText));
+    applyActionShortcut(settingsAction_,
+                        QKeySequence::fromString(shortcuts.settings, QKeySequence::PortableText));
+    applyActionShortcut(trayAction_,
+                        QKeySequence::fromString(shortcuts.hideToTray, QKeySequence::PortableText));
+    applyActionShortcut(quitAction_,
+                        QKeySequence::fromString(shortcuts.quit, QKeySequence::PortableText));
+    applyActionShortcut(pinSelectedHistoryAction_,
+                        QKeySequence::fromString(shortcuts.historyPin, QKeySequence::PortableText));
     applyActionShortcut(
         copySelectedHistoryAction_,
-        QKeySequence::fromString(shortcuts.historyCopy, QKeySequence::PortableText)
-    );
+        QKeySequence::fromString(shortcuts.historyCopy, QKeySequence::PortableText));
     applyActionShortcut(
         saveSelectedHistoryAction_,
-        QKeySequence::fromString(shortcuts.historySave, QKeySequence::PortableText)
-    );
+        QKeySequence::fromString(shortcuts.historySave, QKeySequence::PortableText));
     applyActionShortcut(
         removeSelectedHistoryAction_,
-        QKeySequence::fromString(shortcuts.historyRemove, QKeySequence::PortableText)
-    );
+        QKeySequence::fromString(shortcuts.historyRemove, QKeySequence::PortableText));
 }
 
 void MainWindow::setShortcutActionsSuspended(bool suspended) {
@@ -516,11 +426,8 @@ void MainWindow::setHistoryLimit(int limit) {
     trimHistoryToLimit();
 }
 
-void MainWindow::showCaptureResult(
-    const QImage& image,
-    const QRect& geometry,
-    const QString& backendName
-) {
+void MainWindow::showCaptureResult(const QImage& image, const QRect& geometry,
+                                   const QString& backendName) {
     Q_UNUSED(geometry);
     Q_UNUSED(backendName);
     latestCaptureImage_ = image;
@@ -539,11 +446,9 @@ void MainWindow::addCaptureHistoryEntry(const CaptureHistoryEntry& entry) {
     item->setData(EntryIdRole, entry.id);
     item->setData(BaseTitleRole, entry.title);
     if (!entry.image.isNull()) {
-        item->setIcon(QPixmap::fromImage(entry.image).scaled(
-            historyList_->iconSize(),
-            Qt::KeepAspectRatio,
-            Qt::SmoothTransformation
-        ));
+        item->setIcon(
+            QPixmap::fromImage(entry.image)
+                .scaled(historyList_->iconSize(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
     }
     updateHistoryItemDisplay(item);
     historyList_->insertItem(0, item);
@@ -572,11 +477,8 @@ void MainWindow::markHistoryEntrySaved(const QString& entryId, const QString& fi
     }
 }
 
-void MainWindow::updateHistoryEntryImage(
-    const QString& entryId,
-    const QImage& image,
-    bool clearSavedState
-) {
+void MainWindow::updateHistoryEntryImage(const QString& entryId, const QImage& image,
+                                         bool clearSavedState) {
     if (historyList_ == nullptr || entryId.isEmpty() || image.isNull()) {
         return;
     }
@@ -593,10 +495,7 @@ void MainWindow::updateHistoryEntryImage(
             updateHistoryItemDisplay(item);
         }
         item->setIcon(QPixmap::fromImage(image).scaled(
-            historyList_->iconSize(),
-            Qt::KeepAspectRatio,
-            Qt::SmoothTransformation
-        ));
+            historyList_->iconSize(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
         if (item == historyList_->currentItem()) {
             syncPreviewToCurrentContext();
         }
@@ -619,20 +518,18 @@ void MainWindow::resizeEvent(QResizeEvent* event) {
     updatePreviewPixmap();
 }
 
-QAction* MainWindow::createWindowAction(
-    const QIcon& icon,
-    const QString& text,
-    const QKeySequence& shortcut
-) {
+QAction* MainWindow::createWindowAction(const QIcon& icon, const QString& text,
+                                        const QKeySequence& shortcut) {
     auto* action = new QAction(icon, text, this);
     if (!shortcut.isEmpty()) {
         action->setShortcut(shortcut);
     }
     action->setShortcutContext(Qt::WidgetWithChildrenShortcut);
 
-    const QString tooltip = shortcut.isEmpty()
-        ? text
-        : QString("%1 (%2)").arg(text, shortcut.toString(QKeySequence::NativeText));
+    const QString tooltip =
+        shortcut.isEmpty()
+            ? text
+            : QString("%1 (%2)").arg(text, shortcut.toString(QKeySequence::NativeText));
     action->setToolTip(tooltip);
     action->setStatusTip(tooltip);
     addAction(action);
@@ -662,22 +559,38 @@ QList<QAction*> MainWindow::shortcutActions() const {
 
 void MainWindow::refreshActionTexts() {
     const auto& text = cappy::localization::strings(language_);
-    if (regionCaptureAction_ != nullptr) regionCaptureAction_->setText(text.actionRegionCapture);
-    if (fullscreenCaptureAction_ != nullptr) fullscreenCaptureAction_->setText(text.actionFullscreenCapture);
-    if (activeWindowCaptureAction_ != nullptr) activeWindowCaptureAction_->setText(text.actionActiveWindow);
-    if (windowFitCaptureAction_ != nullptr) windowFitCaptureAction_->setText(text.actionWindowFitCapture);
-    if (pinLatestAction_ != nullptr) pinLatestAction_->setText(text.actionPinLastCapture);
-    if (saveLatestAction_ != nullptr) saveLatestAction_->setText(text.actionSaveLastCapture);
-    if (closePinsAction_ != nullptr) closePinsAction_->setText(text.actionClosePins);
-    if (restorePinInputAction_ != nullptr) restorePinInputAction_->setText(text.actionRestorePinInput);
-    if (openFolderAction_ != nullptr) openFolderAction_->setText(text.actionOpenCaptureFolder);
-    if (settingsAction_ != nullptr) settingsAction_->setText(text.actionSettings);
-    if (trayAction_ != nullptr) trayAction_->setText(text.actionHideToTray);
-    if (quitAction_ != nullptr) quitAction_->setText(text.actionQuit);
-    if (pinSelectedHistoryAction_ != nullptr) pinSelectedHistoryAction_->setText(text.actionPinSelectedHistoryItem);
-    if (copySelectedHistoryAction_ != nullptr) copySelectedHistoryAction_->setText(text.actionCopySelectedHistoryItem);
-    if (saveSelectedHistoryAction_ != nullptr) saveSelectedHistoryAction_->setText(text.actionSaveSelectedHistoryItem);
-    if (removeSelectedHistoryAction_ != nullptr) removeSelectedHistoryAction_->setText(text.actionRemoveSelectedHistoryItem);
+    if (regionCaptureAction_ != nullptr)
+        regionCaptureAction_->setText(text.actionRegionCapture);
+    if (fullscreenCaptureAction_ != nullptr)
+        fullscreenCaptureAction_->setText(text.actionFullscreenCapture);
+    if (activeWindowCaptureAction_ != nullptr)
+        activeWindowCaptureAction_->setText(text.actionActiveWindow);
+    if (windowFitCaptureAction_ != nullptr)
+        windowFitCaptureAction_->setText(text.actionWindowFitCapture);
+    if (pinLatestAction_ != nullptr)
+        pinLatestAction_->setText(text.actionPinLastCapture);
+    if (saveLatestAction_ != nullptr)
+        saveLatestAction_->setText(text.actionSaveLastCapture);
+    if (closePinsAction_ != nullptr)
+        closePinsAction_->setText(text.actionClosePins);
+    if (restorePinInputAction_ != nullptr)
+        restorePinInputAction_->setText(text.actionRestorePinInput);
+    if (openFolderAction_ != nullptr)
+        openFolderAction_->setText(text.actionOpenCaptureFolder);
+    if (settingsAction_ != nullptr)
+        settingsAction_->setText(text.actionSettings);
+    if (trayAction_ != nullptr)
+        trayAction_->setText(text.actionHideToTray);
+    if (quitAction_ != nullptr)
+        quitAction_->setText(text.actionQuit);
+    if (pinSelectedHistoryAction_ != nullptr)
+        pinSelectedHistoryAction_->setText(text.actionPinSelectedHistoryItem);
+    if (copySelectedHistoryAction_ != nullptr)
+        copySelectedHistoryAction_->setText(text.actionCopySelectedHistoryItem);
+    if (saveSelectedHistoryAction_ != nullptr)
+        saveSelectedHistoryAction_->setText(text.actionSaveSelectedHistoryItem);
+    if (removeSelectedHistoryAction_ != nullptr)
+        removeSelectedHistoryAction_->setText(text.actionRemoveSelectedHistoryItem);
 }
 
 void MainWindow::syncPreviewToCurrentContext() {
@@ -704,13 +617,9 @@ void MainWindow::updatePreviewPixmap() {
     }
 
     previewLabel_->setText({});
-    previewLabel_->setPixmap(
-        QPixmap::fromImage(previewImage_).scaled(
-            previewLabel_->contentsRect().size(),
-            Qt::KeepAspectRatio,
-            Qt::SmoothTransformation
-        )
-    );
+    previewLabel_->setPixmap(QPixmap::fromImage(previewImage_)
+                                 .scaled(previewLabel_->contentsRect().size(), Qt::KeepAspectRatio,
+                                         Qt::SmoothTransformation));
 }
 
 void MainWindow::updateHistorySummary() {
@@ -718,7 +627,8 @@ void MainWindow::updateHistorySummary() {
         return;
     }
 
-    historySummaryLabel_->setText(cappy::localization::historyCountLabel(language_, historyList_->count()));
+    historySummaryLabel_->setText(
+        cappy::localization::historyCountLabel(language_, historyList_->count()));
 }
 
 QListWidgetItem* MainWindow::selectedHistoryItem() const {
@@ -753,11 +663,9 @@ void MainWindow::saveSelectedHistoryItem() {
         return;
     }
 
-    emit historySaveRequested(
-        item->data(EntryIdRole).toString(),
-        item->data(ImageRole).value<QImage>(),
-        item->data(CaptureModeRole).toInt()
-    );
+    emit historySaveRequested(item->data(EntryIdRole).toString(),
+                              item->data(ImageRole).value<QImage>(),
+                              item->data(CaptureModeRole).toInt());
 }
 
 void MainWindow::removeSelectedHistoryItem() {
@@ -863,15 +771,9 @@ void MainWindow::updateHistoryItemDisplay(QListWidgetItem* item) {
     const QString stateLabel = filePath.isEmpty() ? text.historyClipboardOnly : text.historySaved;
     const QString modeLabel = historyModeLabel(language_, captureMode);
 
-    item->setText(QString("%1 | %2").arg(
-        baseTitle,
-        stateLabel
-    ));
+    item->setText(QString("%1 | %2").arg(baseTitle, stateLabel));
 
     item->setToolTip(cappy::localization::historyItemDetailText(
-        language_,
-        baseTitle,
-        modeLabel,
-        filePath.isEmpty() ? QString{} : QFileInfo(filePath).absoluteFilePath()
-    ));
+        language_, baseTitle, modeLabel,
+        filePath.isEmpty() ? QString{} : QFileInfo(filePath).absoluteFilePath()));
 }

@@ -13,4 +13,4 @@ struct GlobalHotkey {
     Qt::KeyboardModifiers modifiers = Qt::NoModifier;
 };
 
-}  // namespace cappy::platform::hotkey
+} // namespace cappy::platform::hotkey

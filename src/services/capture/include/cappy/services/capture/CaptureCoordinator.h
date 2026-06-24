@@ -19,7 +19,7 @@ namespace cappy::services::capture {
 class CaptureCoordinator final : public QObject {
     Q_OBJECT
 
-public:
+  public:
     explicit CaptureCoordinator(QObject* parent = nullptr);
     ~CaptureCoordinator() override;
 
@@ -29,7 +29,8 @@ public:
     [[nodiscard]] bool isActiveWindowCaptureSupported() const;
     [[nodiscard]] bool isWindowFitCaptureSupported() const;
     [[nodiscard]] QString backendSummary() const;
-    void setOverlayShortcutSettings(const cappy::shortcuts::CaptureOverlayShortcutSettings& shortcuts);
+    void
+    setOverlayShortcutSettings(const cappy::shortcuts::CaptureOverlayShortcutSettings& shortcuts);
     void setOverlayLanguage(cappy::localization::AppLanguage language);
     void captureFullscreen();
     void captureCurrentScreen();
@@ -37,17 +38,15 @@ public:
     void startWindowFitCapture();
     void startRegionCapture();
 
-signals:
+  signals:
     void captureCompleted(const cappy::domain::capture::CaptureResult& result);
-    void captureFinalized(
-        const cappy::domain::capture::CaptureResult& result,
-        cappy::features::capture::CaptureFinalizeAction action
-    );
+    void captureFinalized(const cappy::domain::capture::CaptureResult& result,
+                          cappy::features::capture::CaptureFinalizeAction action);
     void ocrRequested(const QImage& image);
     void captureFailed(const QString& message);
     void captureCanceled();
 
-private:
+  private:
     void resetOverlay();
 
     std::unique_ptr<cappy::platform::capture::IDesktopCaptureBackend> backend_;
@@ -57,4 +56,4 @@ private:
     cappy::localization::AppLanguage overlayLanguage_ = cappy::localization::AppLanguage::English;
 };
 
-}  // namespace cappy::services::capture
+} // namespace cappy::services::capture

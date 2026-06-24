@@ -8,4 +8,4 @@ class IGlobalHotkeyBackend;
 
 [[nodiscard]] std::unique_ptr<IGlobalHotkeyBackend> createGlobalHotkeyBackend();
 
-}  // namespace cappy::platform::hotkey
+} // namespace cappy::platform::hotkey

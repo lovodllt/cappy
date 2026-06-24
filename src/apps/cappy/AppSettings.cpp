@@ -32,11 +32,10 @@ QString settingsKeyForShortcutId(const QString& id) {
     return key;
 }
 
-}  // namespace
+} // namespace
 
 AppSettings::AppSettings(QString defaultSaveDirectory)
-    : defaultSaveDirectory_(std::move(defaultSaveDirectory)) {
-}
+    : defaultSaveDirectory_(std::move(defaultSaveDirectory)) {}
 
 AppSettings::ShellSettings AppSettings::loadShellSettings() const {
     ShellSettings settings;
@@ -46,47 +45,37 @@ AppSettings::ShellSettings AppSettings::loadShellSettings() const {
     settings.startMinimized = store.value(kStartMinimizedKey, false).toBool();
     settings.closeToTray = store.value(kCloseToTrayKey, true).toBool();
     settings.globalHotkeysEnabled = store.value(kGlobalHotkeysEnabledKey, true).toBool();
-    settings.defaultSaveDirectory = store.value(
-        kDefaultSaveDirectoryKey,
-        defaultSaveDirectory_
-    ).toString();
+    settings.defaultSaveDirectory =
+        store.value(kDefaultSaveDirectoryKey, defaultSaveDirectory_).toString();
     settings.appearanceMode = store.value(kAppearanceModeKey, settings.appearanceMode).toString();
-    settings.interfaceLanguage = store.value(
-        kInterfaceLanguageKey,
-        settings.interfaceLanguage
-    ).toString();
+    settings.interfaceLanguage =
+        store.value(kInterfaceLanguageKey, settings.interfaceLanguage).toString();
     settings.historyLimit = store.value(kHistoryLimitKey, settings.historyLimit).toInt();
     settings.mainWindowGeometry = store.value(kMainWindowGeometryKey).toByteArray();
     store.endGroup();
 
     store.beginGroup(kOcrGroup);
-    settings.ocr.preferredProvider = store.value(
-        kOcrPreferredProviderKey,
-        settings.ocr.preferredProvider
-    ).toString();
-    settings.ocr.localCommand = store.value(kOcrLocalCommandKey, settings.ocr.localCommand).toString();
-    settings.ocr.localLanguage = store.value(kOcrLocalLanguageKey, settings.ocr.localLanguage).toString();
-    settings.ocr.cloudEndpoint = store.value(
-        kOcrCloudEndpointKey,
-        settings.ocr.cloudEndpoint
-    ).toString();
+    settings.ocr.preferredProvider =
+        store.value(kOcrPreferredProviderKey, settings.ocr.preferredProvider).toString();
+    settings.ocr.localCommand =
+        store.value(kOcrLocalCommandKey, settings.ocr.localCommand).toString();
+    settings.ocr.localLanguage =
+        store.value(kOcrLocalLanguageKey, settings.ocr.localLanguage).toString();
+    settings.ocr.cloudEndpoint =
+        store.value(kOcrCloudEndpointKey, settings.ocr.cloudEndpoint).toString();
     settings.ocr.cloudModel = store.value(kOcrCloudModelKey, settings.ocr.cloudModel).toString();
     settings.ocr.cloudApiKey = store.value(kOcrCloudApiKeyKey, settings.ocr.cloudApiKey).toString();
     settings.ocr.cloudPrompt = store.value(kOcrCloudPromptKey, settings.ocr.cloudPrompt).toString();
-    settings.ocr.cloudTimeoutSeconds = store.value(
-        kOcrCloudTimeoutSecondsKey,
-        settings.ocr.cloudTimeoutSeconds
-    ).toInt();
+    settings.ocr.cloudTimeoutSeconds =
+        store.value(kOcrCloudTimeoutSecondsKey, settings.ocr.cloudTimeoutSeconds).toInt();
     store.endGroup();
 
     store.beginGroup(kShortcutGroup);
     for (const auto& definition : cappy::shortcuts::shortcutFieldDefinitions()) {
         const QString fallback = cappy::shortcuts::shortcutValue(settings.shortcuts, definition.id);
         cappy::shortcuts::setShortcutValue(
-            &settings.shortcuts,
-            definition.id,
-            store.value(settingsKeyForShortcutId(definition.id), fallback).toString()
-        );
+            &settings.shortcuts, definition.id,
+            store.value(settingsKeyForShortcutId(definition.id), fallback).toString());
     }
     store.endGroup();
 
@@ -120,10 +109,8 @@ void AppSettings::saveShellSettings(const ShellSettings& settings) {
 
     store.beginGroup(kShortcutGroup);
     for (const auto& definition : cappy::shortcuts::shortcutFieldDefinitions()) {
-        store.setValue(
-            settingsKeyForShortcutId(definition.id),
-            cappy::shortcuts::shortcutValue(settings.shortcuts, definition.id)
-        );
+        store.setValue(settingsKeyForShortcutId(definition.id),
+                       cappy::shortcuts::shortcutValue(settings.shortcuts, definition.id));
     }
     store.endGroup();
     store.sync();

@@ -7,8 +7,8 @@ AppDirectories AppDirectories::ensureCreated() {
     AppDirectories directories;
     directories.appDataDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     directories.logsDir = directories.appDataDir + "/logs";
-    directories.capturesDir = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)
-        + "/Cappy";
+    directories.capturesDir =
+        QStandardPaths::writableLocation(QStandardPaths::PicturesLocation) + "/Cappy";
     directories.pluginsDir = directories.appDataDir + "/plugins";
 
     QDir().mkpath(directories.appDataDir);
@@ -18,4 +18,3 @@ AppDirectories AppDirectories::ensureCreated() {
 
     return directories;
 }
-

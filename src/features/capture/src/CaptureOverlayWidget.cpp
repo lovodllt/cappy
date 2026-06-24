@@ -95,7 +95,8 @@ QIcon drawSymbolicIcon(const QString& id, const QSize& size = kIconSize) {
         painter.setFont(font);
         painter.drawText(QRect(0, 0, size.width(), size.height()), Qt::AlignCenter, "1");
     } else if (id == "pin") {
-        painter.drawLine(QPointF(size.width() / 2.0, 3), QPointF(size.width() / 2.0, size.height() - 4));
+        painter.drawLine(QPointF(size.width() / 2.0, 3),
+                         QPointF(size.width() / 2.0, size.height() - 4));
         painter.drawLine(QPointF(4, 6), QPointF(size.width() - 4, 6));
         painter.drawLine(QPointF(5, 6), QPointF(size.width() / 2.0, 11));
         painter.drawLine(QPointF(size.width() - 5, 6), QPointF(size.width() / 2.0, 11));
@@ -114,11 +115,7 @@ QIcon drawSymbolicIcon(const QString& id, const QSize& size = kIconSize) {
         painter.setPen(Qt::NoPen);
         for (int row = 0; row < 3; ++row) {
             for (int col = 0; col < 2; ++col) {
-                painter.drawEllipse(
-                    QPointF(5.0 + col * 4.0, 4.5 + row * 4.0),
-                    0.95,
-                    0.95
-                );
+                painter.drawEllipse(QPointF(5.0 + col * 4.0, 4.5 + row * 4.0), 0.95, 0.95);
             }
         }
     } else if (id == "resize") {
@@ -167,9 +164,7 @@ bool matchesShortcut(QKeyEvent* event, const QString& text) {
     if (key == Qt::Key_Enter) {
         key = Qt::Key_Return;
     }
-    const QKeySequence pressed(
-        static_cast<int>(event->modifiers()) | key
-    );
+    const QKeySequence pressed(static_cast<int>(event->modifiers()) | key);
     return configured.matches(pressed) == QKeySequence::ExactMatch;
 }
 
@@ -184,29 +179,20 @@ QString joinShortcutLabels(std::initializer_list<QString> shortcuts) {
     return labels.join(" / ");
 }
 
-}  // namespace
+} // namespace
 
 CaptureOverlayWidget::CaptureOverlayWidget(
     const cappy::domain::capture::DesktopFrame& desktopFrame,
     cappy::shortcuts::CaptureOverlayShortcutSettings shortcuts,
-    cappy::localization::AppLanguage language,
-    std::optional<QRect> initialSelection,
-    cappy::domain::capture::CaptureMode captureMode,
-    WindowGeometryResolver windowGeometryResolver,
-    QWidget* parent
-)
-    : QWidget(parent)
-    , desktopFrame_(desktopFrame)
-    , captureMode_(captureMode)
-    , shortcuts_(std::move(shortcuts))
-    , language_(cappy::localization::resolvedAppLanguage(language))
-    , windowGeometryResolver_(std::move(windowGeometryResolver)) {
-    setWindowFlags(
-        Qt::FramelessWindowHint
-        | Qt::Tool
-        | Qt::WindowStaysOnTopHint
-        | Qt::BypassWindowManagerHint
-    );
+    cappy::localization::AppLanguage language, std::optional<QRect> initialSelection,
+    cappy::domain::capture::CaptureMode captureMode, WindowGeometryResolver windowGeometryResolver,
+    QWidget* parent)
+    : QWidget(parent), desktopFrame_(desktopFrame), captureMode_(captureMode),
+      shortcuts_(std::move(shortcuts)),
+      language_(cappy::localization::resolvedAppLanguage(language)),
+      windowGeometryResolver_(std::move(windowGeometryResolver)) {
+    setWindowFlags(Qt::FramelessWindowHint | Qt::Tool | Qt::WindowStaysOnTopHint |
+                   Qt::BypassWindowManagerHint);
     setAttribute(Qt::WA_DeleteOnClose, true);
     setAttribute(Qt::WA_NoSystemBackground, false);
     setMouseTracking(true);
@@ -270,15 +256,16 @@ void CaptureOverlayWidget::paintEvent(QPaintEvent* event) {
         drawTextAnnotations(painter);
         painter.restore();
 
-        if (dragging_ && activeTool_ != Tool::Pencil && activeTool_ != Tool::Marker
-            && selectionMode_ == SelectionMode::None) {
+        if (dragging_ && activeTool_ != Tool::Pencil && activeTool_ != Tool::Marker &&
+            selectionMode_ == SelectionMode::None) {
             painter.save();
             painter.setClipRect(selection);
             drawShapePreview(painter);
             painter.restore();
         }
 
-        if (!dragging_ && activeTool_ == Tool::Serial && hasHoverPoint_ && isWithinSelection(hoverPoint_)) {
+        if (!dragging_ && activeTool_ == Tool::Serial && hasHoverPoint_ &&
+            isWithinSelection(hoverPoint_)) {
             painter.save();
             painter.setClipRect(selection);
             drawSerialPreview(painter);
@@ -324,17 +311,14 @@ void CaptureOverlayWidget::paintEvent(QPaintEvent* event) {
         painter.drawText(textRect, Qt::AlignCenter, sizeText);
     } else {
         painter.setPen(Qt::white);
-        painter.drawText(
-            QRect(16, 16, width() - 32, 32),
-            Qt::AlignLeft | Qt::AlignVCenter,
-            cappy::localization::strings(language_).overlayInstruction
-        );
+        painter.drawText(QRect(16, 16, width() - 32, 32), Qt::AlignLeft | Qt::AlignVCenter,
+                         cappy::localization::strings(language_).overlayInstruction);
     }
 }
 
 void CaptureOverlayWidget::mousePressEvent(QMouseEvent* event) {
-    if (textEntryActive_ && textInputPanel_ != nullptr
-        && !textInputPanel_->geometry().contains(event->pos())) {
+    if (textEntryActive_ && textInputPanel_ != nullptr &&
+        !textInputPanel_->geometry().contains(event->pos())) {
         commitTextEntry();
     }
 
@@ -381,7 +365,8 @@ void CaptureOverlayWidget::mousePressEvent(QMouseEvent* event) {
                 textAnnotationResizing_ = true;
             } else {
                 textAnnotationDragging_ = true;
-                textAnnotationDragOffset_ = imagePoint - textAnnotations_[annotationIndex].rect.topLeft();
+                textAnnotationDragOffset_ =
+                    imagePoint - textAnnotations_[annotationIndex].rect.topLeft();
             }
             update();
             event->accept();
@@ -436,24 +421,24 @@ void CaptureOverlayWidget::mouseMoveEvent(QMouseEvent* event) {
     }
     updateInteractionCursor(point);
 
-    if (selectedTextAnnotationIndex_ >= 0
-        && selectedTextAnnotationIndex_ < textAnnotations_.size()
-        && (textAnnotationDragging_ || textAnnotationResizing_)) {
+    if (selectedTextAnnotationIndex_ >= 0 &&
+        selectedTextAnnotationIndex_ < textAnnotations_.size() &&
+        (textAnnotationDragging_ || textAnnotationResizing_)) {
         auto& annotation = textAnnotations_[selectedTextAnnotationIndex_];
         const QPoint imagePoint = mapOverlayPointToImage(point);
         if (textAnnotationDragging_) {
             QPoint topLeft = imagePoint - textAnnotationDragOffset_;
-            topLeft.setX(std::clamp(topLeft.x(), 0, std::max(0, workingImage_.width() - annotation.rect.width())));
-            topLeft.setY(std::clamp(topLeft.y(), 0, std::max(0, workingImage_.height() - annotation.rect.height())));
+            topLeft.setX(std::clamp(topLeft.x(), 0,
+                                    std::max(0, workingImage_.width() - annotation.rect.width())));
+            topLeft.setY(std::clamp(
+                topLeft.y(), 0, std::max(0, workingImage_.height() - annotation.rect.height())));
             annotation.rect.moveTopLeft(topLeft);
         } else if (textAnnotationResizing_) {
-            const int nextPixelSize = std::clamp(
-                imagePoint.y() - annotation.rect.top() + 10,
-                12,
-                72
-            );
+            const int nextPixelSize =
+                std::clamp(imagePoint.y() - annotation.rect.top() + 10, 12, 72);
             annotation.pixelSize = nextPixelSize;
-            annotation.rect = normalizedTextRect(annotation.text, annotation.pixelSize, annotation.rect.topLeft());
+            annotation.rect = normalizedTextRect(annotation.text, annotation.pixelSize,
+                                                 annotation.rect.topLeft());
             if (annotation.rect.right() > workingImage_.width() - 8) {
                 annotation.rect.moveRight(workingImage_.width() - 8);
             }
@@ -505,13 +490,8 @@ void CaptureOverlayWidget::mouseMoveEvent(QMouseEvent* event) {
         const QPoint nextPoint = mapOverlayPointToImage(point);
         QPainter painter(&workingImage_);
         painter.setRenderHint(QPainter::Antialiasing, true);
-        painter.setPen(QPen(
-            activeStrokeColor(),
-            activeStrokeWidth(),
-            Qt::SolidLine,
-            Qt::RoundCap,
-            Qt::RoundJoin
-        ));
+        painter.setPen(QPen(activeStrokeColor(), activeStrokeWidth(), Qt::SolidLine, Qt::RoundCap,
+                            Qt::RoundJoin));
         painter.drawLine(lastPencilPoint_, nextPoint);
         lastPencilPoint_ = nextPoint;
         hasEdits_ = true;
@@ -560,8 +540,8 @@ void CaptureOverlayWidget::mouseReleaseEvent(QMouseEvent* event) {
         if (selectionMode_ == SelectionMode::Create) {
             selectionRect_ = normalizedSelectionRect();
             selectionRect_ = clampSelectionRect(selectionRect_);
-            if (selectionRect_.width() < kMinimumSelectionSize
-                || selectionRect_.height() < kMinimumSelectionSize) {
+            if (selectionRect_.width() < kMinimumSelectionSize ||
+                selectionRect_.height() < kMinimumSelectionSize) {
                 selectionRect_ = {};
                 selectionMode_ = SelectionMode::None;
                 positionToolbar();
@@ -582,13 +562,8 @@ void CaptureOverlayWidget::mouseReleaseEvent(QMouseEvent* event) {
         if (nextPoint == lastPencilPoint_) {
             QPainter painter(&workingImage_);
             painter.setRenderHint(QPainter::Antialiasing, true);
-            painter.setPen(QPen(
-                activeStrokeColor(),
-                activeStrokeWidth(),
-                Qt::SolidLine,
-                Qt::RoundCap,
-                Qt::RoundJoin
-            ));
+            painter.setPen(QPen(activeStrokeColor(), activeStrokeWidth(), Qt::SolidLine,
+                                Qt::RoundCap, Qt::RoundJoin));
             painter.drawPoint(nextPoint);
         }
 
@@ -631,20 +606,20 @@ bool CaptureOverlayWidget::eventFilter(QObject* watched, QEvent* event) {
         }
     }
 
-    if ((watched == textMoveHandleButton_ || watched == textInputPanel_) && textInputPanel_ != nullptr) {
+    if ((watched == textMoveHandleButton_ || watched == textInputPanel_) &&
+        textInputPanel_ != nullptr) {
         if (event->type() == QEvent::MouseButtonPress) {
             auto* mouseEvent = static_cast<QMouseEvent*>(event);
             if (mouseEvent->button() == Qt::LeftButton) {
                 textInputDragging_ = true;
-                textInputDragOffset_ = mouseEvent->globalPosition().toPoint()
-                    - textInputPanel_->frameGeometry().topLeft();
+                textInputDragOffset_ = mouseEvent->globalPosition().toPoint() -
+                                       textInputPanel_->frameGeometry().topLeft();
                 return true;
             }
         } else if (event->type() == QEvent::MouseMove && textInputDragging_) {
             auto* mouseEvent = static_cast<QMouseEvent*>(event);
             const QPoint topLeft = clampTextInputPanelTopLeft(
-                mouseEvent->globalPosition().toPoint() - textInputDragOffset_
-            );
+                mouseEvent->globalPosition().toPoint() - textInputDragOffset_);
             textInputPanel_->move(topLeft);
             updatePendingTextPointFromPanel();
             return true;
@@ -668,12 +643,12 @@ bool CaptureOverlayWidget::eventFilter(QObject* watched, QEvent* event) {
             }
         } else if (event->type() == QEvent::MouseMove && textInputResizing_) {
             auto* mouseEvent = static_cast<QMouseEvent*>(event);
-            const QPoint delta = mouseEvent->globalPosition().toPoint() - textInputResizeStartGlobalPos_;
+            const QPoint delta =
+                mouseEvent->globalPosition().toPoint() - textInputResizeStartGlobalPos_;
             const QRect bounds = localSelectionRect().adjusted(8, 8, -8, -8);
             const QSize nextSize(
                 std::clamp(textInputResizeStartSize_.width() + delta.x(), 220, bounds.width()),
-                std::clamp(textInputResizeStartSize_.height() + delta.y(), 36, bounds.height())
-            );
+                std::clamp(textInputResizeStartSize_.height() + delta.y(), 36, bounds.height()));
             textInputPanel_->resize(nextSize);
             pendingTextPixelSize_ = std::clamp(nextSize.height() - 18, 12, 56);
             updateTextInputAppearance();
@@ -693,118 +668,76 @@ bool CaptureOverlayWidget::eventFilter(QObject* watched, QEvent* event) {
 void CaptureOverlayWidget::setupToolbar() {
     toolbar_ = new QFrame(this);
     toolbar_->setObjectName("captureOverlayToolbar");
-    toolbar_->setStyleSheet(
-        "#captureOverlayToolbar {"
-        "  background: rgba(24, 24, 24, 220);"
-        "  border: 1px solid rgba(255, 255, 255, 64);"
-        "  border-radius: 6px;"
-        "}"
-        "QToolButton {"
-        "  border: 0;"
-        "  padding: 0;"
-        "  background: transparent;"
-        "}"
-        "QToolButton:checked {"
-        "  background: rgba(255, 255, 255, 36);"
-        "  border-radius: 4px;"
-        "}"
-        "QToolButton:hover {"
-        "  background: rgba(255, 255, 255, 18);"
-        "  border-radius: 4px;"
-        "}"
-    );
+    toolbar_->setStyleSheet("#captureOverlayToolbar {"
+                            "  background: rgba(24, 24, 24, 220);"
+                            "  border: 1px solid rgba(255, 255, 255, 64);"
+                            "  border-radius: 6px;"
+                            "}"
+                            "QToolButton {"
+                            "  border: 0;"
+                            "  padding: 0;"
+                            "  background: transparent;"
+                            "}"
+                            "QToolButton:checked {"
+                            "  background: rgba(255, 255, 255, 36);"
+                            "  border-radius: 4px;"
+                            "}"
+                            "QToolButton:hover {"
+                            "  background: rgba(255, 255, 255, 18);"
+                            "  border-radius: 4px;"
+                            "}");
 
     auto* layout = new QHBoxLayout(toolbar_);
     layout->setContentsMargins(8, 6, 8, 6);
     layout->setSpacing(3);
 
-    auto makeAction = [this](const QIcon& icon,
-                             bool checkable,
-                             auto handler) {
+    auto makeAction = [this](const QIcon& icon, bool checkable, auto handler) {
         auto* action = new QAction(icon, {}, this);
         action->setCheckable(checkable);
         connect(action, &QAction::triggered, this, [handler]() { handler(); });
         return action;
     };
 
-    rectangleAction_ = makeAction(
-        drawSymbolicIcon("rectangle"),
-        true,
-        [this]() { setActiveTool(activeTool_ == Tool::Rectangle ? Tool::None : Tool::Rectangle); }
-    );
-    ellipseAction_ = makeAction(
-        drawSymbolicIcon("ellipse"),
-        true,
-        [this]() { setActiveTool(activeTool_ == Tool::Ellipse ? Tool::None : Tool::Ellipse); }
-    );
-    arrowAction_ = makeAction(
-        drawSymbolicIcon("arrow"),
-        true,
-        [this]() { setActiveTool(activeTool_ == Tool::Arrow ? Tool::None : Tool::Arrow); }
-    );
-    pencilAction_ = makeAction(
-        drawSymbolicIcon("pen"),
-        true,
-        [this]() { setActiveTool(activeTool_ == Tool::Pencil ? Tool::None : Tool::Pencil); }
-    );
-    markerAction_ = makeAction(
-        drawSymbolicIcon("marker"),
-        true,
-        [this]() { setActiveTool(activeTool_ == Tool::Marker ? Tool::None : Tool::Marker); }
-    );
-    mosaicAction_ = makeAction(
-        drawSymbolicIcon("mosaic"),
-        true,
-        [this]() { setActiveTool(activeTool_ == Tool::Mosaic ? Tool::None : Tool::Mosaic); }
-    );
-    textAction_ = makeAction(
-        drawSymbolicIcon("text"),
-        true,
-        [this]() { setActiveTool(activeTool_ == Tool::Text ? Tool::None : Tool::Text); }
-    );
-    serialAction_ = makeAction(
-        drawSymbolicIcon("serial"),
-        true,
-        [this]() { setActiveTool(activeTool_ == Tool::Serial ? Tool::None : Tool::Serial); }
-    );
-    undoAction_ = makeAction(
-        themedIcon(this, "edit-undo", QStyle::SP_ArrowBack),
-        false,
-        [this]() { undo(); }
-    );
-    redoAction_ = makeAction(
-        themedIcon(this, "edit-redo", QStyle::SP_ArrowForward),
-        false,
-        [this]() { redo(); }
-    );
-    copyAction_ = makeAction(
-        drawSymbolicIcon("copy"),
-        false,
-        [this]() { finalizeSelection(CaptureFinalizeAction::Copy); }
-    );
-    saveAction_ = makeAction(
-        drawSymbolicIcon("save"),
-        false,
-        [this]() { finalizeSelection(CaptureFinalizeAction::Save); }
-    );
-    pinAction_ = makeAction(
-        drawSymbolicIcon("pin"),
-        false,
-        [this]() { finalizeSelection(CaptureFinalizeAction::Pin); }
-    );
-    ocrAction_ = makeAction(
-        themedIcon(this, "scanner", QStyle::SP_FileDialogContentsView),
-        false,
-        [this]() { emit ocrRequested(compositedImage()); }
-    );
-    closeAction_ = makeAction(
-        drawSymbolicIcon("close"),
-        false,
-        [this]() {
-            emit captureCanceled();
-            close();
-        }
-    );
+    rectangleAction_ = makeAction(drawSymbolicIcon("rectangle"), true, [this]() {
+        setActiveTool(activeTool_ == Tool::Rectangle ? Tool::None : Tool::Rectangle);
+    });
+    ellipseAction_ = makeAction(drawSymbolicIcon("ellipse"), true, [this]() {
+        setActiveTool(activeTool_ == Tool::Ellipse ? Tool::None : Tool::Ellipse);
+    });
+    arrowAction_ = makeAction(drawSymbolicIcon("arrow"), true, [this]() {
+        setActiveTool(activeTool_ == Tool::Arrow ? Tool::None : Tool::Arrow);
+    });
+    pencilAction_ = makeAction(drawSymbolicIcon("pen"), true, [this]() {
+        setActiveTool(activeTool_ == Tool::Pencil ? Tool::None : Tool::Pencil);
+    });
+    markerAction_ = makeAction(drawSymbolicIcon("marker"), true, [this]() {
+        setActiveTool(activeTool_ == Tool::Marker ? Tool::None : Tool::Marker);
+    });
+    mosaicAction_ = makeAction(drawSymbolicIcon("mosaic"), true, [this]() {
+        setActiveTool(activeTool_ == Tool::Mosaic ? Tool::None : Tool::Mosaic);
+    });
+    textAction_ = makeAction(drawSymbolicIcon("text"), true, [this]() {
+        setActiveTool(activeTool_ == Tool::Text ? Tool::None : Tool::Text);
+    });
+    serialAction_ = makeAction(drawSymbolicIcon("serial"), true, [this]() {
+        setActiveTool(activeTool_ == Tool::Serial ? Tool::None : Tool::Serial);
+    });
+    undoAction_ = makeAction(themedIcon(this, "edit-undo", QStyle::SP_ArrowBack), false,
+                             [this]() { undo(); });
+    redoAction_ = makeAction(themedIcon(this, "edit-redo", QStyle::SP_ArrowForward), false,
+                             [this]() { redo(); });
+    copyAction_ = makeAction(drawSymbolicIcon("copy"), false,
+                             [this]() { finalizeSelection(CaptureFinalizeAction::Copy); });
+    saveAction_ = makeAction(drawSymbolicIcon("save"), false,
+                             [this]() { finalizeSelection(CaptureFinalizeAction::Save); });
+    pinAction_ = makeAction(drawSymbolicIcon("pin"), false,
+                            [this]() { finalizeSelection(CaptureFinalizeAction::Pin); });
+    ocrAction_ = makeAction(themedIcon(this, "scanner", QStyle::SP_FileDialogContentsView), false,
+                            [this]() { emit ocrRequested(compositedImage()); });
+    closeAction_ = makeAction(drawSymbolicIcon("close"), false, [this]() {
+        emit captureCanceled();
+        close();
+    });
 
     layout->addWidget(createToolbarButton(toolbar_, rectangleAction_));
     layout->addWidget(createToolbarButton(toolbar_, ellipseAction_));
@@ -827,22 +760,20 @@ void CaptureOverlayWidget::setupToolbar() {
     textInputPanel_ = new QWidget(this);
     textInputPanel_->hide();
     textInputPanel_->setObjectName("captureOverlayTextInputPanel");
-    textInputPanel_->setStyleSheet(
-        "#captureOverlayTextInputPanel {"
-        "  background: rgba(22, 22, 22, 236);"
-        "  border: 1px solid rgba(255, 255, 255, 70);"
-        "  border-radius: 8px;"
-        "}"
-        "#captureOverlayTextInputPanel QToolButton {"
-        "  border: 0;"
-        "  background: transparent;"
-        "  color: rgb(220, 220, 220);"
-        "  border-radius: 4px;"
-        "}"
-        "#captureOverlayTextInputPanel QToolButton:hover {"
-        "  background: rgba(255, 255, 255, 18);"
-        "}"
-    );
+    textInputPanel_->setStyleSheet("#captureOverlayTextInputPanel {"
+                                   "  background: rgba(22, 22, 22, 236);"
+                                   "  border: 1px solid rgba(255, 255, 255, 70);"
+                                   "  border-radius: 8px;"
+                                   "}"
+                                   "#captureOverlayTextInputPanel QToolButton {"
+                                   "  border: 0;"
+                                   "  background: transparent;"
+                                   "  color: rgb(220, 220, 220);"
+                                   "  border-radius: 4px;"
+                                   "}"
+                                   "#captureOverlayTextInputPanel QToolButton:hover {"
+                                   "  background: rgba(255, 255, 255, 18);"
+                                   "}");
     auto* textInputLayout = new QHBoxLayout(textInputPanel_);
     textInputLayout->setContentsMargins(6, 4, 6, 4);
     textInputLayout->setSpacing(4);
@@ -861,15 +792,13 @@ void CaptureOverlayWidget::setupToolbar() {
     textInput_->setFrame(false);
     textInput_->setClearButtonEnabled(false);
     textInput_->setAttribute(Qt::WA_DeleteOnClose, false);
-    textInput_->setStyleSheet(
-        "QLineEdit {"
-        "  background: transparent;"
-        "  color: rgb(255, 236, 120);"
-        "  border: 0;"
-        "  padding: 0 4px;"
-        "  selection-background-color: rgba(255, 236, 120, 72);"
-        "}"
-    );
+    textInput_->setStyleSheet("QLineEdit {"
+                              "  background: transparent;"
+                              "  color: rgb(255, 236, 120);"
+                              "  border: 0;"
+                              "  padding: 0 4px;"
+                              "  selection-background-color: rgba(255, 236, 120, 72);"
+                              "}");
     textInput_->installEventFilter(this);
     textInputLayout->addWidget(textInput_, 1);
 
@@ -925,63 +854,48 @@ void CaptureOverlayWidget::refreshActionTooltips() {
         action->setStatusTip(tooltip);
     };
 
-    setTooltip(rectangleAction_, QString("%1 (%2)").arg(
-        text.toolRectangle,
-        joinShortcutLabels({shortcuts_.rectangle, shortcuts_.rectangleAlt})
-    ));
-    setTooltip(ellipseAction_, QString("%1 (%2)").arg(
-        text.toolEllipse,
-        joinShortcutLabels({shortcuts_.ellipse, shortcuts_.ellipseAlt})
-    ));
-    setTooltip(arrowAction_, QString("%1 (%2)").arg(
-        text.toolArrow,
-        joinShortcutLabels({shortcuts_.arrow, shortcuts_.arrowAlt})
-    ));
-    setTooltip(pencilAction_, QString("%1 (%2)").arg(
-        text.toolPen,
-        joinShortcutLabels({shortcuts_.pen, shortcuts_.penAlt})
-    ));
-    setTooltip(markerAction_, QString("%1 (%2)").arg(
-        text.toolMarker,
-        joinShortcutLabels({shortcuts_.marker, shortcuts_.markerAlt})
-    ));
-    setTooltip(mosaicAction_, QString("%1 (%2)").arg(
-        text.toolMosaic,
-        joinShortcutLabels({shortcuts_.mosaic, shortcuts_.mosaicAlt})
-    ));
-    setTooltip(textAction_, QString("%1 (%2)").arg(
-        text.toolText,
-        joinShortcutLabels({shortcuts_.text, shortcuts_.textAlt})
-    ));
-    setTooltip(serialAction_, QString("%1 (%2)").arg(
-        text.toolSerial,
-        joinShortcutLabels({shortcuts_.serial, shortcuts_.serialAlt})
-    ));
-    setTooltip(undoAction_, QString("%1 (%2)").arg(
-        text.toolUndo,
-        joinShortcutLabels({shortcuts_.undo})
-    ));
-    setTooltip(redoAction_, QString("%1 (%2)").arg(
-        text.toolRedo,
-        joinShortcutLabels({shortcuts_.redo})
-    ));
-    setTooltip(copyAction_, QString("%1 (%2)").arg(
-        text.actionCopyToClipboard,
-        joinShortcutLabels({shortcuts_.copy, shortcuts_.copyAlt, shortcuts_.quickCopy})
-    ));
-    setTooltip(saveAction_, QString("%1 (%2)").arg(
-        text.actionSaveToFile,
-        joinShortcutLabels({shortcuts_.save, shortcuts_.saveAlt})
-    ));
-    setTooltip(pinAction_, QString("%1 (%2)").arg(
-        text.actionPinToDesktop,
-        joinShortcutLabels({shortcuts_.pin, shortcuts_.pinAlt})
-    ));
+    setTooltip(rectangleAction_,
+               QString("%1 (%2)").arg(
+                   text.toolRectangle,
+                   joinShortcutLabels({shortcuts_.rectangle, shortcuts_.rectangleAlt})));
+    setTooltip(ellipseAction_, QString("%1 (%2)").arg(text.toolEllipse,
+                                                      joinShortcutLabels({shortcuts_.ellipse,
+                                                                          shortcuts_.ellipseAlt})));
+    setTooltip(arrowAction_,
+               QString("%1 (%2)").arg(text.toolArrow,
+                                      joinShortcutLabels({shortcuts_.arrow, shortcuts_.arrowAlt})));
+    setTooltip(pencilAction_,
+               QString("%1 (%2)").arg(text.toolPen,
+                                      joinShortcutLabels({shortcuts_.pen, shortcuts_.penAlt})));
+    setTooltip(markerAction_,
+               QString("%1 (%2)").arg(
+                   text.toolMarker, joinShortcutLabels({shortcuts_.marker, shortcuts_.markerAlt})));
+    setTooltip(mosaicAction_,
+               QString("%1 (%2)").arg(
+                   text.toolMosaic, joinShortcutLabels({shortcuts_.mosaic, shortcuts_.mosaicAlt})));
+    setTooltip(textAction_,
+               QString("%1 (%2)").arg(text.toolText,
+                                      joinShortcutLabels({shortcuts_.text, shortcuts_.textAlt})));
+    setTooltip(serialAction_,
+               QString("%1 (%2)").arg(
+                   text.toolSerial, joinShortcutLabels({shortcuts_.serial, shortcuts_.serialAlt})));
+    setTooltip(undoAction_,
+               QString("%1 (%2)").arg(text.toolUndo, joinShortcutLabels({shortcuts_.undo})));
+    setTooltip(redoAction_,
+               QString("%1 (%2)").arg(text.toolRedo, joinShortcutLabels({shortcuts_.redo})));
+    setTooltip(copyAction_,
+               QString("%1 (%2)").arg(text.actionCopyToClipboard,
+                                      joinShortcutLabels({shortcuts_.copy, shortcuts_.copyAlt,
+                                                          shortcuts_.quickCopy})));
+    setTooltip(saveAction_,
+               QString("%1 (%2)").arg(text.actionSaveToFile,
+                                      joinShortcutLabels({shortcuts_.save, shortcuts_.saveAlt})));
+    setTooltip(pinAction_,
+               QString("%1 (%2)").arg(text.actionPinToDesktop,
+                                      joinShortcutLabels({shortcuts_.pin, shortcuts_.pinAlt})));
     setTooltip(ocrAction_, text.actionExtractText);
-    setTooltip(closeAction_, QString("%1 (%2)").arg(
-        text.actionCancel,
-        joinShortcutLabels({shortcuts_.cancel})
-    ));
+    setTooltip(closeAction_,
+               QString("%1 (%2)").arg(text.actionCancel, joinShortcutLabels({shortcuts_.cancel})));
 }
 
 void CaptureOverlayWidget::updateToolActionState() {
@@ -1010,7 +924,8 @@ void CaptureOverlayWidget::updateToolActionState() {
         serialAction_->setChecked(activeTool_ == Tool::Serial);
     }
 
-    updateInteractionCursor(hasHoverPoint_ ? hoverPoint_ : clampToBounds(mapFromGlobal(QCursor::pos())));
+    updateInteractionCursor(hasHoverPoint_ ? hoverPoint_
+                                           : clampToBounds(mapFromGlobal(QCursor::pos())));
 }
 
 void CaptureOverlayWidget::updateUndoRedoState() {
@@ -1053,7 +968,8 @@ void CaptureOverlayWidget::updateInteractionCursor(const QPoint& point) {
     }
 
     if (activeTool_ != Tool::None) {
-        setCursor((activeTool_ == Tool::Text || activeTool_ == Tool::Serial) ? Qt::IBeamCursor : Qt::CrossCursor);
+        setCursor((activeTool_ == Tool::Text || activeTool_ == Tool::Serial) ? Qt::IBeamCursor
+                                                                             : Qt::CrossCursor);
         return;
     }
 
@@ -1127,15 +1043,13 @@ void CaptureOverlayWidget::updateTrackedWindowSelection(const QPoint& overlayPoi
     }
 
     QRect localRect;
-    const QRect absoluteRect = windowGeometryResolver_(
-        overlayPoint + desktopFrame_.geometry.topLeft(),
-        effectiveWinId()
-    );
+    const QRect absoluteRect =
+        windowGeometryResolver_(overlayPoint + desktopFrame_.geometry.topLeft(), effectiveWinId());
     if (!absoluteRect.isEmpty()) {
         localRect = clampSelectionRect(
-            absoluteRect.translated(-desktopFrame_.geometry.topLeft()).normalized()
-        );
-        if (localRect.width() < kMinimumSelectionSize || localRect.height() < kMinimumSelectionSize) {
+            absoluteRect.translated(-desktopFrame_.geometry.topLeft()).normalized());
+        if (localRect.width() < kMinimumSelectionSize ||
+            localRect.height() < kMinimumSelectionSize) {
             localRect = {};
         }
     }
@@ -1156,9 +1070,7 @@ void CaptureOverlayWidget::refreshWorkingImageFromSelection() {
     }
 
     workingImage_ = cappy::domain::capture::cropNormalizedImage(
-        desktopFrame_,
-        selectionRect_.translated(desktopFrame_.geometry.topLeft())
-    );
+        desktopFrame_, selectionRect_.translated(desktopFrame_.geometry.topLeft()));
     if (workingImage_.isNull()) {
         workingImage_ = desktopFrame_.image.copy(selectionRect_);
     }
@@ -1189,8 +1101,8 @@ void CaptureOverlayWidget::handleShortcut(QKeyEvent* event) {
         return;
     }
 
-    if (suppressNextReturnShortcut_
-        && (event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter)) {
+    if (suppressNextReturnShortcut_ &&
+        (event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter)) {
         suppressNextReturnShortcut_ = false;
         event->accept();
         return;
@@ -1204,25 +1116,25 @@ void CaptureOverlayWidget::handleShortcut(QKeyEvent* event) {
         return;
     }
 
-    const auto toggleToolIfMatched =
-        [this, event](const QString& primary, const QString& alternate, Tool tool) -> bool {
-            if (!matchesShortcut(event, primary) && !matchesShortcut(event, alternate)) {
-                return false;
-            }
+    const auto toggleToolIfMatched = [this, event](const QString& primary, const QString& alternate,
+                                                   Tool tool) -> bool {
+        if (!matchesShortcut(event, primary) && !matchesShortcut(event, alternate)) {
+            return false;
+        }
 
-            setActiveTool(activeTool_ == tool ? Tool::None : tool);
-            event->accept();
-            return true;
-        };
+        setActiveTool(activeTool_ == tool ? Tool::None : tool);
+        event->accept();
+        return true;
+    };
 
-    if (toggleToolIfMatched(shortcuts_.rectangle, shortcuts_.rectangleAlt, Tool::Rectangle)
-        || toggleToolIfMatched(shortcuts_.ellipse, shortcuts_.ellipseAlt, Tool::Ellipse)
-        || toggleToolIfMatched(shortcuts_.arrow, shortcuts_.arrowAlt, Tool::Arrow)
-        || toggleToolIfMatched(shortcuts_.pen, shortcuts_.penAlt, Tool::Pencil)
-        || toggleToolIfMatched(shortcuts_.marker, shortcuts_.markerAlt, Tool::Marker)
-        || toggleToolIfMatched(shortcuts_.mosaic, shortcuts_.mosaicAlt, Tool::Mosaic)
-        || toggleToolIfMatched(shortcuts_.text, shortcuts_.textAlt, Tool::Text)
-        || toggleToolIfMatched(shortcuts_.serial, shortcuts_.serialAlt, Tool::Serial)) {
+    if (toggleToolIfMatched(shortcuts_.rectangle, shortcuts_.rectangleAlt, Tool::Rectangle) ||
+        toggleToolIfMatched(shortcuts_.ellipse, shortcuts_.ellipseAlt, Tool::Ellipse) ||
+        toggleToolIfMatched(shortcuts_.arrow, shortcuts_.arrowAlt, Tool::Arrow) ||
+        toggleToolIfMatched(shortcuts_.pen, shortcuts_.penAlt, Tool::Pencil) ||
+        toggleToolIfMatched(shortcuts_.marker, shortcuts_.markerAlt, Tool::Marker) ||
+        toggleToolIfMatched(shortcuts_.mosaic, shortcuts_.mosaicAlt, Tool::Mosaic) ||
+        toggleToolIfMatched(shortcuts_.text, shortcuts_.textAlt, Tool::Text) ||
+        toggleToolIfMatched(shortcuts_.serial, shortcuts_.serialAlt, Tool::Serial)) {
         return;
     }
 
@@ -1238,9 +1150,8 @@ void CaptureOverlayWidget::handleShortcut(QKeyEvent* event) {
         return;
     }
 
-    if (matchesShortcut(event, shortcuts_.copy)
-        || matchesShortcut(event, shortcuts_.copyAlt)
-        || matchesShortcut(event, shortcuts_.quickCopy)) {
+    if (matchesShortcut(event, shortcuts_.copy) || matchesShortcut(event, shortcuts_.copyAlt) ||
+        matchesShortcut(event, shortcuts_.quickCopy)) {
         finalizeSelection(CaptureFinalizeAction::Copy);
         event->accept();
         return;
@@ -1355,7 +1266,8 @@ void CaptureOverlayWidget::handlePointTool(const QPoint& point) {
                 textAnnotationResizing_ = true;
             } else {
                 textAnnotationDragging_ = true;
-                textAnnotationDragOffset_ = imagePoint - textAnnotations_[annotationIndex].rect.topLeft();
+                textAnnotationDragOffset_ =
+                    imagePoint - textAnnotations_[annotationIndex].rect.topLeft();
             }
             update();
             break;
@@ -1385,13 +1297,8 @@ void CaptureOverlayWidget::commitCurrentShape() {
     case Tool::Rectangle: {
         QPainter painter(&workingImage_);
         painter.setRenderHint(QPainter::Antialiasing, true);
-        painter.setPen(QPen(
-            activeStrokeColor(),
-            activeStrokeWidth(),
-            Qt::SolidLine,
-            Qt::RoundCap,
-            Qt::RoundJoin
-        ));
+        painter.setPen(QPen(activeStrokeColor(), activeStrokeWidth(), Qt::SolidLine, Qt::RoundCap,
+                            Qt::RoundJoin));
         painter.setBrush(Qt::NoBrush);
         painter.drawRect(QRect(imageStart, imageEnd).normalized());
         break;
@@ -1399,13 +1306,8 @@ void CaptureOverlayWidget::commitCurrentShape() {
     case Tool::Ellipse: {
         QPainter painter(&workingImage_);
         painter.setRenderHint(QPainter::Antialiasing, true);
-        painter.setPen(QPen(
-            activeStrokeColor(),
-            activeStrokeWidth(),
-            Qt::SolidLine,
-            Qt::RoundCap,
-            Qt::RoundJoin
-        ));
+        painter.setPen(QPen(activeStrokeColor(), activeStrokeWidth(), Qt::SolidLine, Qt::RoundCap,
+                            Qt::RoundJoin));
         painter.setBrush(Qt::NoBrush);
         painter.drawEllipse(QRect(imageStart, imageEnd).normalized());
         break;
@@ -1413,13 +1315,8 @@ void CaptureOverlayWidget::commitCurrentShape() {
     case Tool::Arrow: {
         QPainter painter(&workingImage_);
         painter.setRenderHint(QPainter::Antialiasing, true);
-        painter.setPen(QPen(
-            activeStrokeColor(),
-            activeStrokeWidth(),
-            Qt::SolidLine,
-            Qt::RoundCap,
-            Qt::RoundJoin
-        ));
+        painter.setPen(QPen(activeStrokeColor(), activeStrokeWidth(), Qt::SolidLine, Qt::RoundCap,
+                            Qt::RoundJoin));
         painter.setBrush(Qt::NoBrush);
         drawArrow(painter, imageStart, imageEnd);
         break;
@@ -1442,13 +1339,8 @@ void CaptureOverlayWidget::commitCurrentShape() {
 
 void CaptureOverlayWidget::drawShapePreview(QPainter& painter) const {
     painter.save();
-    painter.setPen(QPen(
-        activeStrokeColor(),
-        activeStrokeWidth(),
-        Qt::SolidLine,
-        Qt::RoundCap,
-        Qt::RoundJoin
-    ));
+    painter.setPen(
+        QPen(activeStrokeColor(), activeStrokeWidth(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
     painter.setBrush(Qt::NoBrush);
 
     switch (activeTool_) {
@@ -1476,7 +1368,8 @@ void CaptureOverlayWidget::drawShapePreview(QPainter& painter) const {
     painter.restore();
 }
 
-void CaptureOverlayWidget::drawArrow(QPainter& painter, const QPoint& start, const QPoint& end) const {
+void CaptureOverlayWidget::drawArrow(QPainter& painter, const QPoint& start,
+                                     const QPoint& end) const {
     painter.drawLine(start, end);
 
     const QLineF line(start, end);
@@ -1486,14 +1379,10 @@ void CaptureOverlayWidget::drawArrow(QPainter& painter, const QPoint& start, con
 
     constexpr double arrowSize = 14.0;
     const double angle = std::atan2(-line.dy(), line.dx());
-    const QPointF arrowP1 = end + QPointF(
-        std::sin(angle - kPi / 3.0) * arrowSize,
-        std::cos(angle - kPi / 3.0) * arrowSize
-    );
-    const QPointF arrowP2 = end + QPointF(
-        std::sin(angle - kPi + kPi / 3.0) * arrowSize,
-        std::cos(angle - kPi + kPi / 3.0) * arrowSize
-    );
+    const QPointF arrowP1 = end + QPointF(std::sin(angle - kPi / 3.0) * arrowSize,
+                                          std::cos(angle - kPi / 3.0) * arrowSize);
+    const QPointF arrowP2 = end + QPointF(std::sin(angle - kPi + kPi / 3.0) * arrowSize,
+                                          std::cos(angle - kPi + kPi / 3.0) * arrowSize);
 
     painter.drawLine(end, arrowP1.toPoint());
     painter.drawLine(end, arrowP2.toPoint());
@@ -1511,17 +1400,13 @@ void CaptureOverlayWidget::applyMosaic(const QRect& imageRect) {
     constexpr int blockSize = 12;
     for (int y = 0; y < boundedRect.height(); y += blockSize) {
         for (int x = 0; x < boundedRect.width(); x += blockSize) {
-            const QRect blockRect(
-                boundedRect.x() + x,
-                boundedRect.y() + y,
-                std::min(blockSize, boundedRect.width() - x),
-                std::min(blockSize, boundedRect.height() - y)
-            );
+            const QRect blockRect(boundedRect.x() + x, boundedRect.y() + y,
+                                  std::min(blockSize, boundedRect.width() - x),
+                                  std::min(blockSize, boundedRect.height() - y));
             const QRect localRect(x, y, blockRect.width(), blockRect.height());
             const QPoint samplePoint(
                 std::min(localRect.x() + localRect.width() / 2, source.width() - 1),
-                std::min(localRect.y() + localRect.height() / 2, source.height() - 1)
-            );
+                std::min(localRect.y() + localRect.height() / 2, source.height() - 1));
             painter.fillRect(blockRect, source.pixelColor(samplePoint));
         }
     }
@@ -1550,10 +1435,8 @@ void CaptureOverlayWidget::beginTextEntry(const QPoint& imagePoint, const QPoint
     }
 
     pendingTextPixelSize_ = std::clamp(workingImage_.height() / 18, 16, 40);
-    textInputPanel_->resize(
-        std::clamp(localSelectionRect().width() / 2, 220, 360),
-        std::clamp(pendingTextPixelSize_ + 18, 36, 60)
-    );
+    textInputPanel_->resize(std::clamp(localSelectionRect().width() / 2, 220, 360),
+                            std::clamp(pendingTextPixelSize_ + 18, 36, 60));
     updateTextInputAppearance();
     QPoint topLeft = clampTextInputPanelTopLeft(overlayPoint + QPoint(10, 10));
 
@@ -1652,7 +1535,8 @@ void CaptureOverlayWidget::updatePendingTextPointFromPanel() {
         return;
     }
 
-    pendingTextPoint_ = mapOverlayPointToImage(textInputPanel_->geometry().topLeft() + QPoint(10, 8));
+    pendingTextPoint_ =
+        mapOverlayPointToImage(textInputPanel_->geometry().topLeft() + QPoint(10, 8));
 }
 
 QPoint CaptureOverlayWidget::clampTextInputPanelTopLeft(const QPoint& topLeft) const {
@@ -1663,8 +1547,7 @@ QPoint CaptureOverlayWidget::clampTextInputPanelTopLeft(const QPoint& topLeft) c
     const QRect bounds = localSelectionRect().adjusted(8, 8, -8, -8);
     return QPoint(
         std::clamp(topLeft.x(), bounds.left(), bounds.right() - textInputPanel_->width()),
-        std::clamp(topLeft.y(), bounds.top(), bounds.bottom() - textInputPanel_->height())
-    );
+        std::clamp(topLeft.y(), bounds.top(), bounds.bottom() - textInputPanel_->height()));
 }
 
 QImage CaptureOverlayWidget::compositedImage() const {
@@ -1682,7 +1565,8 @@ QImage CaptureOverlayWidget::compositedImage() const {
         font.setPixelSize(annotation.pixelSize);
         painter.setFont(font);
         painter.setPen(QColor(0, 0, 0, 170));
-        painter.drawText(annotation.rect.translated(1, 1), Qt::AlignLeft | Qt::AlignVCenter, annotation.text);
+        painter.drawText(annotation.rect.translated(1, 1), Qt::AlignLeft | Qt::AlignVCenter,
+                         annotation.text);
         painter.setPen(QColor(255, 236, 120));
         painter.drawText(annotation.rect, Qt::AlignLeft | Qt::AlignVCenter, annotation.text);
     }
@@ -1698,7 +1582,8 @@ void CaptureOverlayWidget::drawTextAnnotations(QPainter& painter) const {
         font.setPixelSize(annotation.pixelSize);
         painter.setFont(font);
         painter.setPen(QColor(0, 0, 0, 170));
-        painter.drawText(widgetRect.translated(1, 1), Qt::AlignLeft | Qt::AlignVCenter, annotation.text);
+        painter.drawText(widgetRect.translated(1, 1), Qt::AlignLeft | Qt::AlignVCenter,
+                         annotation.text);
         painter.setPen(QColor(255, 236, 120));
         painter.drawText(widgetRect, Qt::AlignLeft | Qt::AlignVCenter, annotation.text);
 
@@ -1709,9 +1594,7 @@ void CaptureOverlayWidget::drawTextAnnotations(QPainter& painter) const {
 }
 
 void CaptureOverlayWidget::drawTextAnnotationSelection(
-    QPainter& painter,
-    const Snapshot::TextAnnotation& annotation
-) const {
+    QPainter& painter, const Snapshot::TextAnnotation& annotation) const {
     const QRect widgetRect = annotation.rect.translated(localSelectionRect().topLeft());
     painter.setPen(QPen(QColor(255, 255, 255, 180), 1, Qt::DashLine));
     painter.setBrush(Qt::NoBrush);
@@ -1721,7 +1604,8 @@ void CaptureOverlayWidget::drawTextAnnotationSelection(
     painter.drawEllipse(widgetRect.bottomRight() + QPoint(4, 4), 4, 4);
 }
 
-int CaptureOverlayWidget::hitTestTextAnnotation(const QPoint& imagePoint, bool* resizeHandle) const {
+int CaptureOverlayWidget::hitTestTextAnnotation(const QPoint& imagePoint,
+                                                bool* resizeHandle) const {
     if (resizeHandle != nullptr) {
         *resizeHandle = false;
     }
@@ -1742,11 +1626,8 @@ int CaptureOverlayWidget::hitTestTextAnnotation(const QPoint& imagePoint, bool* 
     return -1;
 }
 
-QRect CaptureOverlayWidget::normalizedTextRect(
-    const QString& text,
-    int pixelSize,
-    const QPoint& topLeft
-) const {
+QRect CaptureOverlayWidget::normalizedTextRect(const QString& text, int pixelSize,
+                                               const QPoint& topLeft) const {
     QFont font = this->font();
     font.setBold(true);
     font.setPixelSize(pixelSize);
@@ -1774,23 +1655,14 @@ void CaptureOverlayWidget::drawSerialMarker(const QPoint& imagePoint) {
     pushUndoSnapshot();
 
     const int diameter = std::clamp(workingImage_.height() / 14, 26, 42);
-    QRect markerRect(
-        imagePoint.x() - diameter / 2,
-        imagePoint.y() - diameter / 2,
-        diameter,
-        diameter
-    );
+    QRect markerRect(imagePoint.x() - diameter / 2, imagePoint.y() - diameter / 2, diameter,
+                     diameter);
     markerRect = markerRect.intersected(workingImage_.rect().adjusted(0, 0, -1, -1));
 
     QPainter painter(&workingImage_);
     painter.setRenderHint(QPainter::Antialiasing, true);
-    drawSerialBadge(
-        painter,
-        markerRect,
-        QString::number(nextSerialNumber_),
-        QColor(235, 68, 90, 236),
-        QColor(255, 255, 255, 240)
-    );
+    drawSerialBadge(painter, markerRect, QString::number(nextSerialNumber_),
+                    QColor(235, 68, 90, 236), QColor(255, 255, 255, 240));
     ++nextSerialNumber_;
 
     hasEdits_ = true;
@@ -1800,33 +1672,20 @@ void CaptureOverlayWidget::drawSerialMarker(const QPoint& imagePoint) {
 
 void CaptureOverlayWidget::drawSerialPreview(QPainter& painter) const {
     const int diameter = std::clamp(workingImage_.height() / 14, 26, 42);
-    QRect previewRect(
-        hoverPoint_.x() - diameter / 2,
-        hoverPoint_.y() - diameter / 2,
-        diameter,
-        diameter
-    );
+    QRect previewRect(hoverPoint_.x() - diameter / 2, hoverPoint_.y() - diameter / 2, diameter,
+                      diameter);
     previewRect = previewRect.intersected(localSelectionRect().adjusted(0, 0, -1, -1));
     if (previewRect.isEmpty()) {
         return;
     }
 
-    drawSerialBadge(
-        painter,
-        previewRect,
-        QString::number(nextSerialNumber_),
-        QColor(235, 68, 90, 140),
-        QColor(255, 255, 255, 180)
-    );
+    drawSerialBadge(painter, previewRect, QString::number(nextSerialNumber_),
+                    QColor(235, 68, 90, 140), QColor(255, 255, 255, 180));
 }
 
-void CaptureOverlayWidget::drawSerialBadge(
-    QPainter& painter,
-    const QRect& rect,
-    const QString& text,
-    const QColor& fillColor,
-    const QColor& outlineColor
-) const {
+void CaptureOverlayWidget::drawSerialBadge(QPainter& painter, const QRect& rect,
+                                           const QString& text, const QColor& fillColor,
+                                           const QColor& outlineColor) const {
     if (rect.isEmpty()) {
         return;
     }
@@ -1948,53 +1807,60 @@ QPoint CaptureOverlayWidget::mapOverlayPointToImage(const QPoint& point) const {
     }
 
     const QRect selection = localSelectionRect();
-    const int localX = std::clamp(point.x() - selection.left(), 0, std::max(0, selection.width() - 1));
-    const int localY = std::clamp(point.y() - selection.top(), 0, std::max(0, selection.height() - 1));
+    const int localX =
+        std::clamp(point.x() - selection.left(), 0, std::max(0, selection.width() - 1));
+    const int localY =
+        std::clamp(point.y() - selection.top(), 0, std::max(0, selection.height() - 1));
 
-    const int x = std::clamp(
-        qRound((static_cast<double>(localX) / std::max(1, selection.width() - 1))
-               * (workingImage_.width() - 1)),
-        0,
-        std::max(0, workingImage_.width() - 1)
-    );
-    const int y = std::clamp(
-        qRound((static_cast<double>(localY) / std::max(1, selection.height() - 1))
-               * (workingImage_.height() - 1)),
-        0,
-        std::max(0, workingImage_.height() - 1)
-    );
+    const int x =
+        std::clamp(qRound((static_cast<double>(localX) / std::max(1, selection.width() - 1)) *
+                          (workingImage_.width() - 1)),
+                   0, std::max(0, workingImage_.width() - 1));
+    const int y =
+        std::clamp(qRound((static_cast<double>(localY) / std::max(1, selection.height() - 1)) *
+                          (workingImage_.height() - 1)),
+                   0, std::max(0, workingImage_.height() - 1));
     return {x, y};
 }
 
-CaptureOverlayWidget::SelectionMode CaptureOverlayWidget::hitTestSelection(const QPoint& point) const {
+CaptureOverlayWidget::SelectionMode
+CaptureOverlayWidget::hitTestSelection(const QPoint& point) const {
     const QRect rect = localSelectionRect();
     if (!rect.isValid()) {
         return SelectionMode::None;
     }
 
-    const QRect topLeft(rect.topLeft() - QPoint(kHandleHitDistance, kHandleHitDistance), QSize(kHandleHitDistance * 2, kHandleHitDistance * 2));
-    const QRect topRight(rect.topRight() - QPoint(kHandleHitDistance, kHandleHitDistance), QSize(kHandleHitDistance * 2, kHandleHitDistance * 2));
-    const QRect bottomLeft(rect.bottomLeft() - QPoint(kHandleHitDistance, kHandleHitDistance), QSize(kHandleHitDistance * 2, kHandleHitDistance * 2));
-    const QRect bottomRight(rect.bottomRight() - QPoint(kHandleHitDistance, kHandleHitDistance), QSize(kHandleHitDistance * 2, kHandleHitDistance * 2));
-    if (topLeft.contains(point)) return SelectionMode::ResizeTopLeft;
-    if (topRight.contains(point)) return SelectionMode::ResizeTopRight;
-    if (bottomLeft.contains(point)) return SelectionMode::ResizeBottomLeft;
-    if (bottomRight.contains(point)) return SelectionMode::ResizeBottomRight;
+    const QRect topLeft(rect.topLeft() - QPoint(kHandleHitDistance, kHandleHitDistance),
+                        QSize(kHandleHitDistance * 2, kHandleHitDistance * 2));
+    const QRect topRight(rect.topRight() - QPoint(kHandleHitDistance, kHandleHitDistance),
+                         QSize(kHandleHitDistance * 2, kHandleHitDistance * 2));
+    const QRect bottomLeft(rect.bottomLeft() - QPoint(kHandleHitDistance, kHandleHitDistance),
+                           QSize(kHandleHitDistance * 2, kHandleHitDistance * 2));
+    const QRect bottomRight(rect.bottomRight() - QPoint(kHandleHitDistance, kHandleHitDistance),
+                            QSize(kHandleHitDistance * 2, kHandleHitDistance * 2));
+    if (topLeft.contains(point))
+        return SelectionMode::ResizeTopLeft;
+    if (topRight.contains(point))
+        return SelectionMode::ResizeTopRight;
+    if (bottomLeft.contains(point))
+        return SelectionMode::ResizeBottomLeft;
+    if (bottomRight.contains(point))
+        return SelectionMode::ResizeBottomRight;
 
-    if (std::abs(point.x() - rect.left()) <= kHandleHitDistance
-        && point.y() >= rect.top() && point.y() <= rect.bottom()) {
+    if (std::abs(point.x() - rect.left()) <= kHandleHitDistance && point.y() >= rect.top() &&
+        point.y() <= rect.bottom()) {
         return SelectionMode::ResizeLeft;
     }
-    if (std::abs(point.x() - rect.right()) <= kHandleHitDistance
-        && point.y() >= rect.top() && point.y() <= rect.bottom()) {
+    if (std::abs(point.x() - rect.right()) <= kHandleHitDistance && point.y() >= rect.top() &&
+        point.y() <= rect.bottom()) {
         return SelectionMode::ResizeRight;
     }
-    if (std::abs(point.y() - rect.top()) <= kHandleHitDistance
-        && point.x() >= rect.left() && point.x() <= rect.right()) {
+    if (std::abs(point.y() - rect.top()) <= kHandleHitDistance && point.x() >= rect.left() &&
+        point.x() <= rect.right()) {
         return SelectionMode::ResizeTop;
     }
-    if (std::abs(point.y() - rect.bottom()) <= kHandleHitDistance
-        && point.x() >= rect.left() && point.x() <= rect.right()) {
+    if (std::abs(point.y() - rect.bottom()) <= kHandleHitDistance && point.x() >= rect.left() &&
+        point.x() <= rect.right()) {
         return SelectionMode::ResizeBottom;
     }
     if (rect.contains(point)) {
@@ -2024,4 +1890,4 @@ int CaptureOverlayWidget::activeStrokeWidth() const {
     }
 }
 
-}  // namespace cappy::features::capture
+} // namespace cappy::features::capture

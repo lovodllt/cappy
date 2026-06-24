@@ -45,14 +45,9 @@ class OcrResultWindow;
 class AppController final : public QObject {
     Q_OBJECT
 
-public:
-    AppController(
-        QApplication& app,
-        MainWindow& window,
-        AppSettings& settings,
-        QString logFilePath,
-        QObject* parent = nullptr
-    );
+  public:
+    AppController(QApplication& app, MainWindow& window, AppSettings& settings, QString logFilePath,
+                  QObject* parent = nullptr);
     ~AppController() override;
 
     void initialize();
@@ -61,7 +56,7 @@ public:
     void runActiveWindowCaptureSmokeTest();
     void runPinLatestCaptureSmokeTest();
 
-private:
+  private:
     void dispatch(AppCommand command);
     void setupTray();
     void refreshTrayTexts();
@@ -74,10 +69,8 @@ private:
     void syncLatestCaptureImage(const QImage& image, bool clearSavedState = false);
     void rememberCaptureResult(const cappy::domain::capture::CaptureResult& result);
     void setGlobalHotkeysSuspended(bool suspended);
-    [[nodiscard]] QString saveCaptureToDefaultDirectory(
-        const QImage& image,
-        const QString& label
-    ) const;
+    [[nodiscard]] QString saveCaptureToDefaultDirectory(const QImage& image,
+                                                        const QString& label) const;
     void pinLatestCapture();
     void saveLatestCapture();
     void pinCaptureFromHistory(const QImage& image);
@@ -94,10 +87,8 @@ private:
     void startWindowFitCapture();
     void startRegionCapture();
     void onCaptureCompleted(const cappy::domain::capture::CaptureResult& result);
-    void onCaptureFinalized(
-        const cappy::domain::capture::CaptureResult& result,
-        cappy::features::capture::CaptureFinalizeAction action
-    );
+    void onCaptureFinalized(const cappy::domain::capture::CaptureResult& result,
+                            cappy::features::capture::CaptureFinalizeAction action);
     void openOcrWindow(const QImage& image);
     void onCaptureFailed(const QString& message);
     void onCaptureCanceled();

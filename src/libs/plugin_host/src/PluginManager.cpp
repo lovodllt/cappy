@@ -52,4 +52,4 @@ QStringList PluginManager::loadedPluginIds() const {
     return ids;
 }
 
-}  // namespace cappy::plugin_host
+} // namespace cappy::plugin_host

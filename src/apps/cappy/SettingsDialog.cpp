@@ -79,11 +79,8 @@ QLabel* createFieldLabel(const QString& text, QWidget* parent) {
     return label;
 }
 
-QWidget* createShortcutEditorRow(
-    QWidget* parent,
-    QKeySequenceEdit* primaryEditor,
-    QKeySequenceEdit* secondaryEditor = nullptr
-) {
+QWidget* createShortcutEditorRow(QWidget* parent, QKeySequenceEdit* primaryEditor,
+                                 QKeySequenceEdit* secondaryEditor = nullptr) {
     auto* row = new QWidget(parent);
     auto* layout = new QHBoxLayout(row);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -100,17 +97,12 @@ QWidget* createShortcutEditorRow(
     return row;
 }
 
-}  // namespace
+} // namespace
 
-SettingsDialog::SettingsDialog(
-    const AppSettings::ShellSettings& settings,
-    Diagnostics diagnostics,
-    QWidget* parent
-)
-    : QDialog(parent)
-    , initialSettings_(settings)
-    , diagnostics_(std::move(diagnostics))
-    , language_(cappy::localization::resolvedAppLanguageFromSettings(settings.interfaceLanguage)) {
+SettingsDialog::SettingsDialog(const AppSettings::ShellSettings& settings, Diagnostics diagnostics,
+                               QWidget* parent)
+    : QDialog(parent), initialSettings_(settings), diagnostics_(std::move(diagnostics)),
+      language_(cappy::localization::resolvedAppLanguageFromSettings(settings.interfaceLanguage)) {
     rootLayout_ = new QVBoxLayout(this);
     rebuildUi(settings);
 }
@@ -147,9 +139,8 @@ void SettingsDialog::rebuildUi(const AppSettings::ShellSettings& settings, int c
     setModal(true);
     resize(980, 640);
     setMinimumSize(900, 580);
-    setStyleSheet(settingsDialogStyleSheetForTheme(
-        shellThemeModeFromSettings(settings.appearanceMode)
-    ));
+    setStyleSheet(
+        settingsDialogStyleSheetForTheme(shellThemeModeFromSettings(settings.appearanceMode)));
 
     rootLayout_->setContentsMargins(16, 16, 16, 16);
     rootLayout_->setSpacing(12);
@@ -201,40 +192,26 @@ void SettingsDialog::rebuildUi(const AppSettings::ShellSettings& settings, int c
     interfaceLanguageComboBox_ = new QComboBox(appearancePanel);
     interfaceLanguageComboBox_->setObjectName("interfaceLanguageComboBox");
     interfaceLanguageComboBox_->addItem(
-        cappy::localization::appLanguageOptionLabel(
-            cappy::localization::AppLanguage::System,
-            language_
-        ),
-        cappy::localization::appLanguageToSettingsValue(cappy::localization::AppLanguage::System)
-    );
+        cappy::localization::appLanguageOptionLabel(cappy::localization::AppLanguage::System,
+                                                    language_),
+        cappy::localization::appLanguageToSettingsValue(cappy::localization::AppLanguage::System));
+    interfaceLanguageComboBox_->addItem(
+        cappy::localization::appLanguageOptionLabel(cappy::localization::AppLanguage::English,
+                                                    language_),
+        cappy::localization::appLanguageToSettingsValue(cappy::localization::AppLanguage::English));
     interfaceLanguageComboBox_->addItem(
         cappy::localization::appLanguageOptionLabel(
-            cappy::localization::AppLanguage::English,
-            language_
-        ),
-        cappy::localization::appLanguageToSettingsValue(cappy::localization::AppLanguage::English)
-    );
-    interfaceLanguageComboBox_->addItem(
-        cappy::localization::appLanguageOptionLabel(
-            cappy::localization::AppLanguage::SimplifiedChinese,
-            language_
-        ),
-        cappy::localization::appLanguageToSettingsValue(cappy::localization::AppLanguage::SimplifiedChinese)
-    );
+            cappy::localization::AppLanguage::SimplifiedChinese, language_),
+        cappy::localization::appLanguageToSettingsValue(
+            cappy::localization::AppLanguage::SimplifiedChinese));
     appearanceModeComboBox_->setCurrentIndex(
-        qMax(0, appearanceModeComboBox_->findData(settings.appearanceMode))
-    );
+        qMax(0, appearanceModeComboBox_->findData(settings.appearanceMode)));
     interfaceLanguageComboBox_->setCurrentIndex(
-        qMax(0, interfaceLanguageComboBox_->findData(settings.interfaceLanguage))
-    );
-    appearanceForm->addRow(
-        createFieldLabel(text.settingsPageStyleLabel, appearancePanel),
-        appearanceModeComboBox_
-    );
-    appearanceForm->addRow(
-        createFieldLabel(text.settingsInterfaceLanguageLabel, appearancePanel),
-        interfaceLanguageComboBox_
-    );
+        qMax(0, interfaceLanguageComboBox_->findData(settings.interfaceLanguage)));
+    appearanceForm->addRow(createFieldLabel(text.settingsPageStyleLabel, appearancePanel),
+                           appearanceModeComboBox_);
+    appearanceForm->addRow(createFieldLabel(text.settingsInterfaceLanguageLabel, appearancePanel),
+                           interfaceLanguageComboBox_);
     appearanceLayout->addLayout(appearanceForm);
 
     auto* shellPanel = createPanel(generalPage);
@@ -272,168 +249,145 @@ void SettingsDialog::rebuildUi(const AppSettings::ShellSettings& settings, int c
     shortcutsScrollLayout->setContentsMargins(0, 0, 0, 0);
     shortcutsScrollLayout->setSpacing(12);
 
-    const auto createShortcutEditorForId =
-        [this, &settings](const QString& id, QWidget* parent) -> QKeySequenceEdit* {
-            auto* editor = new QKeySequenceEdit(
-                QKeySequence::fromString(
-                    cappy::shortcuts::shortcutValue(settings.shortcuts, id),
-                    QKeySequence::PortableText
-                ),
-                parent
-            );
-            shortcutEditors_.insert(id, editor);
-            editor->setProperty("recording", false);
-            editor->installEventFilter(this);
-            return editor;
-        };
+    const auto createShortcutEditorForId = [this, &settings](const QString& id,
+                                                             QWidget* parent) -> QKeySequenceEdit* {
+        auto* editor = new QKeySequenceEdit(
+            QKeySequence::fromString(cappy::shortcuts::shortcutValue(settings.shortcuts, id),
+                                     QKeySequence::PortableText),
+            parent);
+        shortcutEditors_.insert(id, editor);
+        editor->setProperty("recording", false);
+        editor->installEventFilter(this);
+        return editor;
+    };
 
-    const auto addShortcutCard =
-        [this, &createShortcutEditorForId, shortcutsScrollContent, &text](
-            const QString& title,
-            const QList<ShortcutRowSpec>& rows,
-            bool showGlobalToggle,
-            bool showAlternateColumn
-        ) -> QFrame* {
-            auto* card = createPanel(shortcutsScrollContent);
-            auto* cardLayout = qobject_cast<QVBoxLayout*>(card->layout());
-            cardLayout->addWidget(createPanelTitle(title, card));
+    const auto addShortcutCard = [this, &createShortcutEditorForId, shortcutsScrollContent, &text](
+                                     const QString& title, const QList<ShortcutRowSpec>& rows,
+                                     bool showGlobalToggle, bool showAlternateColumn) -> QFrame* {
+        auto* card = createPanel(shortcutsScrollContent);
+        auto* cardLayout = qobject_cast<QVBoxLayout*>(card->layout());
+        cardLayout->addWidget(createPanelTitle(title, card));
 
-            if (showGlobalToggle) {
-                globalHotkeysEnabledCheckBox_ = new QCheckBox(text.settingsEnableGlobalHotkeys, card);
-                cardLayout->addWidget(globalHotkeysEnabledCheckBox_);
-            }
+        if (showGlobalToggle) {
+            globalHotkeysEnabledCheckBox_ = new QCheckBox(text.settingsEnableGlobalHotkeys, card);
+            cardLayout->addWidget(globalHotkeysEnabledCheckBox_);
+        }
 
-            if (showAlternateColumn) {
-                auto* header = new QWidget(card);
-                auto* headerLayout = new QHBoxLayout(header);
-                headerLayout->setContentsMargins(0, 0, 0, 0);
-                headerLayout->setSpacing(8);
-                auto* spacer = new QLabel(header);
-                spacer->setMinimumWidth(180);
-                auto* primaryLabel = new QLabel(text.settingsPrimaryShortcut, header);
-                auto* alternateLabel = new QLabel(text.settingsAlternateShortcut, header);
-                primaryLabel->setObjectName("settingsValueLabel");
-                alternateLabel->setObjectName("settingsValueLabel");
-                primaryLabel->setMinimumWidth(150);
-                alternateLabel->setMinimumWidth(150);
-                headerLayout->addWidget(spacer);
-                headerLayout->addWidget(primaryLabel, 1);
-                headerLayout->addWidget(alternateLabel, 1);
-                cardLayout->addWidget(header);
-            }
+        if (showAlternateColumn) {
+            auto* header = new QWidget(card);
+            auto* headerLayout = new QHBoxLayout(header);
+            headerLayout->setContentsMargins(0, 0, 0, 0);
+            headerLayout->setSpacing(8);
+            auto* spacer = new QLabel(header);
+            spacer->setMinimumWidth(180);
+            auto* primaryLabel = new QLabel(text.settingsPrimaryShortcut, header);
+            auto* alternateLabel = new QLabel(text.settingsAlternateShortcut, header);
+            primaryLabel->setObjectName("settingsValueLabel");
+            alternateLabel->setObjectName("settingsValueLabel");
+            primaryLabel->setMinimumWidth(150);
+            alternateLabel->setMinimumWidth(150);
+            headerLayout->addWidget(spacer);
+            headerLayout->addWidget(primaryLabel, 1);
+            headerLayout->addWidget(alternateLabel, 1);
+            cardLayout->addWidget(header);
+        }
 
-            auto* form = new QFormLayout();
-            form->setContentsMargins(0, 0, 0, 0);
-            form->setSpacing(10);
-            form->setLabelAlignment(Qt::AlignLeft | Qt::AlignTop);
+        auto* form = new QFormLayout();
+        form->setContentsMargins(0, 0, 0, 0);
+        form->setSpacing(10);
+        form->setLabelAlignment(Qt::AlignLeft | Qt::AlignTop);
 
-            for (const auto& row : rows) {
-                QKeySequenceEdit* primaryEditor = createShortcutEditorForId(row.primaryId, card);
-                QKeySequenceEdit* secondaryEditor = row.secondaryId.isEmpty()
-                    ? nullptr
-                    : createShortcutEditorForId(row.secondaryId, card);
-                form->addRow(
-                    createFieldLabel(
-                        cappy::localization::shortcutLabel(language_, row.primaryId),
-                        card
-                    ),
-                    createShortcutEditorRow(card, primaryEditor, secondaryEditor)
-                );
-            }
+        for (const auto& row : rows) {
+            QKeySequenceEdit* primaryEditor = createShortcutEditorForId(row.primaryId, card);
+            QKeySequenceEdit* secondaryEditor =
+                row.secondaryId.isEmpty() ? nullptr
+                                          : createShortcutEditorForId(row.secondaryId, card);
+            form->addRow(createFieldLabel(
+                             cappy::localization::shortcutLabel(language_, row.primaryId), card),
+                         createShortcutEditorRow(card, primaryEditor, secondaryEditor));
+        }
 
-            cardLayout->addLayout(form);
-            return card;
-        };
+        cardLayout->addLayout(form);
+        return card;
+    };
 
-    QFrame* entryCard = addShortcutCard(
-        text.settingsShortcutsTab,
-        {
-            {"global.open_home", {}},
-            {"global.screenshot", {}},
-            {"main.region_capture", {}},
-            {"main.fullscreen_capture", {}},
-            {"main.active_window_capture", {}},
-            {"main.pin_latest", {}},
-            {"main.save_latest", {}},
-            {"main.open_capture_folder", {}},
-            {"main.settings", {}},
-            {"main.hide_to_tray", {}},
-            {"main.quit", {}},
-            {"main.close_pins", {}},
-            {"main.restore_pin_input", {}},
-            {"main.history_pin", {}},
-            {"main.history_copy", {}},
-            {"main.history_save", {}},
-            {"main.history_remove", {}},
-        },
-        true,
-        false
-    );
+    QFrame* entryCard = addShortcutCard(text.settingsShortcutsTab,
+                                        {
+                                            {"global.open_home", {}},
+                                            {"global.screenshot", {}},
+                                            {"main.region_capture", {}},
+                                            {"main.fullscreen_capture", {}},
+                                            {"main.active_window_capture", {}},
+                                            {"main.pin_latest", {}},
+                                            {"main.save_latest", {}},
+                                            {"main.open_capture_folder", {}},
+                                            {"main.settings", {}},
+                                            {"main.hide_to_tray", {}},
+                                            {"main.quit", {}},
+                                            {"main.close_pins", {}},
+                                            {"main.restore_pin_input", {}},
+                                            {"main.history_pin", {}},
+                                            {"main.history_copy", {}},
+                                            {"main.history_save", {}},
+                                            {"main.history_remove", {}},
+                                        },
+                                        true, false);
     if (globalHotkeysEnabledCheckBox_ != nullptr) {
         globalHotkeysEnabledCheckBox_->setChecked(settings.globalHotkeysEnabled);
     }
 
-    QFrame* overlayCard = addShortcutCard(
-        text.settingsSectionCaptureOverlay,
-        {
-            {"overlay.rectangle", "overlay.rectangle_alt"},
-            {"overlay.ellipse", "overlay.ellipse_alt"},
-            {"overlay.arrow", "overlay.arrow_alt"},
-            {"overlay.pen", "overlay.pen_alt"},
-            {"overlay.marker", "overlay.marker_alt"},
-            {"overlay.mosaic", "overlay.mosaic_alt"},
-            {"overlay.text", "overlay.text_alt"},
-            {"overlay.serial", "overlay.serial_alt"},
-            {"overlay.undo", {}},
-            {"overlay.redo", {}},
-            {"overlay.copy", "overlay.copy_alt"},
-            {"overlay.quick_copy", {}},
-            {"overlay.save", "overlay.save_alt"},
-            {"overlay.pin", "overlay.pin_alt"},
-            {"overlay.cancel", {}},
-        },
-        false,
-        true
-    );
+    QFrame* overlayCard = addShortcutCard(text.settingsSectionCaptureOverlay,
+                                          {
+                                              {"overlay.rectangle", "overlay.rectangle_alt"},
+                                              {"overlay.ellipse", "overlay.ellipse_alt"},
+                                              {"overlay.arrow", "overlay.arrow_alt"},
+                                              {"overlay.pen", "overlay.pen_alt"},
+                                              {"overlay.marker", "overlay.marker_alt"},
+                                              {"overlay.mosaic", "overlay.mosaic_alt"},
+                                              {"overlay.text", "overlay.text_alt"},
+                                              {"overlay.serial", "overlay.serial_alt"},
+                                              {"overlay.undo", {}},
+                                              {"overlay.redo", {}},
+                                              {"overlay.copy", "overlay.copy_alt"},
+                                              {"overlay.quick_copy", {}},
+                                              {"overlay.save", "overlay.save_alt"},
+                                              {"overlay.pin", "overlay.pin_alt"},
+                                              {"overlay.cancel", {}},
+                                          },
+                                          false, true);
 
-    QFrame* editorCard = addShortcutCard(
-        text.settingsSectionCaptureEditor,
-        {
-            {"editor.rectangle", {}},
-            {"editor.ellipse", {}},
-            {"editor.arrow", {}},
-            {"editor.pen", {}},
-            {"editor.marker", {}},
-            {"editor.mosaic", {}},
-            {"editor.text", {}},
-            {"editor.serial", {}},
-            {"editor.undo", {}},
-            {"editor.redo", {}},
-            {"editor.copy", {}},
-            {"editor.copy_and_close", {}},
-            {"editor.save", "editor.save_alt"},
-            {"editor.pin", "editor.pin_alt"},
-            {"editor.close", {}},
-        },
-        false,
-        true
-    );
+    QFrame* editorCard = addShortcutCard(text.settingsSectionCaptureEditor,
+                                         {
+                                             {"editor.rectangle", {}},
+                                             {"editor.ellipse", {}},
+                                             {"editor.arrow", {}},
+                                             {"editor.pen", {}},
+                                             {"editor.marker", {}},
+                                             {"editor.mosaic", {}},
+                                             {"editor.text", {}},
+                                             {"editor.serial", {}},
+                                             {"editor.undo", {}},
+                                             {"editor.redo", {}},
+                                             {"editor.copy", {}},
+                                             {"editor.copy_and_close", {}},
+                                             {"editor.save", "editor.save_alt"},
+                                             {"editor.pin", "editor.pin_alt"},
+                                             {"editor.close", {}},
+                                         },
+                                         false, true);
 
-    QFrame* pinWindowCard = addShortcutCard(
-        text.settingsSectionPinnedWindow,
-        {
-            {"pin.close", {}},
-            {"pin.scale_up", {}},
-            {"pin.scale_down", {}},
-            {"pin.reset_scale_opacity", {}},
-            {"pin.opacity_down", {}},
-            {"pin.opacity_up", {}},
-            {"pin.toggle_lock", {}},
-            {"pin.toggle_click_through", {}},
-        },
-        false,
-        false
-    );
+    QFrame* pinWindowCard = addShortcutCard(text.settingsSectionPinnedWindow,
+                                            {
+                                                {"pin.close", {}},
+                                                {"pin.scale_up", {}},
+                                                {"pin.scale_down", {}},
+                                                {"pin.reset_scale_opacity", {}},
+                                                {"pin.opacity_down", {}},
+                                                {"pin.opacity_up", {}},
+                                                {"pin.toggle_lock", {}},
+                                                {"pin.toggle_click_through", {}},
+                                            },
+                                            false, false);
 
     shortcutsScrollLayout->addWidget(entryCard);
     shortcutsScrollLayout->addWidget(overlayCard);
@@ -465,19 +419,14 @@ void SettingsDialog::rebuildUi(const AppSettings::ShellSettings& settings, int c
     auto* browseButton = new QPushButton(text.settingsBrowse, saveDirectoryRow);
     saveDirectoryLayout->addWidget(defaultSaveDirectoryEdit_, 1);
     saveDirectoryLayout->addWidget(browseButton, 0);
-    saveForm->addRow(
-        createFieldLabel(text.settingsDefaultSaveDirectory, savePanel),
-        saveDirectoryRow
-    );
+    saveForm->addRow(createFieldLabel(text.settingsDefaultSaveDirectory, savePanel),
+                     saveDirectoryRow);
 
     historyLimitSpinBox_ = new QSpinBox(savePanel);
     historyLimitSpinBox_->setObjectName("historyLimitSpinBox");
     historyLimitSpinBox_->setRange(1, 200);
     historyLimitSpinBox_->setValue(qMax(1, settings.historyLimit));
-    saveForm->addRow(
-        createFieldLabel(text.settingsHistoryLimit, savePanel),
-        historyLimitSpinBox_
-    );
+    saveForm->addRow(createFieldLabel(text.settingsHistoryLimit, savePanel), historyLimitSpinBox_);
 
     saveLayout->addLayout(saveForm);
     saveLayout->addStretch(1);
@@ -511,20 +460,15 @@ void SettingsDialog::rebuildUi(const AppSettings::ShellSettings& settings, int c
     ocrProviderComboBox_->addItem(text.settingsOcrProviderLocal, "local");
     ocrProviderComboBox_->addItem(text.settingsOcrProviderCloud, "cloud");
     ocrProviderComboBox_->setCurrentIndex(
-        qMax(0, ocrProviderComboBox_->findData(settings.ocr.preferredProvider))
-    );
+        qMax(0, ocrProviderComboBox_->findData(settings.ocr.preferredProvider)));
     ocrCloudTimeoutSpinBox_ = new QSpinBox(ocrGeneralPanel);
     ocrCloudTimeoutSpinBox_->setRange(5, 300);
     ocrCloudTimeoutSpinBox_->setValue(settings.ocr.cloudTimeoutSeconds);
 
-    ocrGeneralForm->addRow(
-        createFieldLabel(text.settingsOcrProviderLabel, ocrGeneralPanel),
-        ocrProviderComboBox_
-    );
-    ocrGeneralForm->addRow(
-        createFieldLabel(text.settingsOcrTimeoutSeconds, ocrGeneralPanel),
-        ocrCloudTimeoutSpinBox_
-    );
+    ocrGeneralForm->addRow(createFieldLabel(text.settingsOcrProviderLabel, ocrGeneralPanel),
+                           ocrProviderComboBox_);
+    ocrGeneralForm->addRow(createFieldLabel(text.settingsOcrTimeoutSeconds, ocrGeneralPanel),
+                           ocrCloudTimeoutSpinBox_);
     ocrGeneralLayout->addLayout(ocrGeneralForm);
 
     ocrLocalPanel_ = createPanel(ocrScrollContent);
@@ -536,14 +480,10 @@ void SettingsDialog::rebuildUi(const AppSettings::ShellSettings& settings, int c
     ocrLocalForm->setLabelAlignment(Qt::AlignLeft | Qt::AlignTop);
     ocrLocalCommandEdit_ = new QLineEdit(settings.ocr.localCommand, ocrLocalPanel_);
     ocrLocalLanguageEdit_ = new QLineEdit(settings.ocr.localLanguage, ocrLocalPanel_);
-    ocrLocalForm->addRow(
-        createFieldLabel(text.settingsOcrLocalCommand, ocrLocalPanel_),
-        ocrLocalCommandEdit_
-    );
-    ocrLocalForm->addRow(
-        createFieldLabel(text.settingsOcrLocalLanguage, ocrLocalPanel_),
-        ocrLocalLanguageEdit_
-    );
+    ocrLocalForm->addRow(createFieldLabel(text.settingsOcrLocalCommand, ocrLocalPanel_),
+                         ocrLocalCommandEdit_);
+    ocrLocalForm->addRow(createFieldLabel(text.settingsOcrLocalLanguage, ocrLocalPanel_),
+                         ocrLocalLanguageEdit_);
     ocrLocalLayout->addLayout(ocrLocalForm);
     auto* ocrLocalHint = new QLabel(text.settingsOcrLocalHint, ocrLocalPanel_);
     ocrLocalHint->setObjectName("settingsValueLabel");
@@ -572,22 +512,13 @@ void SettingsDialog::rebuildUi(const AppSettings::ShellSettings& settings, int c
     ocrCloudPromptEdit_ = new QPlainTextEdit(ocrCloudPanel_);
     ocrCloudPromptEdit_->setPlainText(settings.ocr.cloudPrompt);
     ocrCloudPromptEdit_->setFixedHeight(108);
-    ocrCloudForm->addRow(
-        createFieldLabel(text.settingsOcrCloudEndpoint, ocrCloudPanel_),
-        ocrCloudEndpointEdit_
-    );
-    ocrCloudForm->addRow(
-        createFieldLabel(text.settingsOcrCloudModel, ocrCloudPanel_),
-        ocrCloudModelEdit_
-    );
-    ocrCloudForm->addRow(
-        createFieldLabel(text.settingsOcrCloudApiKey, ocrCloudPanel_),
-        apiKeyRow
-    );
-    ocrCloudForm->addRow(
-        createFieldLabel(text.settingsOcrCloudPrompt, ocrCloudPanel_),
-        ocrCloudPromptEdit_
-    );
+    ocrCloudForm->addRow(createFieldLabel(text.settingsOcrCloudEndpoint, ocrCloudPanel_),
+                         ocrCloudEndpointEdit_);
+    ocrCloudForm->addRow(createFieldLabel(text.settingsOcrCloudModel, ocrCloudPanel_),
+                         ocrCloudModelEdit_);
+    ocrCloudForm->addRow(createFieldLabel(text.settingsOcrCloudApiKey, ocrCloudPanel_), apiKeyRow);
+    ocrCloudForm->addRow(createFieldLabel(text.settingsOcrCloudPrompt, ocrCloudPanel_),
+                         ocrCloudPromptEdit_);
     ocrCloudLayout->addLayout(ocrCloudForm);
     auto* ocrCloudHint = new QLabel(text.settingsOcrCloudHint, ocrCloudPanel_);
     ocrCloudHint->setObjectName("settingsValueLabel");
@@ -616,10 +547,7 @@ void SettingsDialog::rebuildUi(const AppSettings::ShellSettings& settings, int c
     contentRow->addWidget(pageStack_, 1);
     rootLayout_->addLayout(contentRow, 1);
 
-    buttonBox_ = new QDialogButtonBox(
-        QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
-        this
-    );
+    buttonBox_ = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
     if (buttonBox_->button(QDialogButtonBox::Ok) != nullptr) {
         buttonBox_->button(QDialogButtonBox::Ok)->setText(text.settingsSave);
         buttonBox_->button(QDialogButtonBox::Ok)->setIcon(QIcon());
@@ -635,124 +563,94 @@ void SettingsDialog::rebuildUi(const AppSettings::ShellSettings& settings, int c
     syncShortcutEditorsEnabled();
     updateOcrFieldState();
 
-    connect(
-        navigationList_,
-        &QListWidget::currentRowChanged,
-        this,
-        [this](int row) {
-            if (pageStack_ != nullptr && row >= 0 && row < pageStack_->count()) {
-                pageStack_->setCurrentIndex(row);
-            }
+    connect(navigationList_, &QListWidget::currentRowChanged, this, [this](int row) {
+        if (pageStack_ != nullptr && row >= 0 && row < pageStack_->count()) {
+            pageStack_->setCurrentIndex(row);
         }
-    );
+    });
 
     connect(browseButton, &QPushButton::clicked, this, &SettingsDialog::chooseDefaultSaveDirectory);
-    connect(
-        appearanceModeComboBox_,
-        &QComboBox::currentIndexChanged,
-        this,
-        &SettingsDialog::applySelectedTheme
-    );
-    connect(
-        interfaceLanguageComboBox_,
-        &QComboBox::currentIndexChanged,
-        this,
-        &SettingsDialog::applySelectedLanguage
-    );
-    connect(
-        globalHotkeysEnabledCheckBox_,
-        &QCheckBox::toggled,
-        this,
-        &SettingsDialog::syncShortcutEditorsEnabled
-    );
-    connect(
-        ocrProviderComboBox_,
-        &QComboBox::currentIndexChanged,
-        this,
-        &SettingsDialog::updateOcrFieldState
-    );
-    connect(
-        ocrCloudApiKeyVisibilityButton_,
-        &QPushButton::clicked,
-        this,
-        [this]() {
-            if (ocrCloudApiKeyEdit_ == nullptr || ocrCloudApiKeyVisibilityButton_ == nullptr) {
-                return;
-            }
-            const bool hidden = ocrCloudApiKeyEdit_->echoMode() == QLineEdit::Password;
-            ocrCloudApiKeyEdit_->setEchoMode(hidden ? QLineEdit::Normal : QLineEdit::Password);
-            const auto& text = cappy::localization::strings(language_);
-            ocrCloudApiKeyVisibilityButton_->setText(hidden ? text.settingsOcrApiKeyHide : text.settingsOcrApiKeyShow);
+    connect(appearanceModeComboBox_, &QComboBox::currentIndexChanged, this,
+            &SettingsDialog::applySelectedTheme);
+    connect(interfaceLanguageComboBox_, &QComboBox::currentIndexChanged, this,
+            &SettingsDialog::applySelectedLanguage);
+    connect(globalHotkeysEnabledCheckBox_, &QCheckBox::toggled, this,
+            &SettingsDialog::syncShortcutEditorsEnabled);
+    connect(ocrProviderComboBox_, &QComboBox::currentIndexChanged, this,
+            &SettingsDialog::updateOcrFieldState);
+    connect(ocrCloudApiKeyVisibilityButton_, &QPushButton::clicked, this, [this]() {
+        if (ocrCloudApiKeyEdit_ == nullptr || ocrCloudApiKeyVisibilityButton_ == nullptr) {
+            return;
         }
-    );
+        const bool hidden = ocrCloudApiKeyEdit_->echoMode() == QLineEdit::Password;
+        ocrCloudApiKeyEdit_->setEchoMode(hidden ? QLineEdit::Normal : QLineEdit::Password);
+        const auto& text = cappy::localization::strings(language_);
+        ocrCloudApiKeyVisibilityButton_->setText(hidden ? text.settingsOcrApiKeyHide
+                                                        : text.settingsOcrApiKeyShow);
+    });
     connect(buttonBox_, &QDialogButtonBox::accepted, this, &SettingsDialog::validateAndAccept);
     connect(buttonBox_, &QDialogButtonBox::rejected, this, &QDialog::reject);
 }
 
 AppSettings::ShellSettings SettingsDialog::shellSettings() const {
     AppSettings::ShellSettings settings = initialSettings_;
-    settings.startMinimized = startMinimizedCheckBox_ != nullptr && startMinimizedCheckBox_->isChecked();
+    settings.startMinimized =
+        startMinimizedCheckBox_ != nullptr && startMinimizedCheckBox_->isChecked();
     settings.closeToTray = closeToTrayCheckBox_ != nullptr && closeToTrayCheckBox_->isChecked();
-    settings.globalHotkeysEnabled = globalHotkeysEnabledCheckBox_ != nullptr
-        && globalHotkeysEnabledCheckBox_->isChecked();
+    settings.globalHotkeysEnabled =
+        globalHotkeysEnabledCheckBox_ != nullptr && globalHotkeysEnabledCheckBox_->isChecked();
     settings.defaultSaveDirectory = defaultSaveDirectoryEdit_ == nullptr
-        ? initialSettings_.defaultSaveDirectory
-        : defaultSaveDirectoryEdit_->text().trimmed();
+                                        ? initialSettings_.defaultSaveDirectory
+                                        : defaultSaveDirectoryEdit_->text().trimmed();
     settings.appearanceMode = appearanceModeComboBox_ == nullptr
-        ? initialSettings_.appearanceMode
-        : appearanceModeComboBox_->currentData().toString();
+                                  ? initialSettings_.appearanceMode
+                                  : appearanceModeComboBox_->currentData().toString();
     settings.interfaceLanguage = interfaceLanguageComboBox_ == nullptr
-        ? initialSettings_.interfaceLanguage
-        : interfaceLanguageComboBox_->currentData().toString();
-    settings.historyLimit = historyLimitSpinBox_ == nullptr
-        ? initialSettings_.historyLimit
-        : historyLimitSpinBox_->value();
+                                     ? initialSettings_.interfaceLanguage
+                                     : interfaceLanguageComboBox_->currentData().toString();
+    settings.historyLimit = historyLimitSpinBox_ == nullptr ? initialSettings_.historyLimit
+                                                            : historyLimitSpinBox_->value();
     settings.ocr.preferredProvider = ocrProviderComboBox_ == nullptr
-        ? initialSettings_.ocr.preferredProvider
-        : ocrProviderComboBox_->currentData().toString();
+                                         ? initialSettings_.ocr.preferredProvider
+                                         : ocrProviderComboBox_->currentData().toString();
     settings.ocr.localCommand = ocrLocalCommandEdit_ == nullptr
-        ? initialSettings_.ocr.localCommand
-        : ocrLocalCommandEdit_->text().trimmed();
+                                    ? initialSettings_.ocr.localCommand
+                                    : ocrLocalCommandEdit_->text().trimmed();
     settings.ocr.localLanguage = ocrLocalLanguageEdit_ == nullptr
-        ? initialSettings_.ocr.localLanguage
-        : ocrLocalLanguageEdit_->text().trimmed();
+                                     ? initialSettings_.ocr.localLanguage
+                                     : ocrLocalLanguageEdit_->text().trimmed();
     settings.ocr.cloudEndpoint = ocrCloudEndpointEdit_ == nullptr
-        ? initialSettings_.ocr.cloudEndpoint
-        : ocrCloudEndpointEdit_->text().trimmed();
-    settings.ocr.cloudModel = ocrCloudModelEdit_ == nullptr
-        ? initialSettings_.ocr.cloudModel
-        : ocrCloudModelEdit_->text().trimmed();
+                                     ? initialSettings_.ocr.cloudEndpoint
+                                     : ocrCloudEndpointEdit_->text().trimmed();
+    settings.ocr.cloudModel = ocrCloudModelEdit_ == nullptr ? initialSettings_.ocr.cloudModel
+                                                            : ocrCloudModelEdit_->text().trimmed();
     settings.ocr.cloudApiKey = ocrCloudApiKeyEdit_ == nullptr
-        ? initialSettings_.ocr.cloudApiKey
-        : ocrCloudApiKeyEdit_->text().trimmed();
+                                   ? initialSettings_.ocr.cloudApiKey
+                                   : ocrCloudApiKeyEdit_->text().trimmed();
     settings.ocr.cloudPrompt = ocrCloudPromptEdit_ == nullptr
-        ? initialSettings_.ocr.cloudPrompt
-        : ocrCloudPromptEdit_->toPlainText().trimmed();
+                                   ? initialSettings_.ocr.cloudPrompt
+                                   : ocrCloudPromptEdit_->toPlainText().trimmed();
     settings.ocr.cloudTimeoutSeconds = ocrCloudTimeoutSpinBox_ == nullptr
-        ? initialSettings_.ocr.cloudTimeoutSeconds
-        : ocrCloudTimeoutSpinBox_->value();
+                                           ? initialSettings_.ocr.cloudTimeoutSeconds
+                                           : ocrCloudTimeoutSpinBox_->value();
     for (const auto& definition : cappy::shortcuts::shortcutFieldDefinitions()) {
         QKeySequenceEdit* editor = shortcutEditors_.value(definition.id, nullptr);
         cappy::shortcuts::setShortcutValue(
-            &settings.shortcuts,
-            definition.id,
+            &settings.shortcuts, definition.id,
             editor == nullptr
                 ? cappy::shortcuts::shortcutValue(initialSettings_.shortcuts, definition.id)
-                : editor->keySequence().toString(QKeySequence::PortableText)
-        );
+                : editor->keySequence().toString(QKeySequence::PortableText));
     }
     return settings;
 }
 
 void SettingsDialog::chooseDefaultSaveDirectory() {
     const QString currentPath = defaultSaveDirectoryEdit_ == nullptr
-        ? QString{}
-        : defaultSaveDirectoryEdit_->text().trimmed();
+                                    ? QString{}
+                                    : defaultSaveDirectoryEdit_->text().trimmed();
     const QString selectedPath = QFileDialog::getExistingDirectory(
-        this,
-        cappy::localization::strings(language_).settingsChooseDefaultSaveDirectory,
-        currentPath
-    );
+        this, cappy::localization::strings(language_).settingsChooseDefaultSaveDirectory,
+        currentPath);
     if (!selectedPath.isEmpty() && defaultSaveDirectoryEdit_ != nullptr) {
         defaultSaveDirectoryEdit_->setText(QDir::toNativeSeparators(selectedPath));
     }
@@ -778,7 +676,8 @@ void SettingsDialog::validateAndAccept() {
     }
     if (settings.ocr.preferredProvider == "cloud") {
         if (settings.ocr.cloudEndpoint.isEmpty()) {
-            QMessageBox::warning(this, text.settingsWarningTitle, text.settingsOcrCloudEndpointEmpty);
+            QMessageBox::warning(this, text.settingsWarningTitle,
+                                 text.settingsOcrCloudEndpointEmpty);
             return;
         }
         if (settings.ocr.cloudModel.isEmpty()) {
@@ -794,46 +693,39 @@ void SettingsDialog::validateAndAccept() {
     for (const auto& definition : cappy::shortcuts::shortcutFieldDefinitions()) {
         const QKeySequence sequence = QKeySequence::fromString(
             cappy::shortcuts::shortcutValue(settings.shortcuts, definition.id),
-            QKeySequence::PortableText
-        );
+            QKeySequence::PortableText);
         if (!sequence.isEmpty() && sequence.count() != 1) {
-            QMessageBox::warning(
-                this,
-                text.settingsWarningTitle,
-                text.settingsShortcutSingleTemplate.arg(
-                    cappy::localization::shortcutLabel(language_, definition.id)
-                )
-            );
+            QMessageBox::warning(this, text.settingsWarningTitle,
+                                 text.settingsShortcutSingleTemplate.arg(
+                                     cappy::localization::shortcutLabel(language_, definition.id)));
             return;
         }
     }
 
     QHash<int, QHash<QString, QString>> seenShortcutsByScope;
     for (const auto& definition : cappy::shortcuts::shortcutFieldDefinitions()) {
-        const QString normalized = QKeySequence::fromString(
-            cappy::shortcuts::shortcutValue(settings.shortcuts, definition.id),
-            QKeySequence::PortableText
-        ).toString(QKeySequence::PortableText);
+        const QString normalized = QKeySequence::fromString(cappy::shortcuts::shortcutValue(
+                                                                settings.shortcuts, definition.id),
+                                                            QKeySequence::PortableText)
+                                       .toString(QKeySequence::PortableText);
         if (normalized.isEmpty()) {
             continue;
         }
 
-        QHash<QString, QString>& scopeEntries = seenShortcutsByScope[static_cast<int>(definition.scope)];
+        QHash<QString, QString>& scopeEntries =
+            seenShortcutsByScope[static_cast<int>(definition.scope)];
         const QString existingLabel = scopeEntries.value(normalized);
         if (!existingLabel.isEmpty()) {
             QMessageBox::warning(
-                this,
-                text.settingsWarningTitle,
+                this, text.settingsWarningTitle,
                 text.settingsDuplicateShortcutTemplate.arg(
                     cappy::localization::shortcutScopeLabel(language_, definition.scope),
-                    existingLabel,
-                    cappy::localization::shortcutLabel(language_, definition.id),
-                    normalized
-                )
-            );
+                    existingLabel, cappy::localization::shortcutLabel(language_, definition.id),
+                    normalized));
             return;
         }
-        scopeEntries.insert(normalized, cappy::localization::shortcutLabel(language_, definition.id));
+        scopeEntries.insert(normalized,
+                            cappy::localization::shortcutLabel(language_, definition.id));
     }
 
     accept();
@@ -841,11 +733,9 @@ void SettingsDialog::validateAndAccept() {
 
 void SettingsDialog::applySelectedTheme() {
     const QString appearanceMode = appearanceModeComboBox_ == nullptr
-        ? initialSettings_.appearanceMode
-        : appearanceModeComboBox_->currentData().toString();
-    setStyleSheet(settingsDialogStyleSheetForTheme(
-        shellThemeModeFromSettings(appearanceMode)
-    ));
+                                       ? initialSettings_.appearanceMode
+                                       : appearanceModeComboBox_->currentData().toString();
+    setStyleSheet(settingsDialogStyleSheetForTheme(shellThemeModeFromSettings(appearanceMode)));
 }
 
 void SettingsDialog::applySelectedLanguage() {
@@ -854,8 +744,7 @@ void SettingsDialog::applySelectedLanguage() {
     }
 
     language_ = cappy::localization::resolvedAppLanguageFromSettings(
-        interfaceLanguageComboBox_->currentData().toString()
-    );
+        interfaceLanguageComboBox_->currentData().toString());
 }
 
 void SettingsDialog::clearLayout(QLayout* layout) {
@@ -911,8 +800,8 @@ bool SettingsDialog::eventFilter(QObject* watched, QEvent* event) {
 }
 
 void SettingsDialog::syncShortcutEditorsEnabled() {
-    const bool enabled = globalHotkeysEnabledCheckBox_ != nullptr
-        && globalHotkeysEnabledCheckBox_->isChecked();
+    const bool enabled =
+        globalHotkeysEnabledCheckBox_ != nullptr && globalHotkeysEnabledCheckBox_->isChecked();
     for (const auto& definition : cappy::shortcuts::shortcutFieldDefinitions()) {
         if (definition.scope != cappy::shortcuts::ShortcutScope::Global) {
             continue;
@@ -926,8 +815,8 @@ void SettingsDialog::syncShortcutEditorsEnabled() {
 }
 
 void SettingsDialog::updateOcrFieldState() {
-    const bool cloudSelected = ocrProviderComboBox_ != nullptr
-        && ocrProviderComboBox_->currentData().toString() == "cloud";
+    const bool cloudSelected = ocrProviderComboBox_ != nullptr &&
+                               ocrProviderComboBox_->currentData().toString() == "cloud";
 
     if (ocrLocalPanel_ != nullptr) {
         ocrLocalPanel_->setVisible(!cloudSelected);
@@ -957,8 +846,7 @@ void SettingsDialog::updateOcrFieldState() {
         ocrCloudApiKeyVisibilityButton_->setText(
             (ocrCloudApiKeyEdit_ != nullptr && ocrCloudApiKeyEdit_->echoMode() == QLineEdit::Normal)
                 ? text.settingsOcrApiKeyHide
-                : text.settingsOcrApiKeyShow
-        );
+                : text.settingsOcrApiKeyShow);
     }
     if (ocrCloudPromptEdit_ != nullptr) {
         ocrCloudPromptEdit_->setEnabled(cloudSelected);
@@ -986,35 +874,31 @@ void SettingsDialog::setShortcutEditorRecording(QKeySequenceEdit* editor, bool r
 
 QString SettingsDialog::shortcutEditorRecordingStyleSheet() const {
     const QString appearanceMode = appearanceModeComboBox_ == nullptr
-        ? initialSettings_.appearanceMode
-        : appearanceModeComboBox_->currentData().toString();
+                                       ? initialSettings_.appearanceMode
+                                       : appearanceModeComboBox_->currentData().toString();
     if (shellThemeModeFromSettings(appearanceMode) == ShellThemeMode::Dark) {
-        return QStringLiteral(
-            "QKeySequenceEdit, QLineEdit {"
-            "  border: 2px solid #68a9e2;"
-            "  border-radius: 6px;"
-            "  padding: 0 9px;"
-            "  background: #2c4358;"
-            "  color: #f4f9ff;"
-            "  selection-background-color: #7fb4e4;"
-            "}"
-            "QLineEdit {"
-            "  font-weight: 600;"
-            "}"
-        );
+        return QStringLiteral("QKeySequenceEdit, QLineEdit {"
+                              "  border: 2px solid #68a9e2;"
+                              "  border-radius: 6px;"
+                              "  padding: 0 9px;"
+                              "  background: #2c4358;"
+                              "  color: #f4f9ff;"
+                              "  selection-background-color: #7fb4e4;"
+                              "}"
+                              "QLineEdit {"
+                              "  font-weight: 600;"
+                              "}");
     }
 
-    return QStringLiteral(
-        "QKeySequenceEdit, QLineEdit {"
-        "  border: 2px solid #4f91d0;"
-        "  border-radius: 6px;"
-        "  padding: 0 9px;"
-        "  background: #dceeff;"
-        "  color: #0e3557;"
-        "  selection-background-color: #8ab8e2;"
-        "}"
-        "QLineEdit {"
-        "  font-weight: 600;"
-        "}"
-    );
+    return QStringLiteral("QKeySequenceEdit, QLineEdit {"
+                          "  border: 2px solid #4f91d0;"
+                          "  border-radius: 6px;"
+                          "  padding: 0 9px;"
+                          "  background: #dceeff;"
+                          "  color: #0e3557;"
+                          "  selection-background-color: #8ab8e2;"
+                          "}"
+                          "QLineEdit {"
+                          "  font-weight: 600;"
+                          "}");
 }

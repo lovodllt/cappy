@@ -224,21 +224,15 @@ struct Strings {
 
 AppLanguage appLanguageFromSettingsValue(const QString& value);
 AppLanguage resolvedAppLanguage(AppLanguage requested, const QLocale& locale = QLocale());
-AppLanguage resolvedAppLanguageFromSettings(
-    const QString& value,
-    const QLocale& locale = QLocale()
-);
+AppLanguage resolvedAppLanguageFromSettings(const QString& value,
+                                            const QLocale& locale = QLocale());
 QString appLanguageToSettingsValue(AppLanguage language);
 QString appLanguageOptionLabel(AppLanguage option, AppLanguage uiLanguage);
 const Strings& strings(AppLanguage language);
 QString shortcutLabel(AppLanguage language, const QString& id);
 QString shortcutScopeLabel(AppLanguage language, cappy::shortcuts::ShortcutScope scope);
 QString historyCountLabel(AppLanguage language, int count);
-QString historyItemDetailText(
-    AppLanguage language,
-    const QString& baseTitle,
-    const QString& modeLabel,
-    const QString& filePath
-);
+QString historyItemDetailText(AppLanguage language, const QString& baseTitle,
+                              const QString& modeLabel, const QString& filePath);
 
-}  // namespace cappy::localization
+} // namespace cappy::localization

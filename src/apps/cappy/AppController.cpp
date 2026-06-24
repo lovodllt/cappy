@@ -37,10 +37,8 @@ namespace {
 constexpr auto kShowHomeHotkeyId = "show_home";
 constexpr auto kRegionCaptureHotkeyId = "capture_region";
 
-QString captureModeDisplayLabel(
-    cappy::localization::AppLanguage language,
-    cappy::domain::capture::CaptureMode mode
-) {
+QString captureModeDisplayLabel(cappy::localization::AppLanguage language,
+                                cappy::domain::capture::CaptureMode mode) {
     const auto& text = cappy::localization::strings(language);
     switch (mode) {
     case cappy::domain::capture::CaptureMode::Region:
@@ -97,11 +95,8 @@ QKeySequence shortcutFromSettings(const QString& text, const QKeySequence& fallb
     return sequence.isEmpty() ? fallback : sequence;
 }
 
-cappy::platform::hotkey::GlobalHotkey globalHotkeyFromSequence(
-    QString id,
-    QString displayName,
-    const QKeySequence& sequence
-) {
+cappy::platform::hotkey::GlobalHotkey globalHotkeyFromSequence(QString id, QString displayName,
+                                                               const QKeySequence& sequence) {
     const int shortcutValue = sequence[0].toCombined();
     return cappy::platform::hotkey::GlobalHotkey{
         .id = std::move(id),
@@ -111,66 +106,45 @@ cappy::platform::hotkey::GlobalHotkey globalHotkeyFromSequence(
     };
 }
 
-QList<cappy::platform::hotkey::GlobalHotkey> globalHotkeysFromSettings(
-    const AppSettings::ShellSettings& settings,
-    cappy::localization::AppLanguage language
-) {
+QList<cappy::platform::hotkey::GlobalHotkey>
+globalHotkeysFromSettings(const AppSettings::ShellSettings& settings,
+                          cappy::localization::AppLanguage language) {
     QList<cappy::platform::hotkey::GlobalHotkey> bindings;
     const auto& text = cappy::localization::strings(language);
 
-    const QKeySequence openHome = shortcutFromSettings(
-        settings.shortcuts.global.openHome,
-        QKeySequence{}
-    );
+    const QKeySequence openHome =
+        shortcutFromSettings(settings.shortcuts.global.openHome, QKeySequence{});
     if (!openHome.isEmpty()) {
-        bindings.push_back(globalHotkeyFromSequence(
-            kShowHomeHotkeyId,
-            text.actionOpenCappy,
-            openHome
-        ));
+        bindings.push_back(
+            globalHotkeyFromSequence(kShowHomeHotkeyId, text.actionOpenCappy, openHome));
     }
 
-    const QKeySequence screenshot = shortcutFromSettings(
-        settings.shortcuts.global.screenshot,
-        QKeySequence{}
-    );
+    const QKeySequence screenshot =
+        shortcutFromSettings(settings.shortcuts.global.screenshot, QKeySequence{});
     if (!screenshot.isEmpty()) {
-        bindings.push_back(globalHotkeyFromSequence(
-            kRegionCaptureHotkeyId,
-            text.actionScreenshot,
-            screenshot
-        ));
+        bindings.push_back(
+            globalHotkeyFromSequence(kRegionCaptureHotkeyId, text.actionScreenshot, screenshot));
     }
 
     return bindings;
 }
 
-}  // namespace
+} // namespace
 
-AppController::AppController(
-    QApplication& app,
-    MainWindow& window,
-    AppSettings& settings,
-    QString logFilePath,
-    QObject* parent
-)
-    : QObject(parent)
-    , app_(app)
-    , window_(window)
-    , settings_(settings)
-    , logFilePath_(std::move(logFilePath))
-    , captureCoordinator_(std::make_unique<cappy::services::capture::CaptureCoordinator>(this))
-    , hotkeyService_(std::make_unique<cappy::services::hotkey::GlobalHotkeyService>(this))
-    , pinboardManager_(std::make_unique<cappy::services::pinboard::PinboardManager>(this)) {
-}
+AppController::AppController(QApplication& app, MainWindow& window, AppSettings& settings,
+                             QString logFilePath, QObject* parent)
+    : QObject(parent), app_(app), window_(window), settings_(settings),
+      logFilePath_(std::move(logFilePath)),
+      captureCoordinator_(std::make_unique<cappy::services::capture::CaptureCoordinator>(this)),
+      hotkeyService_(std::make_unique<cappy::services::hotkey::GlobalHotkeyService>(this)),
+      pinboardManager_(std::make_unique<cappy::services::pinboard::PinboardManager>(this)) {}
 
 AppController::~AppController() = default;
 
 void AppController::initialize() {
     shellSettings_ = settings_.loadShellSettings();
-    currentLanguage_ = cappy::localization::resolvedAppLanguageFromSettings(
-        shellSettings_.interfaceLanguage
-    );
+    currentLanguage_ =
+        cappy::localization::resolvedAppLanguageFromSettings(shellSettings_.interfaceLanguage);
 
     setupWindow();
     setupTray();
@@ -283,38 +257,31 @@ void AppController::setupTray() {
 
     auto addAction = [this](const QString& text, AppCommand command) -> QAction* {
         QAction* action = trayMenu_->addAction(text);
-        connect(action, &QAction::triggered, this, [this, command]() {
-            dispatch(command);
-        });
+        connect(action, &QAction::triggered, this, [this, command]() { dispatch(command); });
         return action;
     };
 
     const auto& text = cappy::localization::strings(currentLanguage_);
     trayRegionCaptureAction_ = addAction(text.actionScreenshot, AppCommand::StartRegionCapture);
-    trayCurrentScreenCaptureAction_ = addAction(
-        text.actionCurrentScreenCapture,
-        AppCommand::StartCurrentScreenCapture
-    );
-    trayFullscreenCaptureAction_ = addAction(text.actionFullscreenCapture, AppCommand::StartFullscreenCapture);
+    trayCurrentScreenCaptureAction_ =
+        addAction(text.actionCurrentScreenCapture, AppCommand::StartCurrentScreenCapture);
+    trayFullscreenCaptureAction_ =
+        addAction(text.actionFullscreenCapture, AppCommand::StartFullscreenCapture);
     traySettingsAction_ = addAction(text.actionSettings, AppCommand::OpenSettings);
     trayRestartAction_ = addAction(text.actionRestart, AppCommand::Restart);
     trayQuitAction_ = addAction(text.actionQuit, AppCommand::Quit);
 
     trayIcon_->setContextMenu(trayMenu_.get());
-    connect(
-        trayIcon_.get(),
-        &QSystemTrayIcon::activated,
-        this,
-        [this](QSystemTrayIcon::ActivationReason reason) {
-            if (reason == QSystemTrayIcon::Trigger || reason == QSystemTrayIcon::DoubleClick) {
-                if (window_.isVisible()) {
-                    dispatch(AppCommand::HideToTray);
-                } else {
-                    dispatch(AppCommand::ShowHome);
+    connect(trayIcon_.get(), &QSystemTrayIcon::activated, this,
+            [this](QSystemTrayIcon::ActivationReason reason) {
+                if (reason == QSystemTrayIcon::Trigger || reason == QSystemTrayIcon::DoubleClick) {
+                    if (window_.isVisible()) {
+                        dispatch(AppCommand::HideToTray);
+                    } else {
+                        dispatch(AppCommand::ShowHome);
+                    }
                 }
-            }
-        }
-    );
+            });
 
     trayIcon_->show();
 }
@@ -330,95 +297,55 @@ void AppController::setupWindow() {
     pinboardManager_->setPinWindowShortcutSettings(shellSettings_.shortcuts.pinWindow);
     pinboardManager_->setPinWindowLanguage(currentLanguage_);
 
-    connect(&window_, &MainWindow::regionCaptureRequested, this, [this]() {
-        dispatch(AppCommand::StartRegionCapture);
-    });
-    connect(&window_, &MainWindow::fullscreenCaptureRequested, this, [this]() {
-        dispatch(AppCommand::StartFullscreenCapture);
-    });
-    connect(&window_, &MainWindow::activeWindowCaptureRequested, this, [this]() {
-        dispatch(AppCommand::StartActiveWindowCapture);
-    });
-    connect(&window_, &MainWindow::windowFitCaptureRequested, this, [this]() {
-        dispatch(AppCommand::StartWindowFitCapture);
-    });
-    connect(&window_, &MainWindow::pinLatestCaptureRequested, this, [this]() {
-        dispatch(AppCommand::PinLatestCapture);
-    });
-    connect(&window_, &MainWindow::saveLatestCaptureRequested, this, [this]() {
-        dispatch(AppCommand::SaveLatestCapture);
-    });
-    connect(&window_, &MainWindow::closeAllPinsRequested, this, [this]() {
-        dispatch(AppCommand::CloseAllPins);
-    });
-    connect(&window_, &MainWindow::restorePinInputRequested, this, [this]() {
-        dispatch(AppCommand::RestorePinInput);
-    });
-    connect(&window_, &MainWindow::historyPinRequested, this, [this](const QImage& image) {
-        pinCaptureFromHistory(image);
-    });
-    connect(
-        &window_,
-        &MainWindow::historySaveRequested,
-        this,
-        [this](const QString& entryId, const QImage& image, int captureMode) {
-            saveHistoryCapture(entryId, image, captureMode);
-        }
-    );
-    connect(&window_, &MainWindow::historyCopyRequested, this, [this](const QImage& image) {
-        copyCaptureToClipboard(image);
-    });
-    connect(&window_, &MainWindow::openCapturesDirectoryRequested, this, [this]() {
-        dispatch(AppCommand::OpenCapturesDirectory);
-    });
-    connect(&window_, &MainWindow::settingsRequested, this, [this]() {
-        dispatch(AppCommand::OpenSettings);
-    });
-    connect(&window_, &MainWindow::hideToTrayRequested, this, [this]() {
-        dispatch(AppCommand::HideToTray);
-    });
-    connect(&window_, &MainWindow::quitRequested, this, [this]() {
-        dispatch(AppCommand::Quit);
-    });
-    connect(
-        captureCoordinator_.get(),
-        &cappy::services::capture::CaptureCoordinator::captureCompleted,
-        this,
-        &AppController::onCaptureCompleted
-    );
-    connect(
-        captureCoordinator_.get(),
-        &cappy::services::capture::CaptureCoordinator::captureFinalized,
-        this,
-        &AppController::onCaptureFinalized
-    );
-    connect(
-        captureCoordinator_.get(),
-        &cappy::services::capture::CaptureCoordinator::captureFailed,
-        this,
-        &AppController::onCaptureFailed
-    );
-    connect(
-        captureCoordinator_.get(),
-        &cappy::services::capture::CaptureCoordinator::captureCanceled,
-        this,
-        &AppController::onCaptureCanceled
-    );
-    connect(
-        captureCoordinator_.get(),
-        &cappy::services::capture::CaptureCoordinator::ocrRequested,
-        this,
-        [this](const QImage& image) {
-            setGlobalHotkeysSuspended(false);
-            openOcrWindow(image);
-        }
-    );
-    connect(
-        pinboardManager_.get(),
-        &cappy::services::pinboard::PinboardManager::ocrRequested,
-        this,
-        &AppController::openOcrWindow
-    );
+    connect(&window_, &MainWindow::regionCaptureRequested, this,
+            [this]() { dispatch(AppCommand::StartRegionCapture); });
+    connect(&window_, &MainWindow::fullscreenCaptureRequested, this,
+            [this]() { dispatch(AppCommand::StartFullscreenCapture); });
+    connect(&window_, &MainWindow::activeWindowCaptureRequested, this,
+            [this]() { dispatch(AppCommand::StartActiveWindowCapture); });
+    connect(&window_, &MainWindow::windowFitCaptureRequested, this,
+            [this]() { dispatch(AppCommand::StartWindowFitCapture); });
+    connect(&window_, &MainWindow::pinLatestCaptureRequested, this,
+            [this]() { dispatch(AppCommand::PinLatestCapture); });
+    connect(&window_, &MainWindow::saveLatestCaptureRequested, this,
+            [this]() { dispatch(AppCommand::SaveLatestCapture); });
+    connect(&window_, &MainWindow::closeAllPinsRequested, this,
+            [this]() { dispatch(AppCommand::CloseAllPins); });
+    connect(&window_, &MainWindow::restorePinInputRequested, this,
+            [this]() { dispatch(AppCommand::RestorePinInput); });
+    connect(&window_, &MainWindow::historyPinRequested, this,
+            [this](const QImage& image) { pinCaptureFromHistory(image); });
+    connect(&window_, &MainWindow::historySaveRequested, this,
+            [this](const QString& entryId, const QImage& image, int captureMode) {
+                saveHistoryCapture(entryId, image, captureMode);
+            });
+    connect(&window_, &MainWindow::historyCopyRequested, this,
+            [this](const QImage& image) { copyCaptureToClipboard(image); });
+    connect(&window_, &MainWindow::openCapturesDirectoryRequested, this,
+            [this]() { dispatch(AppCommand::OpenCapturesDirectory); });
+    connect(&window_, &MainWindow::settingsRequested, this,
+            [this]() { dispatch(AppCommand::OpenSettings); });
+    connect(&window_, &MainWindow::hideToTrayRequested, this,
+            [this]() { dispatch(AppCommand::HideToTray); });
+    connect(&window_, &MainWindow::quitRequested, this, [this]() { dispatch(AppCommand::Quit); });
+    connect(captureCoordinator_.get(),
+            &cappy::services::capture::CaptureCoordinator::captureCompleted, this,
+            &AppController::onCaptureCompleted);
+    connect(captureCoordinator_.get(),
+            &cappy::services::capture::CaptureCoordinator::captureFinalized, this,
+            &AppController::onCaptureFinalized);
+    connect(captureCoordinator_.get(), &cappy::services::capture::CaptureCoordinator::captureFailed,
+            this, &AppController::onCaptureFailed);
+    connect(captureCoordinator_.get(),
+            &cappy::services::capture::CaptureCoordinator::captureCanceled, this,
+            &AppController::onCaptureCanceled);
+    connect(captureCoordinator_.get(), &cappy::services::capture::CaptureCoordinator::ocrRequested,
+            this, [this](const QImage& image) {
+                setGlobalHotkeysSuspended(false);
+                openOcrWindow(image);
+            });
+    connect(pinboardManager_.get(), &cappy::services::pinboard::PinboardManager::ocrRequested, this,
+            &AppController::openOcrWindow);
 }
 
 void AppController::setupGlobalHotkeys() {
@@ -428,30 +355,31 @@ void AppController::setupGlobalHotkeys() {
 
     hotkeyService_->setEnabled(shellSettings_.globalHotkeysEnabled);
     hotkeyService_->setBindings(globalHotkeysFromSettings(shellSettings_, currentLanguage_));
-    connect(
-        hotkeyService_.get(),
-        &cappy::services::hotkey::GlobalHotkeyService::hotkeyActivated,
-        this,
-        [this](const QString& hotkeyId) {
-            if (hotkeyId == kShowHomeHotkeyId) {
-                dispatch(AppCommand::ShowHome);
-            } else if (hotkeyId == kRegionCaptureHotkeyId) {
-                dispatch(AppCommand::StartWindowFitCapture);
-            }
-        }
-    );
+    connect(hotkeyService_.get(), &cappy::services::hotkey::GlobalHotkeyService::hotkeyActivated,
+            this, [this](const QString& hotkeyId) {
+                if (hotkeyId == kShowHomeHotkeyId) {
+                    dispatch(AppCommand::ShowHome);
+                } else if (hotkeyId == kRegionCaptureHotkeyId) {
+                    dispatch(AppCommand::StartWindowFitCapture);
+                }
+            });
 }
 
 void AppController::refreshTrayTexts() {
     const auto& text = cappy::localization::strings(currentLanguage_);
-    if (trayRegionCaptureAction_ != nullptr) trayRegionCaptureAction_->setText(text.actionScreenshot);
+    if (trayRegionCaptureAction_ != nullptr)
+        trayRegionCaptureAction_->setText(text.actionScreenshot);
     if (trayCurrentScreenCaptureAction_ != nullptr) {
         trayCurrentScreenCaptureAction_->setText(text.actionCurrentScreenCapture);
     }
-    if (trayFullscreenCaptureAction_ != nullptr) trayFullscreenCaptureAction_->setText(text.actionFullscreenCapture);
-    if (traySettingsAction_ != nullptr) traySettingsAction_->setText(text.actionSettings);
-    if (trayRestartAction_ != nullptr) trayRestartAction_->setText(text.actionRestart);
-    if (trayQuitAction_ != nullptr) trayQuitAction_->setText(text.actionQuit);
+    if (trayFullscreenCaptureAction_ != nullptr)
+        trayFullscreenCaptureAction_->setText(text.actionFullscreenCapture);
+    if (traySettingsAction_ != nullptr)
+        traySettingsAction_->setText(text.actionSettings);
+    if (trayRestartAction_ != nullptr)
+        trayRestartAction_->setText(text.actionRestart);
+    if (trayQuitAction_ != nullptr)
+        trayQuitAction_->setText(text.actionQuit);
 }
 
 void AppController::restoreShellState() {
@@ -505,21 +433,17 @@ void AppController::rememberCaptureResult(const cappy::domain::capture::CaptureR
     lastCaptureHistoryEntryId_ = QUuid::createUuid().toString(QUuid::WithoutBraces);
 
     window_.showCaptureResult(result.image, result.geometry, result.backendName);
-    window_.addCaptureHistoryEntry(
-        {
-            .id = lastCaptureHistoryEntryId_,
-            .title = QString("%1 | %2 | %3x%4")
-                .arg(
-                    QDateTime::currentDateTime().toString("HH:mm:ss"),
-                    captureModeDisplayLabel(currentLanguage_, result.mode),
-                    QString::number(result.image.width()),
-                    QString::number(result.image.height())
-                ),
-            .image = result.image,
-            .filePath = {},
-            .captureMode = static_cast<int>(result.mode),
-        }
-    );
+    window_.addCaptureHistoryEntry({
+        .id = lastCaptureHistoryEntryId_,
+        .title =
+            QString("%1 | %2 | %3x%4")
+                .arg(QDateTime::currentDateTime().toString("HH:mm:ss"),
+                     captureModeDisplayLabel(currentLanguage_, result.mode),
+                     QString::number(result.image.width()), QString::number(result.image.height())),
+        .image = result.image,
+        .filePath = {},
+        .captureMode = static_cast<int>(result.mode),
+    });
 }
 
 void AppController::setGlobalHotkeysSuspended(bool suspended) {
@@ -528,10 +452,8 @@ void AppController::setGlobalHotkeysSuspended(bool suspended) {
     }
 }
 
-QString AppController::saveCaptureToDefaultDirectory(
-    const QImage& image,
-    const QString& label
-) const {
+QString AppController::saveCaptureToDefaultDirectory(const QImage& image,
+                                                     const QString& label) const {
     if (image.isNull()) {
         return {};
     }
@@ -541,8 +463,9 @@ QString AppController::saveCaptureToDefaultDirectory(
         outputDir.mkpath(".");
     }
 
-    const QString fileName = QString("%1-%2.png")
-        .arg(label, QDateTime::currentDateTime().toString("yyyyMMdd-hhmmss-zzz"));
+    const QString fileName =
+        QString("%1-%2.png")
+            .arg(label, QDateTime::currentDateTime().toString("yyyyMMdd-hhmmss-zzz"));
     const QString filePath = outputDir.filePath(fileName);
     if (!image.save(filePath, "PNG")) {
         return {};
@@ -557,24 +480,23 @@ void AppController::pinLatestCapture() {
     }
 
     if (lastCapturedImage_.isNull()) {
-        window_.setCommandStatus(cappy::localization::strings(currentLanguage_).statusNoCaptureToPin);
+        window_.setCommandStatus(
+            cappy::localization::strings(currentLanguage_).statusNoCaptureToPin);
         return;
     }
 
-    if (!pinboardManager_->pinImage(
-            lastCapturedImage_,
-            lastCaptureGeometry_.has_value() ? std::optional(lastCaptureGeometry_->topLeft()) : std::nullopt
-        )) {
-        window_.setCommandStatus(cappy::localization::strings(currentLanguage_).statusFailedCreatePin);
+    if (!pinboardManager_->pinImage(lastCapturedImage_,
+                                    lastCaptureGeometry_.has_value()
+                                        ? std::optional(lastCaptureGeometry_->topLeft())
+                                        : std::nullopt)) {
+        window_.setCommandStatus(
+            cappy::localization::strings(currentLanguage_).statusFailedCreatePin);
         return;
     }
 
     qInfo() << "Pinned latest capture. Open pins:" << pinboardManager_->openPinCount();
-    window_.setCommandStatus(
-        cappy::localization::strings(currentLanguage_).statusPinnedLatestTemplate.arg(
-            pinboardManager_->openPinCount()
-        )
-    );
+    window_.setCommandStatus(cappy::localization::strings(currentLanguage_)
+                                 .statusPinnedLatestTemplate.arg(pinboardManager_->openPinCount()));
 }
 
 void AppController::saveLatestCapture() {
@@ -583,69 +505,70 @@ void AppController::saveLatestCapture() {
     }
 
     if (lastCapturedImage_.isNull() || !lastCaptureMode_.has_value()) {
-        window_.setCommandStatus(cappy::localization::strings(currentLanguage_).statusNoCaptureToSave);
+        window_.setCommandStatus(
+            cappy::localization::strings(currentLanguage_).statusNoCaptureToSave);
         return;
     }
 
-    const QString savedPath = saveCaptureToDefaultDirectory(
-        lastCapturedImage_,
-        captureModeFileLabel(*lastCaptureMode_)
-    );
+    const QString savedPath =
+        saveCaptureToDefaultDirectory(lastCapturedImage_, captureModeFileLabel(*lastCaptureMode_));
     if (savedPath.isEmpty()) {
-        window_.setCommandStatus(cappy::localization::strings(currentLanguage_).statusFailedSaveLatest);
+        window_.setCommandStatus(
+            cappy::localization::strings(currentLanguage_).statusFailedSaveLatest);
         return;
     }
 
     window_.markHistoryEntrySaved(lastCaptureHistoryEntryId_, savedPath);
     window_.setCommandStatus(
-        cappy::localization::strings(currentLanguage_).statusSavedLatestTemplate.arg(savedPath)
-    );
+        cappy::localization::strings(currentLanguage_).statusSavedLatestTemplate.arg(savedPath));
 }
 
 void AppController::pinCaptureFromHistory(const QImage& image) {
     if (image.isNull()) {
-        window_.setCommandStatus(cappy::localization::strings(currentLanguage_).statusSelectedHistoryNoImage);
+        window_.setCommandStatus(
+            cappy::localization::strings(currentLanguage_).statusSelectedHistoryNoImage);
         return;
     }
 
     if (!pinboardManager_->pinImage(image)) {
-        window_.setCommandStatus(cappy::localization::strings(currentLanguage_).statusFailedPinHistory);
+        window_.setCommandStatus(
+            cappy::localization::strings(currentLanguage_).statusFailedPinHistory);
         return;
     }
 
     qInfo() << "Pinned capture from history. Open pins:" << pinboardManager_->openPinCount();
     window_.setCommandStatus(
-        cappy::localization::strings(currentLanguage_).statusPinnedHistoryTemplate.arg(
-            pinboardManager_->openPinCount()
-        )
-    );
+        cappy::localization::strings(currentLanguage_)
+            .statusPinnedHistoryTemplate.arg(pinboardManager_->openPinCount()));
 }
 
-void AppController::saveHistoryCapture(const QString& entryId, const QImage& image, int captureMode) {
+void AppController::saveHistoryCapture(const QString& entryId, const QImage& image,
+                                       int captureMode) {
     if (image.isNull()) {
-        window_.setCommandStatus(cappy::localization::strings(currentLanguage_).statusSelectedHistoryNoImage);
+        window_.setCommandStatus(
+            cappy::localization::strings(currentLanguage_).statusSelectedHistoryNoImage);
         return;
     }
 
-    const std::optional<cappy::domain::capture::CaptureMode> mode = captureModeFromValue(captureMode);
+    const std::optional<cappy::domain::capture::CaptureMode> mode =
+        captureModeFromValue(captureMode);
     const QString savedPath = saveCaptureToDefaultDirectory(
-        image,
-        mode.has_value() ? captureModeFileLabel(*mode) : "history"
-    );
+        image, mode.has_value() ? captureModeFileLabel(*mode) : "history");
     if (savedPath.isEmpty()) {
-        window_.setCommandStatus(cappy::localization::strings(currentLanguage_).statusFailedSaveHistory);
+        window_.setCommandStatus(
+            cappy::localization::strings(currentLanguage_).statusFailedSaveHistory);
         return;
     }
 
     window_.markHistoryEntrySaved(entryId, savedPath);
     window_.setCommandStatus(
-        cappy::localization::strings(currentLanguage_).statusSavedHistoryTemplate.arg(savedPath)
-    );
+        cappy::localization::strings(currentLanguage_).statusSavedHistoryTemplate.arg(savedPath));
 }
 
 void AppController::copyCaptureToClipboard(const QImage& image) {
     if (image.isNull()) {
-        window_.setCommandStatus(cappy::localization::strings(currentLanguage_).statusSelectedHistoryNoImage);
+        window_.setCommandStatus(
+            cappy::localization::strings(currentLanguage_).statusSelectedHistoryNoImage);
         return;
     }
 
@@ -661,41 +584,34 @@ void AppController::closeAllPins() {
 void AppController::setPinsClickThrough(bool enabled) {
     const int updatedPins = pinboardManager_->setClickThroughForAllPins(enabled);
     if (updatedPins == 0) {
-        window_.setCommandStatus(cappy::localization::strings(currentLanguage_).statusNoPinnedWindowsToUpdate);
+        window_.setCommandStatus(
+            cappy::localization::strings(currentLanguage_).statusNoPinnedWindowsToUpdate);
         return;
     }
 
-    window_.setCommandStatus(
-        enabled
-            ? cappy::localization::strings(currentLanguage_).statusEnabledClickThroughTemplate.arg(updatedPins)
-            : cappy::localization::strings(currentLanguage_).statusRestoredPinInputTemplate.arg(updatedPins)
-    );
+    window_.setCommandStatus(enabled ? cappy::localization::strings(currentLanguage_)
+                                           .statusEnabledClickThroughTemplate.arg(updatedPins)
+                                     : cappy::localization::strings(currentLanguage_)
+                                           .statusRestoredPinInputTemplate.arg(updatedPins));
 }
 
 void AppController::openCapturesDirectory() {
     const QUrl url = QUrl::fromLocalFile(shellSettings_.defaultSaveDirectory);
     if (QDesktopServices::openUrl(url)) {
-        window_.setCommandStatus(
-            cappy::localization::strings(currentLanguage_).statusOpenedCaptureDirectoryTemplate.arg(
-                url.toLocalFile()
-            )
-        );
+        window_.setCommandStatus(cappy::localization::strings(currentLanguage_)
+                                     .statusOpenedCaptureDirectoryTemplate.arg(url.toLocalFile()));
         return;
     }
 
-    window_.setCommandStatus(
-        cappy::localization::strings(currentLanguage_).statusFailedOpenCaptureDirectoryTemplate.arg(
-            url.toLocalFile()
-        )
-    );
+    window_.setCommandStatus(cappy::localization::strings(currentLanguage_)
+                                 .statusFailedOpenCaptureDirectoryTemplate.arg(url.toLocalFile()));
 }
 
 void AppController::openSettingsDialog() {
     qInfo() << "Open settings requested";
     QWidget* dialogParent = window_.isVisible() ? &window_ : nullptr;
-    const bool restoreHotkeysSuspended = hotkeyService_ != nullptr
-        ? hotkeyService_->isSuspended()
-        : false;
+    const bool restoreHotkeysSuspended =
+        hotkeyService_ != nullptr ? hotkeyService_->isSuspended() : false;
     const auto& text = cappy::localization::strings(currentLanguage_);
 
     settingsDialogOpen_ = true;
@@ -706,19 +622,16 @@ void AppController::openSettingsDialog() {
         shellSettings_,
         SettingsDialog::Diagnostics{
             .captureBackendSummary = captureCoordinator_->backendSummary(),
-            .hotkeyBackendSummary = hotkeyService_ == nullptr
-                ? text.diagnosticsUnavailable
-                : hotkeyService_->backendSummary(),
-            .hotkeyBindingsSummary = hotkeyService_ == nullptr
-                ? text.diagnosticsUnavailable
-                : hotkeyService_->bindingsSummary(),
+            .hotkeyBackendSummary = hotkeyService_ == nullptr ? text.diagnosticsUnavailable
+                                                              : hotkeyService_->backendSummary(),
+            .hotkeyBindingsSummary = hotkeyService_ == nullptr ? text.diagnosticsUnavailable
+                                                               : hotkeyService_->bindingsSummary(),
             .hotkeyRegistrationErrors = hotkeyService_ == nullptr
-                ? QStringList{}
-                : hotkeyService_->lastRegistrationErrors(),
+                                            ? QStringList{}
+                                            : hotkeyService_->lastRegistrationErrors(),
             .logFilePath = logFilePath_,
         },
-        dialogParent
-    );
+        dialogParent);
 
     if (dialog.exec() != QDialog::Accepted) {
         window_.setShortcutActionsSuspended(false);
@@ -729,9 +642,8 @@ void AppController::openSettingsDialog() {
 
     shellSettings_ = dialog.shellSettings();
     settings_.saveShellSettings(shellSettings_);
-    currentLanguage_ = cappy::localization::resolvedAppLanguageFromSettings(
-        shellSettings_.interfaceLanguage
-    );
+    currentLanguage_ =
+        cappy::localization::resolvedAppLanguageFromSettings(shellSettings_.interfaceLanguage);
     window_.applyAppearanceMode(shellSettings_.appearanceMode);
     window_.applyLanguage(currentLanguage_);
     window_.applyShortcutSettings(shellSettings_.shortcuts.mainWindow);
@@ -758,11 +670,10 @@ void AppController::openSettingsDialog() {
     window_.setShortcutActionsSuspended(false);
     settingsDialogOpen_ = false;
     const auto& updatedText = cappy::localization::strings(currentLanguage_);
-    window_.setCommandStatus(
-        hotkeyService_ != nullptr && !hotkeyService_->lastRegistrationErrors().isEmpty()
-            ? updatedText.settingsSavedWithErrorsStatus
-            : updatedText.settingsSavedStatus
-    );
+    window_.setCommandStatus(hotkeyService_ != nullptr &&
+                                     !hotkeyService_->lastRegistrationErrors().isEmpty()
+                                 ? updatedText.settingsSavedWithErrorsStatus
+                                 : updatedText.settingsSavedStatus);
 }
 
 void AppController::startFullscreenCapture() {
@@ -776,13 +687,10 @@ void AppController::startFullscreenCapture() {
     closeActiveEditorWindow();
     wasWindowVisibleBeforeCapture_ = window_.isVisible();
     window_.setCommandStatus(
-        cappy::localization::strings(currentLanguage_).statusStartingFullscreenCapture
-    );
+        cappy::localization::strings(currentLanguage_).statusStartingFullscreenCapture);
     setGlobalHotkeysSuspended(true);
 
-    QTimer::singleShot(120, this, [this]() {
-        captureCoordinator_->captureFullscreen();
-    });
+    QTimer::singleShot(120, this, [this]() { captureCoordinator_->captureFullscreen(); });
 }
 
 void AppController::startCurrentScreenCapture() {
@@ -796,13 +704,10 @@ void AppController::startCurrentScreenCapture() {
     closeActiveEditorWindow();
     wasWindowVisibleBeforeCapture_ = window_.isVisible();
     window_.setCommandStatus(
-        cappy::localization::strings(currentLanguage_).statusStartingCurrentScreenCapture
-    );
+        cappy::localization::strings(currentLanguage_).statusStartingCurrentScreenCapture);
     setGlobalHotkeysSuspended(true);
 
-    QTimer::singleShot(120, this, [this]() {
-        captureCoordinator_->captureCurrentScreen();
-    });
+    QTimer::singleShot(120, this, [this]() { captureCoordinator_->captureCurrentScreen(); });
 }
 
 void AppController::startActiveWindowCapture() {
@@ -816,13 +721,10 @@ void AppController::startActiveWindowCapture() {
     closeActiveEditorWindow();
     wasWindowVisibleBeforeCapture_ = window_.isVisible();
     window_.setCommandStatus(
-        cappy::localization::strings(currentLanguage_).statusStartingActiveWindowCapture
-    );
+        cappy::localization::strings(currentLanguage_).statusStartingActiveWindowCapture);
     setGlobalHotkeysSuspended(true);
 
-    QTimer::singleShot(120, this, [this]() {
-        captureCoordinator_->captureActiveWindow();
-    });
+    QTimer::singleShot(120, this, [this]() { captureCoordinator_->captureActiveWindow(); });
 }
 
 void AppController::startWindowFitCapture() {
@@ -836,13 +738,10 @@ void AppController::startWindowFitCapture() {
     closeActiveEditorWindow();
     wasWindowVisibleBeforeCapture_ = window_.isVisible();
     window_.setCommandStatus(
-        cappy::localization::strings(currentLanguage_).statusStartingWindowFitCapture
-    );
+        cappy::localization::strings(currentLanguage_).statusStartingWindowFitCapture);
     setGlobalHotkeysSuspended(true);
 
-    QTimer::singleShot(120, this, [this]() {
-        captureCoordinator_->startWindowFitCapture();
-    });
+    QTimer::singleShot(120, this, [this]() { captureCoordinator_->startWindowFitCapture(); });
 }
 
 void AppController::startRegionCapture() {
@@ -856,30 +755,21 @@ void AppController::startRegionCapture() {
     closeActiveEditorWindow();
     wasWindowVisibleBeforeCapture_ = window_.isVisible();
     window_.setCommandStatus(
-        cappy::localization::strings(currentLanguage_).statusStartingRegionCapture
-    );
+        cappy::localization::strings(currentLanguage_).statusStartingRegionCapture);
     setGlobalHotkeysSuspended(true);
 
-    QTimer::singleShot(120, this, [this]() {
-        captureCoordinator_->startRegionCapture();
-    });
+    QTimer::singleShot(120, this, [this]() { captureCoordinator_->startRegionCapture(); });
 }
 
 void AppController::onCaptureCompleted(const cappy::domain::capture::CaptureResult& result) {
     setGlobalHotkeysSuspended(false);
     rememberCaptureResult(result);
     const auto& text = cappy::localization::strings(currentLanguage_);
-    qInfo() << "Capture completed:"
-            << result.image.size()
-            << result.geometry
-            << result.backendName;
+    qInfo() << "Capture completed:" << result.image.size() << result.geometry << result.backendName;
     window_.setCommandStatus(text.statusCaptureReadyTemplate.arg(
         captureModeDisplayLabel(currentLanguage_, result.mode),
-        QString::number(result.image.width()),
-        QString::number(result.image.height()),
-        QString::number(result.geometry.x()),
-        QString::number(result.geometry.y())
-    ));
+        QString::number(result.image.width()), QString::number(result.image.height()),
+        QString::number(result.geometry.x()), QString::number(result.geometry.y())));
 
     if (pinAfterNextCaptureEvent_) {
         pinAfterNextCaptureEvent_ = false;
@@ -894,101 +784,57 @@ void AppController::onCaptureCompleted(const cappy::domain::capture::CaptureResu
 
     closeActiveEditorWindow();
     activeEditorWindow_ = new cappy::features::editor::CaptureEditorWindow(
-        result.image,
-        result.geometry,
-        shellSettings_.shortcuts.editor,
-        currentLanguage_
-    );
-    connect(
-        activeEditorWindow_,
-        &cappy::features::editor::CaptureEditorWindow::imageChanged,
-        this,
-        [this](const QImage& image) {
-            syncLatestCaptureImage(image, true);
-            window_.setCommandStatus(
-                cappy::localization::strings(currentLanguage_).statusCaptureUpdatedInEditor
-            );
-        }
-    );
-    connect(
-        activeEditorWindow_,
-        &cappy::features::editor::CaptureEditorWindow::copyRequested,
-        this,
-        [this](const QImage& image) {
-            syncLatestCaptureImage(image);
-            QApplication::clipboard()->setImage(lastCapturedImage_);
-            window_.setCommandStatus(
-                cappy::localization::strings(currentLanguage_).statusCopiedCapture
-            );
-        }
-    );
-    connect(
-        activeEditorWindow_,
-        &cappy::features::editor::CaptureEditorWindow::saveRequested,
-        this,
-        [this, captureMode = result.mode](const QImage& image) {
-            syncLatestCaptureImage(image);
-            const QString savedPath = saveCaptureToDefaultDirectory(
-                lastCapturedImage_,
-                captureModeFileLabel(captureMode)
-            );
-            if (savedPath.isEmpty()) {
+        result.image, result.geometry, shellSettings_.shortcuts.editor, currentLanguage_);
+    connect(activeEditorWindow_, &cappy::features::editor::CaptureEditorWindow::imageChanged, this,
+            [this](const QImage& image) {
+                syncLatestCaptureImage(image, true);
                 window_.setCommandStatus(
-                    cappy::localization::strings(currentLanguage_).statusFailedSaveCapture
-                );
-                return;
-            }
-
-            window_.markHistoryEntrySaved(lastCaptureHistoryEntryId_, savedPath);
-            window_.setCommandStatus(
-                cappy::localization::strings(currentLanguage_).statusSavedCaptureTemplate.arg(savedPath)
-            );
-        }
-    );
-    connect(
-        activeEditorWindow_,
-        &cappy::features::editor::CaptureEditorWindow::pinRequested,
-        this,
-        [this, pinTopLeft = result.geometry.topLeft()](const QImage& image) {
-            syncLatestCaptureImage(image);
-            if (!pinboardManager_->pinImage(
-                    lastCapturedImage_,
-                    pinTopLeft
-                )) {
+                    cappy::localization::strings(currentLanguage_).statusCaptureUpdatedInEditor);
+            });
+    connect(activeEditorWindow_, &cappy::features::editor::CaptureEditorWindow::copyRequested, this,
+            [this](const QImage& image) {
+                syncLatestCaptureImage(image);
+                QApplication::clipboard()->setImage(lastCapturedImage_);
                 window_.setCommandStatus(
-                    cappy::localization::strings(currentLanguage_).statusFailedPinCapture
-                );
-                return;
-            }
+                    cappy::localization::strings(currentLanguage_).statusCopiedCapture);
+            });
+    connect(activeEditorWindow_, &cappy::features::editor::CaptureEditorWindow::saveRequested, this,
+            [this, captureMode = result.mode](const QImage& image) {
+                syncLatestCaptureImage(image);
+                const QString savedPath = saveCaptureToDefaultDirectory(
+                    lastCapturedImage_, captureModeFileLabel(captureMode));
+                if (savedPath.isEmpty()) {
+                    window_.setCommandStatus(
+                        cappy::localization::strings(currentLanguage_).statusFailedSaveCapture);
+                    return;
+                }
 
-            window_.setCommandStatus(
-                cappy::localization::strings(currentLanguage_).statusPinnedCaptureTemplate.arg(
-                    pinboardManager_->openPinCount()
-                )
-            );
-        }
-    );
-    connect(
-        activeEditorWindow_,
-        &cappy::features::editor::CaptureEditorWindow::ocrRequested,
-        this,
-        &AppController::openOcrWindow
-    );
-    connect(
-        activeEditorWindow_,
-        &QObject::destroyed,
-        this,
-        [this]() {
-            activeEditorWindow_ = nullptr;
-        }
-    );
+                window_.markHistoryEntrySaved(lastCaptureHistoryEntryId_, savedPath);
+                window_.setCommandStatus(cappy::localization::strings(currentLanguage_)
+                                             .statusSavedCaptureTemplate.arg(savedPath));
+            });
+    connect(activeEditorWindow_, &cappy::features::editor::CaptureEditorWindow::pinRequested, this,
+            [this, pinTopLeft = result.geometry.topLeft()](const QImage& image) {
+                syncLatestCaptureImage(image);
+                if (!pinboardManager_->pinImage(lastCapturedImage_, pinTopLeft)) {
+                    window_.setCommandStatus(
+                        cappy::localization::strings(currentLanguage_).statusFailedPinCapture);
+                    return;
+                }
+
+                window_.setCommandStatus(
+                    cappy::localization::strings(currentLanguage_)
+                        .statusPinnedCaptureTemplate.arg(pinboardManager_->openPinCount()));
+            });
+    connect(activeEditorWindow_, &cappy::features::editor::CaptureEditorWindow::ocrRequested, this,
+            &AppController::openOcrWindow);
+    connect(activeEditorWindow_, &QObject::destroyed, this,
+            [this]() { activeEditorWindow_ = nullptr; });
     activeEditorWindow_->show();
 }
 
-void AppController::onCaptureFinalized(
-    const cappy::domain::capture::CaptureResult& result,
-    cappy::features::capture::CaptureFinalizeAction action
-) {
+void AppController::onCaptureFinalized(const cappy::domain::capture::CaptureResult& result,
+                                       cappy::features::capture::CaptureFinalizeAction action) {
     setGlobalHotkeysSuspended(false);
     rememberCaptureResult(result);
     const auto& text = cappy::localization::strings(currentLanguage_);
@@ -999,10 +845,8 @@ void AppController::onCaptureFinalized(
         window_.setCommandStatus(text.statusCopiedCapture);
         break;
     case cappy::features::capture::CaptureFinalizeAction::Save: {
-        const QString savedPath = saveCaptureToDefaultDirectory(
-            result.image,
-            captureModeFileLabel(result.mode)
-        );
+        const QString savedPath =
+            saveCaptureToDefaultDirectory(result.image, captureModeFileLabel(result.mode));
         if (savedPath.isEmpty()) {
             window_.setCommandStatus(text.statusFailedSaveCapture);
             break;
@@ -1016,7 +860,8 @@ void AppController::onCaptureFinalized(
             window_.setCommandStatus(text.statusFailedPinCapture);
             break;
         }
-        window_.setCommandStatus(text.statusPinnedCaptureTemplate.arg(pinboardManager_->openPinCount()));
+        window_.setCommandStatus(
+            text.statusPinnedCaptureTemplate.arg(pinboardManager_->openPinCount()));
         break;
     }
 
@@ -1032,12 +877,8 @@ void AppController::openOcrWindow(const QImage& image) {
     }
 
     auto* window = new cappy::features::ocr::OcrResultWindow(
-        image,
-        shellSettings_.ocr,
-        currentLanguage_,
-        shellSettings_.appearanceMode,
-        window_.isVisible() ? &window_ : nullptr
-    );
+        image, shellSettings_.ocr, currentLanguage_, shellSettings_.appearanceMode,
+        window_.isVisible() ? &window_ : nullptr);
     window->setAttribute(Qt::WA_DeleteOnClose, true);
     window->show();
     window->raise();
@@ -1051,8 +892,7 @@ void AppController::onCaptureFailed(const QString& message) {
         showMainWindow();
     }
     window_.setCommandStatus(
-        cappy::localization::strings(currentLanguage_).statusCaptureFailedTemplate.arg(message)
-    );
+        cappy::localization::strings(currentLanguage_).statusCaptureFailedTemplate.arg(message));
 
     if (exitAfterNextCaptureEvent_) {
         exitAfterNextCaptureEvent_ = false;
@@ -1095,14 +935,13 @@ void AppController::restartApplication() {
     }
     filteredArguments.push_back("--restart-delay-ms=800");
 
-    const bool launched = QProcess::startDetached(
-        QCoreApplication::applicationFilePath(),
-        filteredArguments,
-        QCoreApplication::applicationDirPath()
-    );
+    const bool launched =
+        QProcess::startDetached(QCoreApplication::applicationFilePath(), filteredArguments,
+                                QCoreApplication::applicationDirPath());
     if (!launched) {
         window_.setCloseToTrayEnabled(shellSettings_.closeToTray);
-        window_.setCommandStatus(cappy::localization::strings(currentLanguage_).statusRestartFailed);
+        window_.setCommandStatus(
+            cappy::localization::strings(currentLanguage_).statusRestartFailed);
         return;
     }
 

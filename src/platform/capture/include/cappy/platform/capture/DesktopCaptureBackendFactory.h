@@ -8,5 +8,4 @@ class IDesktopCaptureBackend;
 
 std::unique_ptr<IDesktopCaptureBackend> createDesktopCaptureBackend();
 
-}  // namespace cappy::platform::capture
-
+} // namespace cappy::platform::capture

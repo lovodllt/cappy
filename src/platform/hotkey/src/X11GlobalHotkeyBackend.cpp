@@ -16,13 +16,9 @@ namespace cappy::platform::hotkey {
 namespace {
 
 constexpr uint16_t kRelevantModifierMask =
-    XCB_MOD_MASK_SHIFT
-    | XCB_MOD_MASK_CONTROL
-    | XCB_MOD_MASK_1
-    | XCB_MOD_MASK_4
-    | XCB_MOD_MASK_LOCK;
+    XCB_MOD_MASK_SHIFT | XCB_MOD_MASK_CONTROL | XCB_MOD_MASK_1 | XCB_MOD_MASK_4 | XCB_MOD_MASK_LOCK;
 
-}  // namespace
+} // namespace
 
 bool X11GlobalHotkeyBackend::canCreate() {
     return QGuiApplication::platformName() == "xcb";
@@ -104,23 +100,15 @@ bool X11GlobalHotkeyBackend::registerHotkey(const GlobalHotkey& hotkey) {
     };
 
     for (uint16_t grabModifiers : registration.grabModifiers) {
-        const xcb_void_cookie_t cookie = xcb_grab_key_checked(
-            connection_,
-            1,
-            rootWindow_,
-            grabModifiers,
-            registration.keycode,
-            XCB_GRAB_MODE_ASYNC,
-            XCB_GRAB_MODE_ASYNC
-        );
+        const xcb_void_cookie_t cookie =
+            xcb_grab_key_checked(connection_, 1, rootWindow_, grabModifiers, registration.keycode,
+                                 XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
         xcb_generic_error_t* error = xcb_request_check(connection_, cookie);
         if (error != nullptr) {
             free(error);
             unregisterHotkey(registration);
-            lastError_ = failureForRequest(
-                hotkey.displayName,
-                "The key combination is already in use."
-            );
+            lastError_ =
+                failureForRequest(hotkey.displayName, "The key combination is already in use.");
             return false;
         }
     }
@@ -146,11 +134,8 @@ void X11GlobalHotkeyBackend::unregisterAll() {
     xcb_flush(connection_);
 }
 
-bool X11GlobalHotkeyBackend::nativeEventFilter(
-    const QByteArray& eventType,
-    void* message,
-    qintptr* result
-) {
+bool X11GlobalHotkeyBackend::nativeEventFilter(const QByteArray& eventType, void* message,
+                                               qintptr* result) {
     Q_UNUSED(result);
 
     if (eventType != "xcb_generic_event_t" || message == nullptr) {
@@ -282,11 +267,9 @@ uint16_t X11GlobalHotkeyBackend::normalizedEventState(uint16_t state) const {
     return static_cast<uint16_t>(state & effectiveMask & ~(XCB_MOD_MASK_LOCK | numLockMask_));
 }
 
-QString X11GlobalHotkeyBackend::failureForRequest(
-    const QString& displayName,
-    const QString& reason
-) {
+QString X11GlobalHotkeyBackend::failureForRequest(const QString& displayName,
+                                                  const QString& reason) {
     return QString("%1: %2").arg(displayName, reason);
 }
 
-}  // namespace cappy::platform::hotkey
+} // namespace cappy::platform::hotkey

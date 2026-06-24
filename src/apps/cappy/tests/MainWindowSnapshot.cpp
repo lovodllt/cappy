@@ -19,43 +19,34 @@ QImage makeImage(const QColor& color, const QSize& size) {
     return image;
 }
 
-}  // namespace
+} // namespace
 
 int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
 
-    const QString outputPath = argc >= 2
-        ? QString::fromLocal8Bit(argv[1])
-        : QStringLiteral("/tmp/cappy-main-window.png");
-    const QString appearance = argc >= 3
-        ? QString::fromLocal8Bit(argv[2]).trimmed().toLower()
-        : QStringLiteral("dark");
-    const QString language = argc >= 4
-        ? QString::fromLocal8Bit(argv[3]).trimmed()
-        : QStringLiteral("zh-CN");
+    const QString outputPath =
+        argc >= 2 ? QString::fromLocal8Bit(argv[1]) : QStringLiteral("/tmp/cappy-main-window.png");
+    const QString appearance =
+        argc >= 3 ? QString::fromLocal8Bit(argv[2]).trimmed().toLower() : QStringLiteral("dark");
+    const QString language =
+        argc >= 4 ? QString::fromLocal8Bit(argv[3]).trimmed() : QStringLiteral("zh-CN");
 
     MainWindow window({}, nullptr);
     window.applyAppearanceMode(appearance);
-    window.applyLanguage(
-        language.compare(QStringLiteral("en"), Qt::CaseInsensitive) == 0
-            ? cappy::localization::AppLanguage::English
-            : cappy::localization::AppLanguage::SimplifiedChinese
-    );
+    window.applyLanguage(language.compare(QStringLiteral("en"), Qt::CaseInsensitive) == 0
+                             ? cappy::localization::AppLanguage::English
+                             : cappy::localization::AppLanguage::SimplifiedChinese);
 
-    window.addCaptureHistoryEntry(
-        {.id = "entry-1",
-         .title = "Region 1",
-         .image = makeImage(QColor(82, 134, 209), QSize(320, 180)),
-         .filePath = {},
-         .captureMode = 0}
-    );
-    window.addCaptureHistoryEntry(
-        {.id = "entry-2",
-         .title = "Screen 1",
-         .image = makeImage(QColor(83, 163, 122), QSize(320, 180)),
-         .filePath = "/tmp/cappy-demo.png",
-         .captureMode = 3}
-    );
+    window.addCaptureHistoryEntry({.id = "entry-1",
+                                   .title = "Region 1",
+                                   .image = makeImage(QColor(82, 134, 209), QSize(320, 180)),
+                                   .filePath = {},
+                                   .captureMode = 0});
+    window.addCaptureHistoryEntry({.id = "entry-2",
+                                   .title = "Screen 1",
+                                   .image = makeImage(QColor(83, 163, 122), QSize(320, 180)),
+                                   .filePath = "/tmp/cappy-demo.png",
+                                   .captureMode = 3});
 
     window.resize(1180, 760);
     window.show();

@@ -12,12 +12,12 @@ QImage makeImage(const QColor& color) {
     return image;
 }
 
-}  // namespace
+} // namespace
 
 class MainWindowTest final : public QObject {
     Q_OBJECT
 
-private slots:
+  private slots:
     void historyLimitTrimsOldEntries();
     void workspaceDoesNotRenderCaptureCommandButtons();
 };
@@ -26,27 +26,21 @@ void MainWindowTest::historyLimitTrimsOldEntries() {
     MainWindow window({}, nullptr);
     window.setHistoryLimit(2);
 
-    window.addCaptureHistoryEntry(
-        {.id = "entry-1",
-         .title = "First",
-         .image = makeImage(Qt::red),
-         .filePath = {},
-         .captureMode = 0}
-    );
-    window.addCaptureHistoryEntry(
-        {.id = "entry-2",
-         .title = "Second",
-         .image = makeImage(Qt::green),
-         .filePath = {},
-         .captureMode = 1}
-    );
-    window.addCaptureHistoryEntry(
-        {.id = "entry-3",
-         .title = "Third",
-         .image = makeImage(Qt::blue),
-         .filePath = {},
-         .captureMode = 2}
-    );
+    window.addCaptureHistoryEntry({.id = "entry-1",
+                                   .title = "First",
+                                   .image = makeImage(Qt::red),
+                                   .filePath = {},
+                                   .captureMode = 0});
+    window.addCaptureHistoryEntry({.id = "entry-2",
+                                   .title = "Second",
+                                   .image = makeImage(Qt::green),
+                                   .filePath = {},
+                                   .captureMode = 1});
+    window.addCaptureHistoryEntry({.id = "entry-3",
+                                   .title = "Third",
+                                   .image = makeImage(Qt::blue),
+                                   .filePath = {},
+                                   .captureMode = 2});
 
     auto* historyList = window.findChild<QListWidget*>();
     QVERIFY(historyList != nullptr);

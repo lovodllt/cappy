@@ -8,9 +8,7 @@
 
 namespace cappy::services::pinboard {
 
-PinboardManager::PinboardManager(QObject* parent)
-    : QObject(parent) {
-}
+PinboardManager::PinboardManager(QObject* parent) : QObject(parent) {}
 
 PinboardManager::~PinboardManager() = default;
 
@@ -20,27 +18,19 @@ bool PinboardManager::pinImage(const QImage& image, std::optional<QPoint> initia
     }
 
     auto* window = new cappy::features::pinboard::PinnedImageWindow(
-        image,
-        initialTopLeft,
-        pinWindowShortcuts_,
-        pinWindowLanguage_
-    );
+        image, initialTopLeft, pinWindowShortcuts_, pinWindowLanguage_);
     windows_.push_back(window);
     connect(window, &QObject::destroyed, this, [this]() {
-        std::erase_if(windows_, [](const auto& candidate) {
-            return candidate.isNull();
-        });
+        std::erase_if(windows_, [](const auto& candidate) { return candidate.isNull(); });
     });
-    connect(window, &cappy::features::pinboard::PinnedImageWindow::ocrRequested, this, [this](const QImage& image) {
-        emit ocrRequested(image);
-    });
+    connect(window, &cappy::features::pinboard::PinnedImageWindow::ocrRequested, this,
+            [this](const QImage& image) { emit ocrRequested(image); });
     window->show();
     return true;
 }
 
 void PinboardManager::setPinWindowShortcutSettings(
-    const cappy::shortcuts::PinWindowShortcutSettings& shortcuts
-) {
+    const cappy::shortcuts::PinWindowShortcutSettings& shortcuts) {
     pinWindowShortcuts_ = shortcuts;
     for (const auto& window : windows_) {
         if (!window.isNull()) {
@@ -59,11 +49,8 @@ void PinboardManager::setPinWindowLanguage(cappy::localization::AppLanguage lang
 }
 
 int PinboardManager::openPinCount() const {
-    return static_cast<int>(std::count_if(
-        windows_.begin(),
-        windows_.end(),
-        [](const auto& window) { return !window.isNull(); }
-    ));
+    return static_cast<int>(std::count_if(windows_.begin(), windows_.end(),
+                                          [](const auto& window) { return !window.isNull(); }));
 }
 
 int PinboardManager::setClickThroughForAllPins(bool enabled) {
@@ -75,9 +62,7 @@ int PinboardManager::setClickThroughForAllPins(bool enabled) {
         }
     }
 
-    std::erase_if(windows_, [](const auto& candidate) {
-        return candidate.isNull();
-    });
+    std::erase_if(windows_, [](const auto& candidate) { return candidate.isNull(); });
     return updatedCount;
 }
 
@@ -88,9 +73,7 @@ void PinboardManager::closeAllPins() {
         }
     }
 
-    std::erase_if(windows_, [](const auto& candidate) {
-        return candidate.isNull();
-    });
+    std::erase_if(windows_, [](const auto& candidate) { return candidate.isNull(); });
 }
 
-}  // namespace cappy::services::pinboard
+} // namespace cappy::services::pinboard

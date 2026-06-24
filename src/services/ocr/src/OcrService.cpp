@@ -28,17 +28,16 @@ namespace {
 
 QString defaultCloudPrompt() {
     return QStringLiteral(
-        "Recognize all visible text in the image. Return plain text only. Preserve line breaks."
-    );
+        "Recognize all visible text in the image. Return plain text only. Preserve line breaks.");
 }
 
 constexpr int kMinUsefulWordConfidence = 40;
 
 bool isCjkCharacter(QChar character) {
     const char32_t codePoint = character.unicode();
-    return (codePoint >= 0x3400 && codePoint <= 0x4DBF)
-        || (codePoint >= 0x4E00 && codePoint <= 0x9FFF)
-        || (codePoint >= 0xF900 && codePoint <= 0xFAFF);
+    return (codePoint >= 0x3400 && codePoint <= 0x4DBF) ||
+           (codePoint >= 0x4E00 && codePoint <= 0x9FFF) ||
+           (codePoint >= 0xF900 && codePoint <= 0xFAFF);
 }
 
 void appendRecognizedToken(QString& line, const QString& token) {
@@ -59,13 +58,8 @@ void appendRecognizedToken(QString& line, const QString& token) {
     line += token;
 }
 
-void flushMergedLineRegion(
-    OcrResult& result,
-    QString& currentLineText,
-    QRect& currentLineRect,
-    int& currentLineConfidenceSum,
-    int& currentLineConfidenceCount
-) {
+void flushMergedLineRegion(OcrResult& result, QString& currentLineText, QRect& currentLineRect,
+                           int& currentLineConfidenceSum, int& currentLineConfidenceCount) {
     if (currentLineText.isEmpty()) {
         currentLineRect = {};
         currentLineConfidenceSum = 0;
@@ -76,9 +70,10 @@ void flushMergedLineRegion(
     OcrTextRegion region;
     region.rect = currentLineRect;
     region.text = currentLineText;
-    region.confidence = currentLineConfidenceCount > 0
-        ? qRound(static_cast<double>(currentLineConfidenceSum) / currentLineConfidenceCount)
-        : -1;
+    region.confidence =
+        currentLineConfidenceCount > 0
+            ? qRound(static_cast<double>(currentLineConfidenceSum) / currentLineConfidenceCount)
+            : -1;
     result.regions.push_back(region);
 
     currentLineText.clear();
@@ -113,9 +108,8 @@ OcrResult parseTsvOutput(const QString& tsv) {
     const int heightIndex = columnIndexByName.value(QStringLiteral("height"), -1);
     const int confidenceIndex = columnIndexByName.value(QStringLiteral("conf"), -1);
     const int textIndex = columnIndexByName.value(QStringLiteral("text"), -1);
-    if (levelIndex < 0 || blockIndex < 0 || paragraphIndex < 0 || lineIndex < 0
-        || leftIndex < 0 || topIndex < 0 || widthIndex < 0 || heightIndex < 0
-        || confidenceIndex < 0 || textIndex < 0) {
+    if (levelIndex < 0 || blockIndex < 0 || paragraphIndex < 0 || lineIndex < 0 || leftIndex < 0 ||
+        topIndex < 0 || widthIndex < 0 || heightIndex < 0 || confidenceIndex < 0 || textIndex < 0) {
         return result;
     }
 
@@ -133,7 +127,9 @@ OcrResult parseTsvOutput(const QString& tsv) {
         }
 
         const QStringList columns = rowLine.split('\t', Qt::KeepEmptyParts);
-        if (columns.size() <= std::max({levelIndex, blockIndex, paragraphIndex, lineIndex, leftIndex, topIndex, widthIndex, heightIndex, confidenceIndex, textIndex})) {
+        if (columns.size() <=
+            std::max({levelIndex, blockIndex, paragraphIndex, lineIndex, leftIndex, topIndex,
+                      widthIndex, heightIndex, confidenceIndex, textIndex})) {
             continue;
         }
 
@@ -172,18 +168,13 @@ OcrResult parseTsvOutput(const QString& tsv) {
         }
 
         const QString lineKey = QStringLiteral("%1:%2:%3")
-            .arg(columns.at(blockIndex))
-            .arg(columns.at(paragraphIndex))
-            .arg(columns.at(lineIndex));
+                                    .arg(columns.at(blockIndex))
+                                    .arg(columns.at(paragraphIndex))
+                                    .arg(columns.at(lineIndex));
         if (!currentLineKey.isEmpty() && currentLineKey != lineKey && !currentLineText.isEmpty()) {
             lines.push_back(currentLineText);
-            flushMergedLineRegion(
-                result,
-                currentLineText,
-                currentLineRect,
-                currentLineConfidenceSum,
-                currentLineConfidenceCount
-            );
+            flushMergedLineRegion(result, currentLineText, currentLineRect,
+                                  currentLineConfidenceSum, currentLineConfidenceCount);
         }
         currentLineKey = lineKey;
         appendRecognizedToken(currentLineText, token);
@@ -198,13 +189,8 @@ OcrResult parseTsvOutput(const QString& tsv) {
 
     if (!currentLineText.isEmpty()) {
         lines.push_back(currentLineText);
-        flushMergedLineRegion(
-            result,
-            currentLineText,
-            currentLineRect,
-            currentLineConfidenceSum,
-            currentLineConfidenceCount
-        );
+        flushMergedLineRegion(result, currentLineText, currentLineRect, currentLineConfidenceSum,
+                              currentLineConfidenceCount);
     }
 
     result.text = lines.join(QLatin1Char('\n')).trimmed();
@@ -223,7 +209,8 @@ QString extractChatCompletionText(const QJsonDocument& document) {
         return {};
     }
 
-    const QJsonValue contentValue = choices.first().toObject().value("message").toObject().value("content");
+    const QJsonValue contentValue =
+        choices.first().toObject().value("message").toObject().value("content");
     if (contentValue.isString()) {
         return contentValue.toString().trimmed();
     }
@@ -269,12 +256,10 @@ QString extractResponsesText(const QJsonDocument& document) {
     return parts.join("\n").trimmed();
 }
 
-}  // namespace
+} // namespace
 
 OcrService::OcrService(QObject* parent)
-    : QObject(parent)
-    , networkAccessManager_(std::make_unique<QNetworkAccessManager>(this)) {
-}
+    : QObject(parent), networkAccessManager_(std::make_unique<QNetworkAccessManager>(this)) {}
 
 OcrService::~OcrService() {
     cancel();
@@ -347,36 +332,39 @@ void OcrService::startLocalRecognition(const QImage& image, const OcrSettings& s
     temporaryImageFile_->close();
 
     process_ = std::make_unique<QProcess>(this);
-    connect(process_.get(), &QProcess::errorOccurred, this, [this, command](QProcess::ProcessError error) {
-        if (error == QProcess::FailedToStart) {
-            const QString resolved = QStandardPaths::findExecutable(command);
-            finishWithError(
-                resolved.isEmpty()
-                    ? QStringLiteral("Failed to start local OCR command: %1. Check that it is installed and available on PATH.")
-                          .arg(command)
-                    : QStringLiteral("Failed to start local OCR command: %1.").arg(command)
-            );
-            return;
-        }
-        if (error == QProcess::Crashed) {
-            finishWithError(QStringLiteral("Local OCR process crashed."));
-            return;
-        }
-        finishWithError(QStringLiteral("Local OCR process failed."));
-    });
-    connect(process_.get(), &QProcess::finished, this, [this](int exitCode, QProcess::ExitStatus exitStatus) {
-        const QString standardOutput = QString::fromUtf8(process_->readAllStandardOutput()).trimmed();
-        const QString standardError = QString::fromUtf8(process_->readAllStandardError()).trimmed();
-        if (exitStatus != QProcess::NormalExit || exitCode != 0) {
-            finishWithError(
-                standardError.isEmpty()
-                    ? QStringLiteral("Local OCR exited with an error.")
-                    : standardError
-            );
-            return;
-        }
-        finishWithResult(parseTsvOutput(standardOutput));
-    });
+    connect(
+        process_.get(), &QProcess::errorOccurred, this,
+        [this, command](QProcess::ProcessError error) {
+            if (error == QProcess::FailedToStart) {
+                const QString resolved = QStandardPaths::findExecutable(command);
+                finishWithError(
+                    resolved.isEmpty()
+                        ? QStringLiteral("Failed to start local OCR command: %1. Check that it is "
+                                         "installed and available on PATH.")
+                              .arg(command)
+                        : QStringLiteral("Failed to start local OCR command: %1.").arg(command));
+                return;
+            }
+            if (error == QProcess::Crashed) {
+                finishWithError(QStringLiteral("Local OCR process crashed."));
+                return;
+            }
+            finishWithError(QStringLiteral("Local OCR process failed."));
+        });
+    connect(process_.get(), &QProcess::finished, this,
+            [this](int exitCode, QProcess::ExitStatus exitStatus) {
+                const QString standardOutput =
+                    QString::fromUtf8(process_->readAllStandardOutput()).trimmed();
+                const QString standardError =
+                    QString::fromUtf8(process_->readAllStandardError()).trimmed();
+                if (exitStatus != QProcess::NormalExit || exitCode != 0) {
+                    finishWithError(standardError.isEmpty()
+                                        ? QStringLiteral("Local OCR exited with an error.")
+                                        : standardError);
+                    return;
+                }
+                finishWithResult(parseTsvOutput(standardOutput));
+            });
 
     QStringList arguments;
     arguments << temporaryImageFile_->fileName() << "stdout";
@@ -405,8 +393,8 @@ void OcrService::startCloudRecognition(const QImage& image, const OcrSettings& s
     QBuffer buffer(&imageBytes);
     buffer.open(QIODevice::WriteOnly);
     image.save(&buffer, "PNG");
-    const QString imageDataUrl = QStringLiteral("data:image/png;base64,%1")
-        .arg(QString::fromLatin1(imageBytes.toBase64()));
+    const QString imageDataUrl =
+        QStringLiteral("data:image/png;base64,%1").arg(QString::fromLatin1(imageBytes.toBase64()));
 
     const QUrl endpoint(settings.cloudEndpoint.trimmed());
     const bool usesResponsesApi = endpoint.path().contains("/responses");
@@ -416,66 +404,46 @@ void OcrService::startCloudRecognition(const QImage& image, const OcrSettings& s
         payload.insert("model", settings.cloudModel.trimmed());
         payload.insert(
             "input",
-            QJsonArray{
-                QJsonObject{
-                    {"role", "user"},
-                    {"content", QJsonArray{
-                        QJsonObject{
-                            {"type", "input_text"},
-                            {"text", settings.cloudPrompt.trimmed().isEmpty()
-                                ? defaultCloudPrompt()
-                                : settings.cloudPrompt.trimmed()}
-                        },
-                        QJsonObject{
-                            {"type", "input_image"},
-                            {"image_url", imageDataUrl}
-                        }
-                    }}
-                }
-            }
-        );
+            QJsonArray{QJsonObject{
+                {"role", "user"},
+                {"content",
+                 QJsonArray{QJsonObject{{"type", "input_text"},
+                                        {"text", settings.cloudPrompt.trimmed().isEmpty()
+                                                     ? defaultCloudPrompt()
+                                                     : settings.cloudPrompt.trimmed()}},
+                            QJsonObject{{"type", "input_image"}, {"image_url", imageDataUrl}}}}}});
     } else {
         payload.insert("model", settings.cloudModel.trimmed());
         payload.insert("temperature", 0.1);
         payload.insert(
             "messages",
             QJsonArray{
-                QJsonObject{
-                    {"role", "system"},
-                    {"content", settings.cloudPrompt.trimmed().isEmpty()
-                        ? defaultCloudPrompt()
-                        : settings.cloudPrompt.trimmed()}
-                },
+                QJsonObject{{"role", "system"},
+                            {"content", settings.cloudPrompt.trimmed().isEmpty()
+                                            ? defaultCloudPrompt()
+                                            : settings.cloudPrompt.trimmed()}},
                 QJsonObject{
                     {"role", "user"},
-                    {"content", QJsonArray{
-                        QJsonObject{
-                            {"type", "text"},
-                            {"text", "Recognize the text in this image."}
-                        },
-                        QJsonObject{
-                            {"type", "image_url"},
-                            {"image_url", QJsonObject{
-                                {"url", imageDataUrl}
-                            }}
-                        }
-                    }}
-                }
-            }
-        );
+                    {"content",
+                     QJsonArray{QJsonObject{{"type", "text"},
+                                            {"text", "Recognize the text in this image."}},
+                                QJsonObject{{"type", "image_url"},
+                                            {"image_url", QJsonObject{{"url", imageDataUrl}}}}}}}});
     }
 
     QNetworkRequest request(endpoint);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-    request.setRawHeader("Authorization", QByteArray("Bearer ") + settings.cloudApiKey.trimmed().toUtf8());
+    request.setRawHeader("Authorization",
+                         QByteArray("Bearer ") + settings.cloudApiKey.trimmed().toUtf8());
     request.setTransferTimeout(std::max(5, settings.cloudTimeoutSeconds) * 1000);
 
-    activeReply_ = networkAccessManager_->post(request, QJsonDocument(payload).toJson(QJsonDocument::Compact));
+    activeReply_ =
+        networkAccessManager_->post(request, QJsonDocument(payload).toJson(QJsonDocument::Compact));
     connect(activeReply_, &QNetworkReply::finished, this, [this, usesResponsesApi]() {
         const QByteArray responseBytes = activeReply_->readAll();
         const QString networkError = activeReply_->error() == QNetworkReply::NoError
-            ? QString{}
-            : activeReply_->errorString();
+                                         ? QString{}
+                                         : activeReply_->errorString();
         activeReply_->deleteLater();
         activeReply_ = nullptr;
 
@@ -485,9 +453,8 @@ void OcrService::startCloudRecognition(const QImage& image, const OcrSettings& s
         }
 
         const QJsonDocument document = QJsonDocument::fromJson(responseBytes);
-        const QString text = usesResponsesApi
-            ? extractResponsesText(document)
-            : extractChatCompletionText(document);
+        const QString text =
+            usesResponsesApi ? extractResponsesText(document) : extractChatCompletionText(document);
         if (text.isEmpty()) {
             finishWithError(QStringLiteral("Cloud OCR returned an empty response."));
             return;
@@ -517,4 +484,4 @@ void OcrService::clearActiveState() {
     setBusy(false);
 }
 
-}  // namespace cappy::services::ocr
+} // namespace cappy::services::ocr

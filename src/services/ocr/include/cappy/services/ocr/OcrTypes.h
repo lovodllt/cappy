@@ -35,16 +35,15 @@ struct OcrResult {
 };
 
 [[nodiscard]] inline OcrProvider ocrProviderFromSettingsValue(const QString& value) {
-    return value.trimmed().compare("cloud", Qt::CaseInsensitive) == 0
-        ? OcrProvider::Cloud
-        : OcrProvider::Local;
+    return value.trimmed().compare("cloud", Qt::CaseInsensitive) == 0 ? OcrProvider::Cloud
+                                                                      : OcrProvider::Local;
 }
 
 [[nodiscard]] inline QString ocrProviderToSettingsValue(OcrProvider provider) {
     return provider == OcrProvider::Cloud ? "cloud" : "local";
 }
 
-}  // namespace cappy::services::ocr
+} // namespace cappy::services::ocr
 
 Q_DECLARE_METATYPE(cappy::services::ocr::OcrTextRegion)
 Q_DECLARE_METATYPE(cappy::services::ocr::OcrResult)

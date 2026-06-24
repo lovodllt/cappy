@@ -3,6 +3,6 @@
 #include <QString>
 
 class AppLogger {
-public:
+  public:
     static QString initialize(const QString& logsDirectory);
 };

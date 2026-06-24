@@ -17,7 +17,7 @@ namespace cappy::services::ocr {
 class OcrService final : public QObject {
     Q_OBJECT
 
-public:
+  public:
     explicit OcrService(QObject* parent = nullptr);
     ~OcrService() override;
 
@@ -25,13 +25,13 @@ public:
     void recognize(const QImage& image, const OcrSettings& settings, OcrProvider provider);
     void cancel();
 
-signals:
+  signals:
     void started();
     void finished(const cappy::services::ocr::OcrResult& result);
     void failed(const QString& message);
     void busyChanged(bool busy);
 
-private:
+  private:
     void setBusy(bool busy);
     void startLocalRecognition(const QImage& image, const OcrSettings& settings);
     void startCloudRecognition(const QImage& image, const OcrSettings& settings);
@@ -46,4 +46,4 @@ private:
     QNetworkReply* activeReply_ = nullptr;
 };
 
-}  // namespace cappy::services::ocr
+} // namespace cappy::services::ocr

@@ -7,7 +7,8 @@
 
 namespace cappy::domain::capture {
 
-inline QRect mapGlobalRectToFragmentPixels(const QRect& globalRect, const ScreenFragment& fragment) {
+inline QRect mapGlobalRectToFragmentPixels(const QRect& globalRect,
+                                           const ScreenFragment& fragment) {
     if (fragment.isNull() || globalRect.isEmpty()) {
         return {};
     }
@@ -66,4 +67,4 @@ inline QImage cropNormalizedImage(const DesktopFrame& frame, const QRect& global
     return composed;
 }
 
-}  // namespace cappy::domain::capture
+} // namespace cappy::domain::capture

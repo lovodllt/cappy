@@ -18,22 +18,10 @@ using cappy::domain::capture::DesktopFrame;
 using cappy::features::capture::CaptureFinalizeAction;
 using cappy::features::capture::CaptureOverlayWidget;
 
-void sendMouseEvent(
-    CaptureOverlayWidget& widget,
-    QEvent::Type type,
-    const QPoint& position,
-    Qt::MouseButton button,
-    Qt::MouseButtons buttons
-) {
-    QMouseEvent event(
-        type,
-        QPointF(position),
-        QPointF(position),
-        QPointF(position),
-        button,
-        buttons,
-        Qt::NoModifier
-    );
+void sendMouseEvent(CaptureOverlayWidget& widget, QEvent::Type type, const QPoint& position,
+                    Qt::MouseButton button, Qt::MouseButtons buttons) {
+    QMouseEvent event(type, QPointF(position), QPointF(position), QPointF(position), button,
+                      buttons, Qt::NoModifier);
     QApplication::sendEvent(&widget, &event);
 }
 
@@ -53,12 +41,12 @@ DesktopFrame makeDesktopFrame() {
     return frame;
 }
 
-}  // namespace
+} // namespace
 
 class CaptureOverlayWidgetTest : public QObject {
     Q_OBJECT
 
-private slots:
+  private slots:
     void dragSelectionAndFinalizeByEnterEmitsCapture();
     void dragSelectionAndFinalizeByPlainSaveShortcutEmitsSave();
     void initialSelectionFinalizePreservesCaptureMode();
@@ -72,16 +60,12 @@ void CaptureOverlayWidgetTest::dragSelectionAndFinalizeByEnterEmitsCapture() {
     bool finalized = false;
     CaptureResult finalizedResult;
     CaptureFinalizeAction finalizedAction = CaptureFinalizeAction::Save;
-    QObject::connect(
-        &widget,
-        &CaptureOverlayWidget::captureFinalized,
-        this,
-        [&](const CaptureResult& result, CaptureFinalizeAction action) {
-            finalized = true;
-            finalizedResult = result;
-            finalizedAction = action;
-        }
-    );
+    QObject::connect(&widget, &CaptureOverlayWidget::captureFinalized, this,
+                     [&](const CaptureResult& result, CaptureFinalizeAction action) {
+                         finalized = true;
+                         finalizedResult = result;
+                         finalizedAction = action;
+                     });
 
     widget.show();
     widget.raise();
@@ -108,15 +92,11 @@ void CaptureOverlayWidgetTest::dragSelectionAndFinalizeByPlainSaveShortcutEmitsS
 
     bool finalized = false;
     CaptureFinalizeAction finalizedAction = CaptureFinalizeAction::Copy;
-    QObject::connect(
-        &widget,
-        &CaptureOverlayWidget::captureFinalized,
-        this,
-        [&](const CaptureResult&, CaptureFinalizeAction action) {
-            finalized = true;
-            finalizedAction = action;
-        }
-    );
+    QObject::connect(&widget, &CaptureOverlayWidget::captureFinalized, this,
+                     [&](const CaptureResult&, CaptureFinalizeAction action) {
+                         finalized = true;
+                         finalizedAction = action;
+                     });
 
     widget.show();
     widget.raise();
@@ -135,25 +115,16 @@ void CaptureOverlayWidgetTest::dragSelectionAndFinalizeByPlainSaveShortcutEmitsS
 }
 
 void CaptureOverlayWidgetTest::initialSelectionFinalizePreservesCaptureMode() {
-    CaptureOverlayWidget widget(
-        makeDesktopFrame(),
-        {},
-        cappy::localization::AppLanguage::English,
-        QRect(40, 50, 120, 80),
-        CaptureMode::WindowFit
-    );
+    CaptureOverlayWidget widget(makeDesktopFrame(), {}, cappy::localization::AppLanguage::English,
+                                QRect(40, 50, 120, 80), CaptureMode::WindowFit);
 
     bool finalized = false;
     CaptureResult finalizedResult;
-    QObject::connect(
-        &widget,
-        &CaptureOverlayWidget::captureFinalized,
-        this,
-        [&](const CaptureResult& result, CaptureFinalizeAction) {
-            finalized = true;
-            finalizedResult = result;
-        }
-    );
+    QObject::connect(&widget, &CaptureOverlayWidget::captureFinalized, this,
+                     [&](const CaptureResult& result, CaptureFinalizeAction) {
+                         finalized = true;
+                         finalizedResult = result;
+                     });
 
     widget.show();
     widget.raise();
@@ -172,28 +143,17 @@ void CaptureOverlayWidgetTest::initialSelectionFinalizePreservesCaptureMode() {
 }
 
 void CaptureOverlayWidgetTest::trackedWindowClickConfirmsWindowFitSelection() {
-    CaptureOverlayWidget widget(
-        makeDesktopFrame(),
-        {},
-        cappy::localization::AppLanguage::English,
-        std::nullopt,
-        CaptureMode::WindowFit,
-        [](const QPoint&, WId) {
-            return QRect(60, 70, 140, 90);
-        }
-    );
+    CaptureOverlayWidget widget(makeDesktopFrame(), {}, cappy::localization::AppLanguage::English,
+                                std::nullopt, CaptureMode::WindowFit,
+                                [](const QPoint&, WId) { return QRect(60, 70, 140, 90); });
 
     bool finalized = false;
     CaptureResult finalizedResult;
-    QObject::connect(
-        &widget,
-        &CaptureOverlayWidget::captureFinalized,
-        this,
-        [&](const CaptureResult& result, CaptureFinalizeAction) {
-            finalized = true;
-            finalizedResult = result;
-        }
-    );
+    QObject::connect(&widget, &CaptureOverlayWidget::captureFinalized, this,
+                     [&](const CaptureResult& result, CaptureFinalizeAction) {
+                         finalized = true;
+                         finalizedResult = result;
+                     });
 
     widget.show();
     widget.raise();
@@ -202,8 +162,10 @@ void CaptureOverlayWidgetTest::trackedWindowClickConfirmsWindowFitSelection() {
     QCoreApplication::processEvents();
 
     sendMouseEvent(widget, QEvent::MouseMove, QPoint(80, 90), Qt::NoButton, Qt::NoButton);
-    sendMouseEvent(widget, QEvent::MouseButtonPress, QPoint(80, 90), Qt::LeftButton, Qt::LeftButton);
-    sendMouseEvent(widget, QEvent::MouseButtonRelease, QPoint(80, 90), Qt::LeftButton, Qt::NoButton);
+    sendMouseEvent(widget, QEvent::MouseButtonPress, QPoint(80, 90), Qt::LeftButton,
+                   Qt::LeftButton);
+    sendMouseEvent(widget, QEvent::MouseButtonRelease, QPoint(80, 90), Qt::LeftButton,
+                   Qt::NoButton);
 
     QKeyEvent keyPress(QEvent::KeyPress, Qt::Key_Return, Qt::NoModifier);
     QApplication::sendEvent(&widget, &keyPress);
@@ -215,28 +177,17 @@ void CaptureOverlayWidgetTest::trackedWindowClickConfirmsWindowFitSelection() {
 }
 
 void CaptureOverlayWidgetTest::trackedWindowDragFallsBackToRegionSelection() {
-    CaptureOverlayWidget widget(
-        makeDesktopFrame(),
-        {},
-        cappy::localization::AppLanguage::English,
-        std::nullopt,
-        CaptureMode::WindowFit,
-        [](const QPoint&, WId) {
-            return QRect(60, 70, 140, 90);
-        }
-    );
+    CaptureOverlayWidget widget(makeDesktopFrame(), {}, cappy::localization::AppLanguage::English,
+                                std::nullopt, CaptureMode::WindowFit,
+                                [](const QPoint&, WId) { return QRect(60, 70, 140, 90); });
 
     bool finalized = false;
     CaptureResult finalizedResult;
-    QObject::connect(
-        &widget,
-        &CaptureOverlayWidget::captureFinalized,
-        this,
-        [&](const CaptureResult& result, CaptureFinalizeAction) {
-            finalized = true;
-            finalizedResult = result;
-        }
-    );
+    QObject::connect(&widget, &CaptureOverlayWidget::captureFinalized, this,
+                     [&](const CaptureResult& result, CaptureFinalizeAction) {
+                         finalized = true;
+                         finalizedResult = result;
+                     });
 
     widget.show();
     widget.raise();

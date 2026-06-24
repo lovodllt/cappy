@@ -21,12 +21,12 @@ QImage makeReplacementImage() {
     return image;
 }
 
-}  // namespace
+} // namespace
 
 class PinnedImageWindowTest : public QObject {
     Q_OBJECT
 
-private slots:
+  private slots:
     void honorsRequestedInitialTopLeft();
     void restoreResetsImageState();
     void restoreReturnsToInitialImageAfterReplacingImage();

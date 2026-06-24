@@ -18,14 +18,11 @@ std::unique_ptr<IDesktopCaptureBackend> createDesktopCaptureBackend() {
     }
 
     return std::make_unique<UnsupportedCaptureBackend>(
-        QString("Unsupported Linux platform plugin: %1").arg(platformName)
-    );
+        QString("Unsupported Linux platform plugin: %1").arg(platformName));
 #else
     return std::make_unique<UnsupportedCaptureBackend>(
-        QString("Unsupported platform plugin: %1").arg(platformName)
-    );
+        QString("Unsupported platform plugin: %1").arg(platformName));
 #endif
 }
 
-}  // namespace cappy::platform::capture
-
+} // namespace cappy::platform::capture

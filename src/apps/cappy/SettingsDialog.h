@@ -27,7 +27,7 @@ class QVBoxLayout;
 class SettingsDialog final : public QDialog {
     Q_OBJECT
 
-public:
+  public:
     struct Diagnostics {
         QString captureBackendSummary;
         QString hotkeyBackendSummary;
@@ -36,15 +36,12 @@ public:
         QString logFilePath;
     };
 
-    SettingsDialog(
-        const AppSettings::ShellSettings& settings,
-        Diagnostics diagnostics,
-        QWidget* parent = nullptr
-    );
+    SettingsDialog(const AppSettings::ShellSettings& settings, Diagnostics diagnostics,
+                   QWidget* parent = nullptr);
 
     [[nodiscard]] AppSettings::ShellSettings shellSettings() const;
 
-private slots:
+  private slots:
     void chooseDefaultSaveDirectory();
     void validateAndAccept();
     void applySelectedTheme();
@@ -52,7 +49,7 @@ private slots:
     void syncShortcutEditorsEnabled();
     void updateOcrFieldState();
 
-private:
+  private:
     bool eventFilter(QObject* watched, QEvent* event) override;
     void rebuildUi(const AppSettings::ShellSettings& settings, int currentPageIndex = 0);
     void clearLayout(QLayout* layout);

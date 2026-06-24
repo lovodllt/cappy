@@ -117,4 +117,4 @@ QString shortcutScopeLabel(ShortcutScope scope);
 QString shortcutValue(const ShortcutSettings& settings, const QString& id);
 bool setShortcutValue(ShortcutSettings* settings, const QString& id, const QString& value);
 
-}  // namespace cappy::shortcuts
+} // namespace cappy::shortcuts

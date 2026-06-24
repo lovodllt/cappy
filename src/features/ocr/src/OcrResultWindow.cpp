@@ -146,13 +146,15 @@ QString ocrWindowStyleSheet(bool darkMode) {
             "}"
             "QScrollArea { background: transparent; border: 0; }"
             "QScrollBar:vertical { width: 10px; background: #141b22; border-radius: 5px; }"
-            "QScrollBar::handle:vertical { background: #3d4f60; min-height: 28px; border-radius: 5px; }"
+            "QScrollBar::handle:vertical { background: #3d4f60; min-height: 28px; border-radius: "
+            "5px; }"
             "QScrollBar:horizontal { height: 10px; background: #141b22; border-radius: 5px; }"
-            "QScrollBar::handle:horizontal { background: #3d4f60; min-width: 28px; border-radius: 5px; }"
-            "QScrollBar::add-line, QScrollBar::sub-line, QScrollBar::add-page, QScrollBar::sub-page {"
+            "QScrollBar::handle:horizontal { background: #3d4f60; min-width: 28px; border-radius: "
+            "5px; }"
+            "QScrollBar::add-line, QScrollBar::sub-line, QScrollBar::add-page, "
+            "QScrollBar::sub-page {"
             "  width: 0; height: 0; background: transparent;"
-            "}"
-        );
+            "}");
     }
 
     return QStringLiteral(
@@ -210,8 +212,8 @@ QString ocrWindowStyleSheet(bool darkMode) {
         "}"
         "QComboBox::drop-down { border: 0; }"
         "QPlainTextEdit {"
-            "  color: #13202c;"
-            "  background: #ffffff;"
+        "  color: #13202c;"
+        "  background: #ffffff;"
         "  border: 1px solid #cad4de;"
         "  border-radius: 8px;"
         "  padding: 12px;"
@@ -246,32 +248,23 @@ QString ocrWindowStyleSheet(bool darkMode) {
         "QScrollBar:vertical { width: 10px; background: #d9e2ea; border-radius: 5px; }"
         "QScrollBar::handle:vertical { background: #99adbf; min-height: 28px; border-radius: 5px; }"
         "QScrollBar:horizontal { height: 10px; background: #d9e2ea; border-radius: 5px; }"
-        "QScrollBar::handle:horizontal { background: #99adbf; min-width: 28px; border-radius: 5px; }"
+        "QScrollBar::handle:horizontal { background: #99adbf; min-width: 28px; border-radius: 5px; "
+        "}"
         "QScrollBar::add-line, QScrollBar::sub-line, QScrollBar::add-page, QScrollBar::sub-page {"
         "  width: 0; height: 0; background: transparent;"
-        "}"
-    );
+        "}");
 }
 
-}  // namespace
+} // namespace
 
-OcrResultWindow::OcrResultWindow(
-    const QImage& image,
-    cappy::services::ocr::OcrSettings settings,
-    cappy::localization::AppLanguage language,
-    QString appearanceMode,
-    QWidget* parent,
-    cappy::services::ocr::OcrResult initialResult,
-    bool autoRun
-)
-    : QDialog(parent)
-    , image_(image)
-    , currentResult_(std::move(initialResult))
-    , settings_(std::move(settings))
-    , language_(cappy::localization::resolvedAppLanguage(language))
-    , appearanceMode_(std::move(appearanceMode))
-    , ocrService_(new cappy::services::ocr::OcrService(this))
-    , autoRun_(autoRun) {
+OcrResultWindow::OcrResultWindow(const QImage& image, cappy::services::ocr::OcrSettings settings,
+                                 cappy::localization::AppLanguage language, QString appearanceMode,
+                                 QWidget* parent, cappy::services::ocr::OcrResult initialResult,
+                                 bool autoRun)
+    : QDialog(parent), image_(image), currentResult_(std::move(initialResult)),
+      settings_(std::move(settings)), language_(cappy::localization::resolvedAppLanguage(language)),
+      appearanceMode_(std::move(appearanceMode)),
+      ocrService_(new cappy::services::ocr::OcrService(this)), autoRun_(autoRun) {
     buildUi();
     refreshTexts();
     resultEdit_->setPlainText(currentResult_.text);
@@ -284,7 +277,8 @@ OcrResultWindow::OcrResultWindow(
         }
     });
     connect(ocrService_, &cappy::services::ocr::OcrService::started, this, [this]() {
-        const bool cloud = providerComboBox_ != nullptr && providerComboBox_->currentData().toString() == "cloud";
+        const bool cloud =
+            providerComboBox_ != nullptr && providerComboBox_->currentData().toString() == "cloud";
         const auto& text = cappy::localization::strings(language_);
         currentResult_ = {};
         activeRegionIndex_ = -1;
@@ -293,26 +287,25 @@ OcrResultWindow::OcrResultWindow(
         resultEdit_->clear();
         suppressTextCursorSync_ = false;
         updatePreview();
-        statusLabel_->setText(cloud ? text.dialogOcrStatusRunningCloud : text.dialogOcrStatusRunningLocal);
+        statusLabel_->setText(cloud ? text.dialogOcrStatusRunningCloud
+                                    : text.dialogOcrStatusRunningLocal);
     });
-    connect(ocrService_, &cappy::services::ocr::OcrService::finished, this, [this](const cappy::services::ocr::OcrResult& result) {
-        currentResult_ = result;
-        activeRegionIndex_ = currentResult_.regions.isEmpty() ? -1 : 0;
-        hoveredRegionIndex_ = -1;
-        suppressTextCursorSync_ = true;
-        resultEdit_->setPlainText(result.text);
-        suppressTextCursorSync_ = false;
-        updateTextRegionSelection();
-        updatePreview();
-        statusLabel_->setText(
-            cappy::localization::strings(language_).dialogOcrStatusFinishedTemplate
-                .arg(result.text.size())
-                .arg(result.regions.size())
-        );
-    });
-    connect(ocrService_, &cappy::services::ocr::OcrService::failed, this, [this](const QString& message) {
-        statusLabel_->setText(message);
-    });
+    connect(ocrService_, &cappy::services::ocr::OcrService::finished, this,
+            [this](const cappy::services::ocr::OcrResult& result) {
+                currentResult_ = result;
+                activeRegionIndex_ = currentResult_.regions.isEmpty() ? -1 : 0;
+                hoveredRegionIndex_ = -1;
+                suppressTextCursorSync_ = true;
+                resultEdit_->setPlainText(result.text);
+                suppressTextCursorSync_ = false;
+                updateTextRegionSelection();
+                updatePreview();
+                statusLabel_->setText(cappy::localization::strings(language_)
+                                          .dialogOcrStatusFinishedTemplate.arg(result.text.size())
+                                          .arg(result.regions.size()));
+            });
+    connect(ocrService_, &cappy::services::ocr::OcrService::failed, this,
+            [this](const QString& message) { statusLabel_->setText(message); });
 
     connect(resultEdit_, &QPlainTextEdit::cursorPositionChanged, this, [this]() {
         if (suppressTextCursorSync_) {
@@ -388,10 +381,14 @@ void OcrResultWindow::buildUi() {
     toolbarLayout->addLayout(titleColumn, 1);
 
     zoomInButton_ = createToolbarButton(toolbar_, themedIcon(this, "zoom-in", QStyle::SP_ArrowUp));
-    zoomOutButton_ = createToolbarButton(toolbar_, themedIcon(this, "zoom-out", QStyle::SP_ArrowDown));
-    fitButton_ = createToolbarButton(toolbar_, themedIcon(this, "zoom-fit-best", QStyle::SP_TitleBarMaxButton));
-    copyButton_ = createToolbarButton(toolbar_, themedIcon(this, "edit-copy", QStyle::SP_FileDialogListView));
-    saveButton_ = createToolbarButton(toolbar_, themedIcon(this, "document-save", QStyle::SP_DialogSaveButton));
+    zoomOutButton_ =
+        createToolbarButton(toolbar_, themedIcon(this, "zoom-out", QStyle::SP_ArrowDown));
+    fitButton_ = createToolbarButton(
+        toolbar_, themedIcon(this, "zoom-fit-best", QStyle::SP_TitleBarMaxButton));
+    copyButton_ =
+        createToolbarButton(toolbar_, themedIcon(this, "edit-copy", QStyle::SP_FileDialogListView));
+    saveButton_ = createToolbarButton(
+        toolbar_, themedIcon(this, "document-save", QStyle::SP_DialogSaveButton));
     zoomInButton_->setFixedSize(34, 34);
     zoomOutButton_->setFixedSize(34, 34);
     fitButton_->setFixedSize(34, 34);
@@ -412,15 +409,9 @@ void OcrResultWindow::buildUi() {
     providerComboBox_->addItem(QStringLiteral("Local OCR"), "local");
     providerComboBox_->addItem(QStringLiteral("Cloud API"), "cloud");
     providerComboBox_->setCurrentIndex(
-        qMax(
-            0,
-            providerComboBox_->findData(
-                settings_.preferredProvider.trimmed().isEmpty()
-                    ? QStringLiteral("local")
-                    : settings_.preferredProvider.trimmed()
-            )
-        )
-    );
+        qMax(0, providerComboBox_->findData(settings_.preferredProvider.trimmed().isEmpty()
+                                                ? QStringLiteral("local")
+                                                : settings_.preferredProvider.trimmed())));
     providerComboBox_->setMinimumWidth(140);
     runButton_ = new QPushButton(toolbar_);
     runButton_->setObjectName("accentButton");
@@ -528,8 +519,10 @@ void OcrResultWindow::buildUi() {
     splitter->setSizes({700, 480});
     rootLayout->addWidget(splitter, 1);
 
-    connect(zoomInButton_, &QPushButton::clicked, this, [this]() { setZoomFactor(zoomFactor_ + 0.15); });
-    connect(zoomOutButton_, &QPushButton::clicked, this, [this]() { setZoomFactor(zoomFactor_ - 0.15); });
+    connect(zoomInButton_, &QPushButton::clicked, this,
+            [this]() { setZoomFactor(zoomFactor_ + 0.15); });
+    connect(zoomOutButton_, &QPushButton::clicked, this,
+            [this]() { setZoomFactor(zoomFactor_ - 0.15); });
     connect(fitButton_, &QPushButton::clicked, this, &OcrResultWindow::fitPreview);
     connect(copyButton_, &QPushButton::clicked, this, &OcrResultWindow::copyRecognizedText);
     connect(saveButton_, &QPushButton::clicked, this, &OcrResultWindow::saveRecognizedText);
@@ -546,7 +539,8 @@ void OcrResultWindow::refreshTexts() {
     const auto& text = cappy::localization::strings(language_);
     setWindowTitle(text.dialogOcrTitle);
     titleLabel_->setText(text.dialogOcrTitle);
-    imageMetaLabel_->setText(text.dialogOcrImageMetaTemplate.arg(image_.width()).arg(image_.height()));
+    imageMetaLabel_->setText(
+        text.dialogOcrImageMetaTemplate.arg(image_.width()).arg(image_.height()));
     zoomInButton_->setToolTip(text.dialogOcrZoomIn);
     zoomOutButton_->setToolTip(text.dialogOcrZoomOut);
     fitButton_->setToolTip(text.dialogOcrFitImage);
@@ -578,10 +572,8 @@ void OcrResultWindow::runRecognition() {
 
     settings_.preferredProvider = providerComboBox_->currentData().toString();
     ocrService_->recognize(
-        image_,
-        settings_,
-        cappy::services::ocr::ocrProviderFromSettingsValue(settings_.preferredProvider)
-    );
+        image_, settings_,
+        cappy::services::ocr::ocrProviderFromSettingsValue(settings_.preferredProvider));
 }
 
 void OcrResultWindow::setZoomFactor(double factor) {
@@ -595,11 +587,8 @@ void OcrResultWindow::updatePreview() {
     }
 
     const QSize scaledSize = image_.size() * zoomFactor_;
-    QPixmap pixmap = QPixmap::fromImage(image_).scaled(
-        scaledSize,
-        Qt::KeepAspectRatio,
-        Qt::SmoothTransformation
-    );
+    QPixmap pixmap = QPixmap::fromImage(image_).scaled(scaledSize, Qt::KeepAspectRatio,
+                                                       Qt::SmoothTransformation);
     if (!pixmap.isNull() && !currentResult_.regions.isEmpty()) {
         const bool darkMode = isDarkMode(appearanceMode_);
         const double scaleX = static_cast<double>(pixmap.width()) / std::max(1, image_.width());
@@ -612,20 +601,19 @@ void OcrResultWindow::updatePreview() {
             const auto& region = currentResult_.regions.at(index);
             const bool isActive = index == activeRegionIndex_;
             const bool isHovered = index == hoveredRegionIndex_;
-            const QColor strokeColor = isActive
-                ? (darkMode ? QColor(255, 194, 87, 248) : QColor(207, 111, 14, 244))
-                : (isHovered ? (darkMode ? QColor(156, 214, 255, 232) : QColor(43, 122, 207, 228))
-                             : (darkMode ? QColor(106, 183, 255, 214) : QColor(29, 115, 201, 210)));
-            const QColor fillColor = isActive
-                ? (darkMode ? QColor(255, 194, 87, 84) : QColor(240, 154, 64, 78))
-                : (isHovered ? (darkMode ? QColor(96, 172, 236, 70) : QColor(84, 153, 219, 62))
-                             : (darkMode ? QColor(72, 154, 230, 48) : QColor(63, 137, 214, 36)));
-            const QRectF rect(
-                region.rect.x() * scaleX,
-                region.rect.y() * scaleY,
-                region.rect.width() * scaleX,
-                region.rect.height() * scaleY
-            );
+            const QColor strokeColor =
+                isActive
+                    ? (darkMode ? QColor(255, 194, 87, 248) : QColor(207, 111, 14, 244))
+                    : (isHovered
+                           ? (darkMode ? QColor(156, 214, 255, 232) : QColor(43, 122, 207, 228))
+                           : (darkMode ? QColor(106, 183, 255, 214) : QColor(29, 115, 201, 210)));
+            const QColor fillColor =
+                isActive ? (darkMode ? QColor(255, 194, 87, 84) : QColor(240, 154, 64, 78))
+                         : (isHovered
+                                ? (darkMode ? QColor(96, 172, 236, 70) : QColor(84, 153, 219, 62))
+                                : (darkMode ? QColor(72, 154, 230, 48) : QColor(63, 137, 214, 36)));
+            const QRectF rect(region.rect.x() * scaleX, region.rect.y() * scaleY,
+                              region.rect.width() * scaleX, region.rect.height() * scaleY);
             QPen pen(strokeColor);
             pen.setWidthF(isActive ? penWidth + 0.9 : (isHovered ? penWidth + 0.45 : penWidth));
             painter.setPen(pen);
@@ -638,9 +626,8 @@ void OcrResultWindow::updatePreview() {
         previewLabel_->resize(pixmap.size());
     }
     if (zoomLabel_ != nullptr) {
-        zoomLabel_->setText(
-            cappy::localization::strings(language_).dialogOcrZoomTemplate.arg(qRound(zoomFactor_ * 100.0))
-        );
+        zoomLabel_->setText(cappy::localization::strings(language_).dialogOcrZoomTemplate.arg(
+            qRound(zoomFactor_ * 100.0)));
     }
 }
 
@@ -650,8 +637,10 @@ void OcrResultWindow::fitPreview() {
     }
 
     const QSize viewportSize = previewScrollArea_->viewport()->size() - QSize(24, 24);
-    const double widthFactor = static_cast<double>(viewportSize.width()) / std::max(1, image_.width());
-    const double heightFactor = static_cast<double>(viewportSize.height()) / std::max(1, image_.height());
+    const double widthFactor =
+        static_cast<double>(viewportSize.width()) / std::max(1, image_.width());
+    const double heightFactor =
+        static_cast<double>(viewportSize.height()) / std::max(1, image_.height());
     setZoomFactor(std::min(widthFactor, heightFactor));
 }
 
@@ -663,11 +652,7 @@ void OcrResultWindow::copyRecognizedText() {
 void OcrResultWindow::saveRecognizedText() {
     const auto& text = cappy::localization::strings(language_);
     const QString selectedPath = QFileDialog::getSaveFileName(
-        this,
-        text.dialogSaveAs,
-        QStringLiteral("cappy-ocr.txt"),
-        text.dialogOcrTextFileFilter
-    );
+        this, text.dialogSaveAs, QStringLiteral("cappy-ocr.txt"), text.dialogOcrTextFileFilter);
     if (selectedPath.isEmpty()) {
         return;
     }
@@ -693,13 +678,11 @@ void OcrResultWindow::refreshRegionList() {
     regionListWidget_->clear();
     for (int index = 0; index < currentResult_.regions.size(); ++index) {
         const auto& region = currentResult_.regions.at(index);
-        const QString confidenceText = region.confidence >= 0
-            ? text.dialogOcrRegionConfidenceTemplate.arg(region.confidence)
-            : text.dialogOcrRegionNoConfidence;
-        auto* item = new QListWidgetItem(
-            QStringLiteral("%1\n%2").arg(region.text, confidenceText),
-            regionListWidget_
-        );
+        const QString confidenceText =
+            region.confidence >= 0 ? text.dialogOcrRegionConfidenceTemplate.arg(region.confidence)
+                                   : text.dialogOcrRegionNoConfidence;
+        auto* item = new QListWidgetItem(QStringLiteral("%1\n%2").arg(region.text, confidenceText),
+                                         regionListWidget_);
         item->setData(Qt::UserRole, index);
         item->setToolTip(region.text);
         item->setSizeHint(QSize(0, 54));
@@ -784,13 +767,9 @@ int OcrResultWindow::regionIndexAtPreviewPosition(const QPoint& position) const 
         return -1;
     }
 
-    const QRect pixmapRect(
-        QPoint(
-            std::max(0, (previewLabel_->width() - pixmap.width()) / 2),
-            std::max(0, (previewLabel_->height() - pixmap.height()) / 2)
-        ),
-        pixmap.size()
-    );
+    const QRect pixmapRect(QPoint(std::max(0, (previewLabel_->width() - pixmap.width()) / 2),
+                                  std::max(0, (previewLabel_->height() - pixmap.height()) / 2)),
+                           pixmap.size());
     if (!pixmapRect.contains(position)) {
         return -1;
     }
@@ -804,12 +783,8 @@ int OcrResultWindow::regionIndexAtPreviewPosition(const QPoint& position) const 
 
     for (int index = 0; index < currentResult_.regions.size(); ++index) {
         const auto& region = currentResult_.regions.at(index);
-        const QRectF rect(
-            region.rect.x() * scaleX,
-            region.rect.y() * scaleY,
-            region.rect.width() * scaleX,
-            region.rect.height() * scaleY
-        );
+        const QRectF rect(region.rect.x() * scaleX, region.rect.y() * scaleY,
+                          region.rect.width() * scaleX, region.rect.height() * scaleY);
         if (!rect.contains(imagePosition)) {
             continue;
         }
@@ -832,4 +807,4 @@ void OcrResultWindow::updateTextRegionSelection() {
     activeRegionIndex_ = 0;
 }
 
-}  // namespace cappy::features::ocr
+} // namespace cappy::features::ocr

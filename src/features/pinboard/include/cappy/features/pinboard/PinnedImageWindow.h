@@ -16,24 +16,22 @@ namespace cappy::features::pinboard {
 class PinnedImageWindow final : public QWidget {
     Q_OBJECT
 
-public:
+  public:
     explicit PinnedImageWindow(
-        const QImage& image,
-        std::optional<QPoint> initialTopLeft = std::nullopt,
+        const QImage& image, std::optional<QPoint> initialTopLeft = std::nullopt,
         cappy::shortcuts::PinWindowShortcutSettings shortcuts = {},
         cappy::localization::AppLanguage language = cappy::localization::AppLanguage::English,
-        QWidget* parent = nullptr
-    );
+        QWidget* parent = nullptr);
     [[nodiscard]] bool isClickThrough() const;
     void applyShortcutSettings(const cappy::shortcuts::PinWindowShortcutSettings& shortcuts);
     void setLanguage(cappy::localization::AppLanguage language);
     void setClickThrough(bool enabled);
 
-signals:
+  signals:
     void pinWindowClosed();
     void ocrRequested(const QImage& image);
 
-protected:
+  protected:
     void paintEvent(QPaintEvent* event) override;
     void mousePressEvent(QMouseEvent* event) override;
     void mouseDoubleClickEvent(QMouseEvent* event) override;
@@ -44,7 +42,7 @@ protected:
     void closeEvent(QCloseEvent* event) override;
     void keyPressEvent(QKeyEvent* event) override;
 
-private:
+  private:
     void applyInteractionCursor();
     void copyImageToClipboard();
     void changeImage();
@@ -78,4 +76,4 @@ private:
     cappy::localization::AppLanguage language_ = cappy::localization::AppLanguage::English;
 };
 
-}  // namespace cappy::features::pinboard
+} // namespace cappy::features::pinboard

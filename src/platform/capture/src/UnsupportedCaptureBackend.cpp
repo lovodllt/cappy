@@ -2,9 +2,7 @@
 
 namespace cappy::platform::capture {
 
-UnsupportedCaptureBackend::UnsupportedCaptureBackend(QString reason)
-    : reason_(std::move(reason)) {
-}
+UnsupportedCaptureBackend::UnsupportedCaptureBackend(QString reason) : reason_(std::move(reason)) {}
 
 QString UnsupportedCaptureBackend::backendName() const {
     return "unsupported";
@@ -26,7 +24,8 @@ QRect UnsupportedCaptureBackend::activeWindowGeometry() const {
     return {};
 }
 
-QRect UnsupportedCaptureBackend::windowGeometryAtPoint(const QPoint& point, WId excludedWindowId) const {
+QRect UnsupportedCaptureBackend::windowGeometryAtPoint(const QPoint& point,
+                                                       WId excludedWindowId) const {
     Q_UNUSED(point);
     Q_UNUSED(excludedWindowId);
     return {};
@@ -40,4 +39,4 @@ cappy::domain::capture::CaptureResult UnsupportedCaptureBackend::captureActiveWi
     return {};
 }
 
-}  // namespace cappy::platform::capture
+} // namespace cappy::platform::capture

@@ -9,7 +9,7 @@
 namespace cappy::platform::hotkey {
 
 class IGlobalHotkeyBackend {
-public:
+  public:
     virtual ~IGlobalHotkeyBackend() = default;
 
     virtual QString backendName() const = 0;
@@ -21,4 +21,4 @@ public:
     virtual void unregisterAll() = 0;
 };
 
-}  // namespace cappy::platform::hotkey
+} // namespace cappy::platform::hotkey

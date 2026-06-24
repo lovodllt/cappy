@@ -7,10 +7,9 @@
 
 namespace cappy::platform::hotkey {
 
-class WinGlobalHotkeyBackend final
-    : public IGlobalHotkeyBackend
-    , public QAbstractNativeEventFilter {
-public:
+class WinGlobalHotkeyBackend final : public IGlobalHotkeyBackend,
+                                     public QAbstractNativeEventFilter {
+  public:
     static bool canCreate();
 
     WinGlobalHotkeyBackend();
@@ -25,7 +24,7 @@ public:
     void unregisterAll() override;
     bool nativeEventFilter(const QByteArray& eventType, void* message, qintptr* result) override;
 
-private:
+  private:
     struct RegisteredHotkey {
         int nativeId = 0;
         QString id;
@@ -33,7 +32,8 @@ private:
 
     [[nodiscard]] quint32 qtModifiersToNative(Qt::KeyboardModifiers modifiers) const;
     [[nodiscard]] quint32 qtKeyToNative(Qt::Key key) const;
-    [[nodiscard]] QString failureForRequest(const QString& displayName, const QString& reason) const;
+    [[nodiscard]] QString failureForRequest(const QString& displayName,
+                                            const QString& reason) const;
 
     std::function<void(const QString&)> activationHandler_;
     QString lastError_;
@@ -41,4 +41,4 @@ private:
     QHash<int, RegisteredHotkey> registrations_;
 };
 
-}  // namespace cappy::platform::hotkey
+} // namespace cappy::platform::hotkey

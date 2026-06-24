@@ -119,26 +119,15 @@ QAction* addMenuAction(QMenu* menu, const QIcon& icon, const QString& text) {
     return action;
 }
 
-}  // namespace
+} // namespace
 
-PinnedImageWindow::PinnedImageWindow(
-    const QImage& image,
-    std::optional<QPoint> initialTopLeft,
-    cappy::shortcuts::PinWindowShortcutSettings shortcuts,
-    cappy::localization::AppLanguage language,
-    QWidget* parent
-)
-    : QWidget(parent)
-    , initialImage_(image)
-    , originalImage_(image)
-    , image_(image)
-    , shortcuts_(std::move(shortcuts))
-    , language_(cappy::localization::resolvedAppLanguage(language)) {
-    setWindowFlags(
-        Qt::Tool
-        | Qt::FramelessWindowHint
-        | Qt::WindowStaysOnTopHint
-    );
+PinnedImageWindow::PinnedImageWindow(const QImage& image, std::optional<QPoint> initialTopLeft,
+                                     cappy::shortcuts::PinWindowShortcutSettings shortcuts,
+                                     cappy::localization::AppLanguage language, QWidget* parent)
+    : QWidget(parent), initialImage_(image), originalImage_(image), image_(image),
+      shortcuts_(std::move(shortcuts)),
+      language_(cappy::localization::resolvedAppLanguage(language)) {
+    setWindowFlags(Qt::Tool | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
     setAttribute(Qt::WA_DeleteOnClose, true);
     setAttribute(Qt::WA_TranslucentBackground, true);
     setMouseTracking(true);
@@ -173,11 +162,8 @@ void PinnedImageWindow::paintEvent(QPaintEvent* event) {
         const int alpha = static_cast<int>(2 + progress * progress * 10);
         painter.setPen(Qt::NoPen);
         painter.setBrush(QColor(0, 0, 0, alpha));
-        painter.drawRoundedRect(
-            targetRect.adjusted(-layer, -layer + 1, layer, layer + 1),
-            5 + layer * 0.28,
-            5 + layer * 0.28
-        );
+        painter.drawRoundedRect(targetRect.adjusted(-layer, -layer + 1, layer, layer + 1),
+                                5 + layer * 0.28, 5 + layer * 0.28);
     }
 
     painter.drawImage(targetRect, image_);
@@ -245,84 +231,50 @@ void PinnedImageWindow::wheelEvent(QWheelEvent* event) {
 void PinnedImageWindow::contextMenuEvent(QContextMenuEvent* event) {
     QMenu menu(this);
     menu.setWindowFlag(Qt::NoDropShadowWindowHint, true);
-    menu.setStyleSheet(QString(
-        "QMenu {"
-        "  margin: 0px;"
-        "  padding: 1px 4px 1px 6px;"
-        "}"
-        "QMenu::item {"
-        "  padding: 4px 12px 4px 10px;"
-        "  min-height: %1px;"
-        "}"
-        "QMenu::separator {"
-        "  height: 1px;"
-        "  margin: 4px 8px;"
-        "}"
-    ).arg(kMenuItemMinHeight));
+    menu.setStyleSheet(QString("QMenu {"
+                               "  margin: 0px;"
+                               "  padding: 1px 4px 1px 6px;"
+                               "}"
+                               "QMenu::item {"
+                               "  padding: 4px 12px 4px 10px;"
+                               "  min-height: %1px;"
+                               "}"
+                               "QMenu::separator {"
+                               "  height: 1px;"
+                               "  margin: 4px 8px;"
+                               "}")
+                           .arg(kMenuItemMinHeight));
     const auto& text = cappy::localization::strings(language_);
-    QAction* copyAction = addMenuAction(
-        &menu,
-        themedIcon(this, "edit-copy", QStyle::SP_FileDialogListView),
-        text.actionCopyToClipboard
-    );
-    QAction* saveAsAction = addMenuAction(
-        &menu,
-        themedIcon(this, "document-save", QStyle::SP_DialogSaveButton),
-        text.dialogSaveAs + "..."
-    );
+    QAction* copyAction =
+        addMenuAction(&menu, themedIcon(this, "edit-copy", QStyle::SP_FileDialogListView),
+                      text.actionCopyToClipboard);
+    QAction* saveAsAction =
+        addMenuAction(&menu, themedIcon(this, "document-save", QStyle::SP_DialogSaveButton),
+                      text.dialogSaveAs + "...");
     QAction* changeImageAction = addMenuAction(
-        &menu,
-        themedIcon(this, "document-open", QStyle::SP_DirOpenIcon),
-        text.actionChangeImage
-    );
+        &menu, themedIcon(this, "document-open", QStyle::SP_DirOpenIcon), text.actionChangeImage);
     menu.addSeparator();
-    QAction* flipHorizontalAction = addMenuAction(
-        &menu,
-        drawSymbolicIcon(this, "flip-horizontal"),
-        text.actionFlipHorizontal
-    );
-    QAction* flipVerticalAction = addMenuAction(
-        &menu,
-        drawSymbolicIcon(this, "flip-vertical"),
-        text.actionFlipVertical
-    );
+    QAction* flipHorizontalAction =
+        addMenuAction(&menu, drawSymbolicIcon(this, "flip-horizontal"), text.actionFlipHorizontal);
+    QAction* flipVerticalAction =
+        addMenuAction(&menu, drawSymbolicIcon(this, "flip-vertical"), text.actionFlipVertical);
     QAction* rotateClockwiseAction = addMenuAction(
-        &menu,
-        drawSymbolicIcon(this, "rotate-clockwise"),
-        text.actionRotateClockwise90
-    );
-    QAction* rotateCounterclockwiseAction = addMenuAction(
-        &menu,
-        drawSymbolicIcon(this, "rotate-counterclockwise"),
-        text.actionRotateCounterclockwise90
-    );
-    QAction* invertColorsAction = addMenuAction(
-        &menu,
-        drawSymbolicIcon(this, "invert-colors"),
-        text.actionInvertColors
-    );
+        &menu, drawSymbolicIcon(this, "rotate-clockwise"), text.actionRotateClockwise90);
+    QAction* rotateCounterclockwiseAction =
+        addMenuAction(&menu, drawSymbolicIcon(this, "rotate-counterclockwise"),
+                      text.actionRotateCounterclockwise90);
+    QAction* invertColorsAction =
+        addMenuAction(&menu, drawSymbolicIcon(this, "invert-colors"), text.actionInvertColors);
     QAction* lockAction = addMenuAction(
-        &menu,
-        themedIcon(this, "object-locked", QStyle::SP_MessageBoxWarning),
-        text.actionLock
-    );
+        &menu, themedIcon(this, "object-locked", QStyle::SP_MessageBoxWarning), text.actionLock);
     lockAction->setCheckable(true);
     lockAction->setChecked(locked_);
-    QAction* extractTextAction = addMenuAction(
-        &menu,
-        drawSymbolicIcon(this, "ocr"),
-        text.actionExtractText
-    );
+    QAction* extractTextAction =
+        addMenuAction(&menu, drawSymbolicIcon(this, "ocr"), text.actionExtractText);
     QAction* restoreAction = addMenuAction(
-        &menu,
-        themedIcon(this, "edit-undo", QStyle::SP_ArrowBack),
-        text.actionRestore
-    );
+        &menu, themedIcon(this, "edit-undo", QStyle::SP_ArrowBack), text.actionRestore);
     QAction* closeAction = addMenuAction(
-        &menu,
-        themedIcon(this, "window-close", QStyle::SP_DialogCloseButton),
-        text.actionClose
-    );
+        &menu, themedIcon(this, "window-close", QStyle::SP_DialogCloseButton), text.actionClose);
     QAction* selected = menu.exec(event->globalPos());
     if (selected == copyAction) {
         copyImageToClipboard();
@@ -399,8 +351,7 @@ bool PinnedImageWindow::isClickThrough() const {
 }
 
 void PinnedImageWindow::applyShortcutSettings(
-    const cappy::shortcuts::PinWindowShortcutSettings& shortcuts
-) {
+    const cappy::shortcuts::PinWindowShortcutSettings& shortcuts) {
     shortcuts_ = shortcuts;
 }
 
@@ -445,11 +396,8 @@ void PinnedImageWindow::changeImage() {
     }
 
     const QString selectedPath = QFileDialog::getOpenFileName(
-        this,
-        cappy::localization::strings(language_).dialogOpenImage,
-        defaultDirectory,
-        cappy::localization::strings(language_).fileDialogImageFilter
-    );
+        this, cappy::localization::strings(language_).dialogOpenImage, defaultDirectory,
+        cappy::localization::strings(language_).fileDialogImageFilter);
     if (selectedPath.isEmpty()) {
         return;
     }
@@ -475,17 +423,14 @@ void PinnedImageWindow::saveImageAs() {
         defaultDirectory = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
     }
 
-    const QString defaultFileName = QString("cappy-pin-%1.png")
-        .arg(QDateTime::currentDateTime().toString("yyyyMMdd-hhmmss"));
+    const QString defaultFileName =
+        QString("cappy-pin-%1.png").arg(QDateTime::currentDateTime().toString("yyyyMMdd-hhmmss"));
     const QString defaultPath = defaultDirectory.isEmpty()
-        ? defaultFileName
-        : QDir(defaultDirectory).filePath(defaultFileName);
+                                    ? defaultFileName
+                                    : QDir(defaultDirectory).filePath(defaultFileName);
     const QString selectedPath = QFileDialog::getSaveFileName(
-        this,
-        cappy::localization::strings(language_).dialogSaveAs,
-        defaultPath,
-        cappy::localization::strings(language_).fileDialogImageFilter
-    );
+        this, cappy::localization::strings(language_).dialogSaveAs, defaultPath,
+        cappy::localization::strings(language_).fileDialogImageFilter);
     if (selectedPath.isEmpty()) {
         return;
     }
@@ -598,12 +543,7 @@ void PinnedImageWindow::replaceImageForEditing(const QImage& image) {
 }
 
 QRect PinnedImageWindow::imageRect() const {
-    return rect().adjusted(
-        kShadowMargin,
-        kShadowMargin,
-        -kShadowMargin,
-        -kShadowMargin
-    );
+    return rect().adjusted(kShadowMargin, kShadowMargin, -kShadowMargin, -kShadowMargin);
 }
 
-}  // namespace cappy::features::pinboard
+} // namespace cappy::features::pinboard

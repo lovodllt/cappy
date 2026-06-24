@@ -10,4 +10,3 @@ struct AppDirectories {
 
     static AppDirectories ensureCreated();
 };
-

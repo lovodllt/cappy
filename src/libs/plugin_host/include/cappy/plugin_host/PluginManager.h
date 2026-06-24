@@ -14,15 +14,15 @@ class IPlugin;
 namespace cappy::plugin_host {
 
 class PluginManager {
-public:
+  public:
     ~PluginManager();
 
     bool loadFromDirectory(const QString& path);
     QStringList loadedPluginIds() const;
 
-private:
+  private:
     std::vector<std::unique_ptr<QPluginLoader>> loaders_;
     std::vector<cappy::plugin_api::IPlugin*> plugins_;
 };
 
-}  // namespace cappy::plugin_host
+} // namespace cappy::plugin_host

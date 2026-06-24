@@ -11,7 +11,7 @@
 class OcrServiceTest final : public QObject {
     Q_OBJECT
 
-private slots:
+  private slots:
     void localRecognitionParsesStructuredTsvOutput();
 };
 
@@ -31,15 +31,15 @@ void OcrServiceTest::localRecognitionParsesStructuredTsvOutput() {
     QTextStream scriptStream(&scriptFile);
     scriptStream << "#!/usr/bin/env bash\n";
     scriptStream << "printf '%s\\n' \\\n";
-    scriptStream << "'level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\tleft\ttop\twidth\theight\tconf\ttext' \\\n";
+    scriptStream << "'level\tpage_num\tblock_num\tpar_num\tline_num\tword_"
+                    "num\tleft\ttop\twidth\theight\tconf\ttext' \\\n";
     scriptStream << "'5\t1\t1\t1\t1\t1\t10\t20\t40\t18\t95\tHello' \\\n";
     scriptStream << "'5\t1\t1\t1\t1\t2\t58\t20\t26\t18\t93\tOCR' \\\n";
     scriptStream << "'5\t1\t1\t1\t2\t1\t12\t52\t20\t20\t88\t你' \\\n";
     scriptStream << "'5\t1\t1\t1\t2\t2\t36\t52\t20\t20\t87\t好'\n";
     scriptFile.close();
-    QVERIFY(scriptFile.setPermissions(
-        QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner
-    ));
+    QVERIFY(scriptFile.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner |
+                                      QFileDevice::ExeOwner));
 
     cappy::services::ocr::OcrService service;
     QSignalSpy finishedSpy(&service, &cappy::services::ocr::OcrService::finished);
@@ -58,8 +58,7 @@ void OcrServiceTest::localRecognitionParsesStructuredTsvOutput() {
     QCOMPARE(failedSpy.count(), 0);
     QCOMPARE(finishedSpy.count(), 1);
 
-    const auto result =
-        qvariant_cast<cappy::services::ocr::OcrResult>(finishedSpy.at(0).at(0));
+    const auto result = qvariant_cast<cappy::services::ocr::OcrResult>(finishedSpy.at(0).at(0));
     QCOMPARE(result.text, QString("Hello OCR\n你好"));
     QCOMPARE(result.regions.size(), 2);
     QCOMPARE(result.regions.at(0).text, QString("Hello OCR"));

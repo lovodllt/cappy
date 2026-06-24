@@ -16,28 +16,25 @@ namespace {
 QComboBox* findOcrProviderCombo(SettingsDialog& dialog) {
     const auto comboBoxes = dialog.findChildren<QComboBox*>();
     for (QComboBox* combo : comboBoxes) {
-        if (combo->findData(QStringLiteral("local")) >= 0
-            && combo->findData(QStringLiteral("cloud")) >= 0) {
+        if (combo->findData(QStringLiteral("local")) >= 0 &&
+            combo->findData(QStringLiteral("cloud")) >= 0) {
             return combo;
         }
     }
     return nullptr;
 }
 
-}  // namespace
+} // namespace
 
 int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
 
-    QString outputPath = argc >= 2
-        ? QString::fromLocal8Bit(argv[1])
-        : QStringLiteral("/tmp/cappy-settings-ocr.png");
-    const QString provider = argc >= 3
-        ? QString::fromLocal8Bit(argv[2]).trimmed().toLower()
-        : QStringLiteral("local");
-    const QString language = argc >= 4
-        ? QString::fromLocal8Bit(argv[3]).trimmed()
-        : QStringLiteral("zh-CN");
+    QString outputPath =
+        argc >= 2 ? QString::fromLocal8Bit(argv[1]) : QStringLiteral("/tmp/cappy-settings-ocr.png");
+    const QString provider =
+        argc >= 3 ? QString::fromLocal8Bit(argv[2]).trimmed().toLower() : QStringLiteral("local");
+    const QString language =
+        argc >= 4 ? QString::fromLocal8Bit(argv[3]).trimmed() : QStringLiteral("zh-CN");
 
     AppSettings::ShellSettings settings;
     settings.appearanceMode = "dark";
@@ -51,16 +48,13 @@ int main(int argc, char* argv[]) {
     settings.ocr.cloudApiKey = "sk-example";
     settings.ocr.cloudPrompt = "Recognize visible text only.";
 
-    SettingsDialog dialog(
-        settings,
-        SettingsDialog::Diagnostics{
-            .captureBackendSummary = "qt-screen",
-            .hotkeyBackendSummary = "x11",
-            .hotkeyBindingsSummary = "F1 screenshot",
-            .hotkeyRegistrationErrors = {},
-            .logFilePath = "/tmp/cappy.log",
-        }
-    );
+    SettingsDialog dialog(settings, SettingsDialog::Diagnostics{
+                                        .captureBackendSummary = "qt-screen",
+                                        .hotkeyBackendSummary = "x11",
+                                        .hotkeyBindingsSummary = "F1 screenshot",
+                                        .hotkeyRegistrationErrors = {},
+                                        .logFilePath = "/tmp/cappy.log",
+                                    });
     dialog.show();
     app.processEvents();
 

@@ -57,7 +57,8 @@ bool WinGlobalHotkeyBackend::registerHotkey(const GlobalHotkey& hotkey) {
     const quint32 nativeModifiers = qtModifiersToNative(hotkey.modifiers);
     const quint32 nativeKey = qtKeyToNative(hotkey.key);
     if (nativeKey == 0) {
-        lastError_ = failureForRequest(hotkey.displayName, "Could not resolve a Win32 virtual key.");
+        lastError_ =
+            failureForRequest(hotkey.displayName, "Could not resolve a Win32 virtual key.");
         return false;
     }
 
@@ -67,13 +68,10 @@ bool WinGlobalHotkeyBackend::registerHotkey(const GlobalHotkey& hotkey) {
         return false;
     }
 
-    registrations_.insert(
-        nativeId,
-        RegisteredHotkey{
-            .nativeId = nativeId,
-            .id = hotkey.id,
-        }
-    );
+    registrations_.insert(nativeId, RegisteredHotkey{
+                                        .nativeId = nativeId,
+                                        .id = hotkey.id,
+                                    });
     return true;
 #else
     Q_UNUSED(hotkey);
@@ -91,11 +89,8 @@ void WinGlobalHotkeyBackend::unregisterAll() {
     registrations_.clear();
 }
 
-bool WinGlobalHotkeyBackend::nativeEventFilter(
-    const QByteArray& eventType,
-    void* message,
-    qintptr* result
-) {
+bool WinGlobalHotkeyBackend::nativeEventFilter(const QByteArray& eventType, void* message,
+                                               qintptr* result) {
     Q_UNUSED(result);
 
 #if defined(Q_OS_WIN)
@@ -203,11 +198,9 @@ quint32 WinGlobalHotkeyBackend::qtKeyToNative(Qt::Key key) const {
 #endif
 }
 
-QString WinGlobalHotkeyBackend::failureForRequest(
-    const QString& displayName,
-    const QString& reason
-) const {
+QString WinGlobalHotkeyBackend::failureForRequest(const QString& displayName,
+                                                  const QString& reason) const {
     return QString("%1: %2").arg(displayName, reason);
 }
 
-}  // namespace cappy::platform::hotkey
+} // namespace cappy::platform::hotkey

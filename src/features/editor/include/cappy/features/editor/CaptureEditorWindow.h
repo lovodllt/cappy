@@ -21,27 +21,25 @@ namespace cappy::features::editor {
 class CaptureEditorWindow final : public QWidget {
     Q_OBJECT
 
-public:
+  public:
     explicit CaptureEditorWindow(
-        const QImage& image,
-        const QRect& globalGeometry,
+        const QImage& image, const QRect& globalGeometry,
         cappy::shortcuts::CaptureEditorShortcutSettings shortcuts = {},
         cappy::localization::AppLanguage language = cappy::localization::AppLanguage::English,
-        QWidget* parent = nullptr
-    );
+        QWidget* parent = nullptr);
 
     [[nodiscard]] QImage currentImage() const;
     void applyShortcutSettings(const cappy::shortcuts::CaptureEditorShortcutSettings& shortcuts);
     void setLanguage(cappy::localization::AppLanguage language);
 
-signals:
+  signals:
     void imageChanged(const QImage& image);
     void copyRequested(const QImage& image);
     void saveRequested(const QImage& image);
     void pinRequested(const QImage& image);
     void ocrRequested(const QImage& image);
 
-protected:
+  protected:
     void closeEvent(QCloseEvent* event) override;
     void showEvent(QShowEvent* event) override;
     void paintEvent(QPaintEvent* event) override;
@@ -53,7 +51,7 @@ protected:
     void leaveEvent(QEvent* event) override;
     bool eventFilter(QObject* watched, QEvent* event) override;
 
-private:
+  private:
     enum class Tool {
         None,
         Rectangle,
@@ -97,18 +95,16 @@ private:
     [[nodiscard]] QPoint clampTextInputPanelTopLeft(const QPoint& topLeft) const;
     [[nodiscard]] QImage compositedImage() const;
     void drawTextAnnotations(QPainter& painter) const;
-    void drawTextAnnotationSelection(QPainter& painter, const EditorSnapshot::TextAnnotation& annotation) const;
-    [[nodiscard]] int hitTestTextAnnotation(const QPoint& imagePoint, bool* resizeHandle = nullptr) const;
-    [[nodiscard]] QRect normalizedTextRect(const QString& text, int pixelSize, const QPoint& topLeft) const;
+    void drawTextAnnotationSelection(QPainter& painter,
+                                     const EditorSnapshot::TextAnnotation& annotation) const;
+    [[nodiscard]] int hitTestTextAnnotation(const QPoint& imagePoint,
+                                            bool* resizeHandle = nullptr) const;
+    [[nodiscard]] QRect normalizedTextRect(const QString& text, int pixelSize,
+                                           const QPoint& topLeft) const;
     void drawSerialMarker(const QPoint& imagePoint);
     void drawSerialPreview(QPainter& painter) const;
-    void drawSerialBadge(
-        QPainter& painter,
-        const QRect& rect,
-        const QString& text,
-        const QColor& fillColor,
-        const QColor& outlineColor
-    ) const;
+    void drawSerialBadge(QPainter& painter, const QRect& rect, const QString& text,
+                         const QColor& fillColor, const QColor& outlineColor) const;
     [[nodiscard]] QColor activeStrokeColor() const;
     [[nodiscard]] int activeStrokeWidth() const;
     [[nodiscard]] bool isPointTool() const;
@@ -176,4 +172,4 @@ private:
     QVector<EditorSnapshot::TextAnnotation> textAnnotations_;
 };
 
-}  // namespace cappy::features::editor
+} // namespace cappy::features::editor

@@ -15,7 +15,7 @@
 class MainWindow final : public QMainWindow {
     Q_OBJECT
 
-public:
+  public:
     struct CaptureHistoryEntry {
         QString id;
         QString title;
@@ -35,14 +35,11 @@ public:
     void setHistoryLimit(int limit);
     void showCaptureResult(const QImage& image, const QRect& geometry, const QString& backendName);
     void addCaptureHistoryEntry(const CaptureHistoryEntry& entry);
-    void updateHistoryEntryImage(
-        const QString& entryId,
-        const QImage& image,
-        bool clearSavedState = false
-    );
+    void updateHistoryEntryImage(const QString& entryId, const QImage& image,
+                                 bool clearSavedState = false);
     void markHistoryEntrySaved(const QString& entryId, const QString& filePath);
 
-signals:
+  signals:
     void regionCaptureRequested();
     void fullscreenCaptureRequested();
     void activeWindowCaptureRequested();
@@ -59,16 +56,13 @@ signals:
     void hideToTrayRequested();
     void quitRequested();
 
-protected:
+  protected:
     void closeEvent(QCloseEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;
 
-private:
-    QAction* createWindowAction(
-        const QIcon& icon,
-        const QString& text,
-        const QKeySequence& shortcut = {}
-    );
+  private:
+    QAction* createWindowAction(const QIcon& icon, const QString& text,
+                                const QKeySequence& shortcut = {});
     void syncPreviewToCurrentContext();
     void updatePreviewPixmap();
     void updateHistorySummary();

@@ -16,11 +16,10 @@ typedef uint32_t xcb_window_t;
 
 namespace cappy::platform::hotkey {
 
-class X11GlobalHotkeyBackend final
-    : public QObject
-    , public IGlobalHotkeyBackend
-    , public QAbstractNativeEventFilter {
-public:
+class X11GlobalHotkeyBackend final : public QObject,
+                                     public IGlobalHotkeyBackend,
+                                     public QAbstractNativeEventFilter {
+  public:
     static bool canCreate();
 
     X11GlobalHotkeyBackend();
@@ -35,7 +34,7 @@ public:
     void unregisterAll() override;
     bool nativeEventFilter(const QByteArray& eventType, void* message, qintptr* result) override;
 
-private:
+  private:
     struct RegisteredHotkey {
         QString id;
         uint8_t keycode = 0;
@@ -61,4 +60,4 @@ private:
     std::unordered_map<std::string, RegisteredHotkey> hotkeys_;
 };
 
-}  // namespace cappy::platform::hotkey
+} // namespace cappy::platform::hotkey

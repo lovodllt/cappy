@@ -10,9 +10,7 @@
 namespace cappy::services::capture {
 
 CaptureCoordinator::CaptureCoordinator(QObject* parent)
-    : QObject(parent)
-    , backend_(cappy::platform::capture::createDesktopCaptureBackend()) {
-}
+    : QObject(parent), backend_(cappy::platform::capture::createDesktopCaptureBackend()) {}
 
 CaptureCoordinator::~CaptureCoordinator() = default;
 
@@ -50,8 +48,7 @@ QString CaptureCoordinator::backendSummary() const {
 }
 
 void CaptureCoordinator::setOverlayShortcutSettings(
-    const cappy::shortcuts::CaptureOverlayShortcutSettings& shortcuts
-) {
+    const cappy::shortcuts::CaptureOverlayShortcutSettings& shortcuts) {
     overlayShortcuts_ = shortcuts;
 }
 
@@ -151,52 +148,32 @@ void CaptureCoordinator::startWindowFitCapture() {
     }
 
     overlay_ = new cappy::features::capture::CaptureOverlayWidget(
-        currentFrame_,
-        overlayShortcuts_,
-        overlayLanguage_,
-        std::nullopt,
+        currentFrame_, overlayShortcuts_, overlayLanguage_, std::nullopt,
         cappy::domain::capture::CaptureMode::WindowFit,
         [this](const QPoint& point, WId excludedWindowId) -> QRect {
             if (backend_ == nullptr) {
                 return {};
             }
             return backend_->windowGeometryAtPoint(point, excludedWindowId);
-        }
-    );
-    connect(
-        overlay_,
-        &cappy::features::capture::CaptureOverlayWidget::captureFinalized,
-        this,
-        [this](
-            const cappy::domain::capture::CaptureResult& result,
-            cappy::features::capture::CaptureFinalizeAction action
-        ) {
-            emit captureFinalized(result, action);
-            resetOverlay();
-        }
-    );
-    connect(
-        overlay_,
-        &cappy::features::capture::CaptureOverlayWidget::captureCanceled,
-        this,
-        [this]() {
-            emit captureCanceled();
-            resetOverlay();
-        }
-    );
-    connect(overlay_, &cappy::features::capture::CaptureOverlayWidget::ocrRequested, this, [this](const QImage& image) {
-        const QImage capturedImage = image;
-        resetOverlay();
-        emit ocrRequested(capturedImage);
-    });
-    connect(
-        overlay_,
-        &QObject::destroyed,
-        this,
-        [this]() {
-            overlay_ = nullptr;
-        }
-    );
+        });
+    connect(overlay_, &cappy::features::capture::CaptureOverlayWidget::captureFinalized, this,
+            [this](const cappy::domain::capture::CaptureResult& result,
+                   cappy::features::capture::CaptureFinalizeAction action) {
+                emit captureFinalized(result, action);
+                resetOverlay();
+            });
+    connect(overlay_, &cappy::features::capture::CaptureOverlayWidget::captureCanceled, this,
+            [this]() {
+                emit captureCanceled();
+                resetOverlay();
+            });
+    connect(overlay_, &cappy::features::capture::CaptureOverlayWidget::ocrRequested, this,
+            [this](const QImage& image) {
+                const QImage capturedImage = image;
+                resetOverlay();
+                emit ocrRequested(capturedImage);
+            });
+    connect(overlay_, &QObject::destroyed, this, [this]() { overlay_ = nullptr; });
     overlay_->show();
 }
 
@@ -222,45 +199,26 @@ void CaptureCoordinator::startRegionCapture() {
         return;
     }
 
-    overlay_ = new cappy::features::capture::CaptureOverlayWidget(
-        currentFrame_,
-        overlayShortcuts_,
-        overlayLanguage_
-    );
-    connect(
-        overlay_,
-        &cappy::features::capture::CaptureOverlayWidget::captureFinalized,
-        this,
-        [this](
-            const cappy::domain::capture::CaptureResult& result,
-            cappy::features::capture::CaptureFinalizeAction action
-        ) {
-            emit captureFinalized(result, action);
-            resetOverlay();
-        }
-    );
-    connect(
-        overlay_,
-        &cappy::features::capture::CaptureOverlayWidget::captureCanceled,
-        this,
-        [this]() {
-            emit captureCanceled();
-            resetOverlay();
-        }
-    );
-    connect(overlay_, &cappy::features::capture::CaptureOverlayWidget::ocrRequested, this, [this](const QImage& image) {
-        const QImage capturedImage = image;
-        resetOverlay();
-        emit ocrRequested(capturedImage);
-    });
-    connect(
-        overlay_,
-        &QObject::destroyed,
-        this,
-        [this]() {
-            overlay_ = nullptr;
-        }
-    );
+    overlay_ = new cappy::features::capture::CaptureOverlayWidget(currentFrame_, overlayShortcuts_,
+                                                                  overlayLanguage_);
+    connect(overlay_, &cappy::features::capture::CaptureOverlayWidget::captureFinalized, this,
+            [this](const cappy::domain::capture::CaptureResult& result,
+                   cappy::features::capture::CaptureFinalizeAction action) {
+                emit captureFinalized(result, action);
+                resetOverlay();
+            });
+    connect(overlay_, &cappy::features::capture::CaptureOverlayWidget::captureCanceled, this,
+            [this]() {
+                emit captureCanceled();
+                resetOverlay();
+            });
+    connect(overlay_, &cappy::features::capture::CaptureOverlayWidget::ocrRequested, this,
+            [this](const QImage& image) {
+                const QImage capturedImage = image;
+                resetOverlay();
+                emit ocrRequested(capturedImage);
+            });
+    connect(overlay_, &QObject::destroyed, this, [this]() { overlay_ = nullptr; });
     overlay_->show();
 }
 
@@ -273,4 +231,4 @@ void CaptureCoordinator::resetOverlay() {
     }
 }
 
-}  // namespace cappy::services::capture
+} // namespace cappy::services::capture

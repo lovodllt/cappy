@@ -31,7 +31,7 @@ enum class CaptureFinalizeAction {
 class CaptureOverlayWidget final : public QWidget {
     Q_OBJECT
 
-public:
+  public:
     using WindowGeometryResolver = std::function<QRect(const QPoint&, WId)>;
 
     explicit CaptureOverlayWidget(
@@ -39,21 +39,18 @@ public:
         cappy::shortcuts::CaptureOverlayShortcutSettings shortcuts = {},
         cappy::localization::AppLanguage language = cappy::localization::AppLanguage::English,
         std::optional<QRect> initialSelection = std::nullopt,
-        cappy::domain::capture::CaptureMode captureMode = cappy::domain::capture::CaptureMode::Region,
-        WindowGeometryResolver windowGeometryResolver = {},
-        QWidget* parent = nullptr
-    );
+        cappy::domain::capture::CaptureMode captureMode =
+            cappy::domain::capture::CaptureMode::Region,
+        WindowGeometryResolver windowGeometryResolver = {}, QWidget* parent = nullptr);
     void setLanguage(cappy::localization::AppLanguage language);
 
-signals:
-    void captureFinalized(
-        const cappy::domain::capture::CaptureResult& result,
-        cappy::features::capture::CaptureFinalizeAction action
-    );
+  signals:
+    void captureFinalized(const cappy::domain::capture::CaptureResult& result,
+                          cappy::features::capture::CaptureFinalizeAction action);
     void captureCanceled();
     void ocrRequested(const QImage& image);
 
-protected:
+  protected:
     void closeEvent(QCloseEvent* event) override;
     void showEvent(QShowEvent* event) override;
     void paintEvent(QPaintEvent* event) override;
@@ -64,7 +61,7 @@ protected:
     void leaveEvent(QEvent* event) override;
     bool eventFilter(QObject* watched, QEvent* event) override;
 
-private:
+  private:
     enum class Tool {
         None,
         Rectangle,
@@ -131,18 +128,16 @@ private:
     [[nodiscard]] QPoint clampTextInputPanelTopLeft(const QPoint& topLeft) const;
     [[nodiscard]] QImage compositedImage() const;
     void drawTextAnnotations(QPainter& painter) const;
-    void drawTextAnnotationSelection(QPainter& painter, const Snapshot::TextAnnotation& annotation) const;
-    [[nodiscard]] int hitTestTextAnnotation(const QPoint& imagePoint, bool* resizeHandle = nullptr) const;
-    [[nodiscard]] QRect normalizedTextRect(const QString& text, int pixelSize, const QPoint& topLeft) const;
+    void drawTextAnnotationSelection(QPainter& painter,
+                                     const Snapshot::TextAnnotation& annotation) const;
+    [[nodiscard]] int hitTestTextAnnotation(const QPoint& imagePoint,
+                                            bool* resizeHandle = nullptr) const;
+    [[nodiscard]] QRect normalizedTextRect(const QString& text, int pixelSize,
+                                           const QPoint& topLeft) const;
     void drawSerialMarker(const QPoint& imagePoint);
     void drawSerialPreview(QPainter& painter) const;
-    void drawSerialBadge(
-        QPainter& painter,
-        const QRect& rect,
-        const QString& text,
-        const QColor& fillColor,
-        const QColor& outlineColor
-    ) const;
+    void drawSerialBadge(QPainter& painter, const QRect& rect, const QString& text,
+                         const QColor& fillColor, const QColor& outlineColor) const;
     void pushUndoSnapshot();
     void undo();
     void redo();
@@ -221,4 +216,4 @@ private:
     WindowGeometryResolver windowGeometryResolver_;
 };
 
-}  // namespace cappy::features::capture
+} // namespace cappy::features::capture

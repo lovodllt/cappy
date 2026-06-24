@@ -92,7 +92,8 @@ QIcon drawSymbolicIcon(const QString& id, const QSize& size = kIconSize) {
         painter.setFont(font);
         painter.drawText(QRect(0, 0, size.width(), size.height()), Qt::AlignCenter, "1");
     } else if (id == "pin") {
-        painter.drawLine(QPointF(size.width() / 2.0, 3), QPointF(size.width() / 2.0, size.height() - 4));
+        painter.drawLine(QPointF(size.width() / 2.0, 3),
+                         QPointF(size.width() / 2.0, size.height() - 4));
         painter.drawLine(QPointF(4, 6), QPointF(size.width() - 4, 6));
         painter.drawLine(QPointF(5, 6), QPointF(size.width() / 2.0, 11));
         painter.drawLine(QPointF(size.width() - 5, 6), QPointF(size.width() / 2.0, 11));
@@ -110,11 +111,7 @@ QIcon drawSymbolicIcon(const QString& id, const QSize& size = kIconSize) {
         painter.setPen(Qt::NoPen);
         for (int row = 0; row < 3; ++row) {
             for (int col = 0; col < 2; ++col) {
-                painter.drawEllipse(
-                    QPointF(5.0 + col * 4.0, 4.5 + row * 4.0),
-                    0.95,
-                    0.95
-                );
+                painter.drawEllipse(QPointF(5.0 + col * 4.0, 4.5 + row * 4.0), 0.95, 0.95);
             }
         }
     } else if (id == "resize") {
@@ -178,20 +175,14 @@ QString joinShortcutLabels(std::initializer_list<QString> shortcuts) {
     return labels.join(" / ");
 }
 
-}  // namespace
+} // namespace
 
-CaptureEditorWindow::CaptureEditorWindow(
-    const QImage& image,
-    const QRect& globalGeometry,
-    cappy::shortcuts::CaptureEditorShortcutSettings shortcuts,
-    cappy::localization::AppLanguage language,
-    QWidget* parent
-)
-    : QWidget(parent)
-    , workingImage_(image)
-    , globalGeometry_(globalGeometry)
-    , shortcuts_(std::move(shortcuts))
-    , language_(cappy::localization::resolvedAppLanguage(language)) {
+CaptureEditorWindow::CaptureEditorWindow(const QImage& image, const QRect& globalGeometry,
+                                         cappy::shortcuts::CaptureEditorShortcutSettings shortcuts,
+                                         cappy::localization::AppLanguage language, QWidget* parent)
+    : QWidget(parent), workingImage_(image), globalGeometry_(globalGeometry),
+      shortcuts_(std::move(shortcuts)),
+      language_(cappy::localization::resolvedAppLanguage(language)) {
     setWindowFlags(Qt::Tool | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
     setAttribute(Qt::WA_DeleteOnClose, true);
     setAttribute(Qt::WA_OpaquePaintEvent, true);
@@ -202,29 +193,20 @@ CaptureEditorWindow::CaptureEditorWindow(
 
     const QSize imageSize = workingImage_.isNull() ? QSize(360, 220) : workingImage_.size();
     const QSize toolbarSize = toolbar_->sizeHint();
-    const int width = std::max(
-        imageSize.width() + kOuterPadding * 2,
-        toolbarSize.width() + kOuterPadding * 2
-    );
+    const int width =
+        std::max(imageSize.width() + kOuterPadding * 2, toolbarSize.width() + kOuterPadding * 2);
     const int height = imageSize.height() + toolbarSize.height() + kOuterPadding * 2 + kToolbarGap;
 
     resize(width, height);
-    imageViewportRect_ = QRect(
-        (width - imageSize.width()) / 2,
-        kOuterPadding,
-        imageSize.width(),
-        imageSize.height()
-    );
-    toolbar_->setGeometry(
-        (width - toolbarSize.width()) / 2,
-        imageViewportRect_.bottom() + 1 + kToolbarGap,
-        toolbarSize.width(),
-        toolbarSize.height()
-    );
+    imageViewportRect_ = QRect((width - imageSize.width()) / 2, kOuterPadding, imageSize.width(),
+                               imageSize.height());
+    toolbar_->setGeometry((width - toolbarSize.width()) / 2,
+                          imageViewportRect_.bottom() + 1 + kToolbarGap, toolbarSize.width(),
+                          toolbarSize.height());
 
     const QScreen* screen = globalGeometry_.isValid()
-        ? QGuiApplication::screenAt(globalGeometry_.center())
-        : QGuiApplication::screenAt(QCursor::pos());
+                                ? QGuiApplication::screenAt(globalGeometry_.center())
+                                : QGuiApplication::screenAt(QCursor::pos());
     if (screen == nullptr) {
         screen = QGuiApplication::primaryScreen();
     }
@@ -252,8 +234,7 @@ QImage CaptureEditorWindow::currentImage() const {
 }
 
 void CaptureEditorWindow::applyShortcutSettings(
-    const cappy::shortcuts::CaptureEditorShortcutSettings& shortcuts
-) {
+    const cappy::shortcuts::CaptureEditorShortcutSettings& shortcuts) {
     shortcuts_ = shortcuts;
     refreshActionTooltips();
 }
@@ -314,8 +295,8 @@ void CaptureEditorWindow::paintEvent(QPaintEvent* event) {
 }
 
 void CaptureEditorWindow::mousePressEvent(QMouseEvent* event) {
-    if (textEntryActive_ && textInputPanel_ != nullptr
-        && !textInputPanel_->geometry().contains(event->pos())) {
+    if (textEntryActive_ && textInputPanel_ != nullptr &&
+        !textInputPanel_->geometry().contains(event->pos())) {
         commitTextEntry();
     }
 
@@ -350,7 +331,8 @@ void CaptureEditorWindow::mousePressEvent(QMouseEvent* event) {
                 textAnnotationResizing_ = true;
             } else {
                 textAnnotationDragging_ = true;
-                textAnnotationDragOffset_ = imagePoint - textAnnotations_[annotationIndex].rect.topLeft();
+                textAnnotationDragOffset_ =
+                    imagePoint - textAnnotations_[annotationIndex].rect.topLeft();
             }
             update();
             event->accept();
@@ -386,24 +368,24 @@ void CaptureEditorWindow::mouseMoveEvent(QMouseEvent* event) {
         hoverPoint_ = event->pos();
     }
 
-    if (selectedTextAnnotationIndex_ >= 0
-        && selectedTextAnnotationIndex_ < textAnnotations_.size()
-        && (textAnnotationDragging_ || textAnnotationResizing_)) {
+    if (selectedTextAnnotationIndex_ >= 0 &&
+        selectedTextAnnotationIndex_ < textAnnotations_.size() &&
+        (textAnnotationDragging_ || textAnnotationResizing_)) {
         auto& annotation = textAnnotations_[selectedTextAnnotationIndex_];
         const QPoint imagePoint = mapWidgetPointToImage(event->pos());
         if (textAnnotationDragging_) {
             QPoint topLeft = imagePoint - textAnnotationDragOffset_;
-            topLeft.setX(std::clamp(topLeft.x(), 0, std::max(0, workingImage_.width() - annotation.rect.width())));
-            topLeft.setY(std::clamp(topLeft.y(), 0, std::max(0, workingImage_.height() - annotation.rect.height())));
+            topLeft.setX(std::clamp(topLeft.x(), 0,
+                                    std::max(0, workingImage_.width() - annotation.rect.width())));
+            topLeft.setY(std::clamp(
+                topLeft.y(), 0, std::max(0, workingImage_.height() - annotation.rect.height())));
             annotation.rect.moveTopLeft(topLeft);
         } else if (textAnnotationResizing_) {
-            const int nextPixelSize = std::clamp(
-                imagePoint.y() - annotation.rect.top() + 10,
-                12,
-                72
-            );
+            const int nextPixelSize =
+                std::clamp(imagePoint.y() - annotation.rect.top() + 10, 12, 72);
             annotation.pixelSize = nextPixelSize;
-            annotation.rect = normalizedTextRect(annotation.text, annotation.pixelSize, annotation.rect.topLeft());
+            annotation.rect = normalizedTextRect(annotation.text, annotation.pixelSize,
+                                                 annotation.rect.topLeft());
             if (annotation.rect.right() > workingImage_.width() - 8) {
                 annotation.rect.moveRight(workingImage_.width() - 8);
             }
@@ -428,13 +410,8 @@ void CaptureEditorWindow::mouseMoveEvent(QMouseEvent* event) {
         const QPoint nextPoint = mapWidgetPointToImage(event->pos());
         QPainter painter(&workingImage_);
         painter.setRenderHint(QPainter::Antialiasing, true);
-        painter.setPen(QPen(
-            activeStrokeColor(),
-            activeStrokeWidth(),
-            Qt::SolidLine,
-            Qt::RoundCap,
-            Qt::RoundJoin
-        ));
+        painter.setPen(QPen(activeStrokeColor(), activeStrokeWidth(), Qt::SolidLine, Qt::RoundCap,
+                            Qt::RoundJoin));
         painter.drawLine(lastPencilPoint_, nextPoint);
         lastPencilPoint_ = nextPoint;
         update();
@@ -465,13 +442,8 @@ void CaptureEditorWindow::mouseReleaseEvent(QMouseEvent* event) {
         if (nextPoint == lastPencilPoint_) {
             QPainter painter(&workingImage_);
             painter.setRenderHint(QPainter::Antialiasing, true);
-            painter.setPen(QPen(
-                activeStrokeColor(),
-                activeStrokeWidth(),
-                Qt::SolidLine,
-                Qt::RoundCap,
-                Qt::RoundJoin
-            ));
+            painter.setPen(QPen(activeStrokeColor(), activeStrokeWidth(), Qt::SolidLine,
+                                Qt::RoundCap, Qt::RoundJoin));
             painter.drawPoint(nextPoint);
         }
 
@@ -523,20 +495,20 @@ bool CaptureEditorWindow::eventFilter(QObject* watched, QEvent* event) {
         }
     }
 
-    if ((watched == textMoveHandleButton_ || watched == textInputPanel_) && textInputPanel_ != nullptr) {
+    if ((watched == textMoveHandleButton_ || watched == textInputPanel_) &&
+        textInputPanel_ != nullptr) {
         if (event->type() == QEvent::MouseButtonPress) {
             auto* mouseEvent = static_cast<QMouseEvent*>(event);
             if (mouseEvent->button() == Qt::LeftButton) {
                 textInputDragging_ = true;
-                textInputDragOffset_ = mouseEvent->globalPosition().toPoint()
-                    - textInputPanel_->frameGeometry().topLeft();
+                textInputDragOffset_ = mouseEvent->globalPosition().toPoint() -
+                                       textInputPanel_->frameGeometry().topLeft();
                 return true;
             }
         } else if (event->type() == QEvent::MouseMove && textInputDragging_) {
             auto* mouseEvent = static_cast<QMouseEvent*>(event);
             const QPoint topLeft = clampTextInputPanelTopLeft(
-                mouseEvent->globalPosition().toPoint() - textInputDragOffset_
-            );
+                mouseEvent->globalPosition().toPoint() - textInputDragOffset_);
             textInputPanel_->move(topLeft);
             updatePendingTextPointFromPanel();
             return true;
@@ -560,12 +532,12 @@ bool CaptureEditorWindow::eventFilter(QObject* watched, QEvent* event) {
             }
         } else if (event->type() == QEvent::MouseMove && textInputResizing_) {
             auto* mouseEvent = static_cast<QMouseEvent*>(event);
-            const QPoint delta = mouseEvent->globalPosition().toPoint() - textInputResizeStartGlobalPos_;
+            const QPoint delta =
+                mouseEvent->globalPosition().toPoint() - textInputResizeStartGlobalPos_;
             const QRect bounds = imageViewportRect_.adjusted(8, 8, -8, -8);
             const QSize nextSize(
                 std::clamp(textInputResizeStartSize_.width() + delta.x(), 220, bounds.width()),
-                std::clamp(textInputResizeStartSize_.height() + delta.y(), 36, bounds.height())
-            );
+                std::clamp(textInputResizeStartSize_.height() + delta.y(), 36, bounds.height()));
             textInputPanel_->resize(nextSize);
             pendingTextPixelSize_ = std::clamp(nextSize.height() - 18, 12, 56);
             updateTextInputAppearance();
@@ -585,26 +557,24 @@ bool CaptureEditorWindow::eventFilter(QObject* watched, QEvent* event) {
 void CaptureEditorWindow::setupUi() {
     toolbar_ = new QFrame(this);
     toolbar_->setObjectName("captureEditorToolbar");
-    toolbar_->setStyleSheet(
-        "#captureEditorToolbar {"
-        "  background: rgba(24, 24, 24, 220);"
-        "  border: 1px solid rgba(255, 255, 255, 64);"
-        "  border-radius: 6px;"
-        "}"
-        "QToolButton {"
-        "  border: 0;"
-        "  padding: 0;"
-        "  background: transparent;"
-        "}"
-        "QToolButton:checked {"
-        "  background: rgba(255, 255, 255, 36);"
-        "  border-radius: 4px;"
-        "}"
-        "QToolButton:hover {"
-        "  background: rgba(255, 255, 255, 18);"
-        "  border-radius: 4px;"
-        "}"
-    );
+    toolbar_->setStyleSheet("#captureEditorToolbar {"
+                            "  background: rgba(24, 24, 24, 220);"
+                            "  border: 1px solid rgba(255, 255, 255, 64);"
+                            "  border-radius: 6px;"
+                            "}"
+                            "QToolButton {"
+                            "  border: 0;"
+                            "  padding: 0;"
+                            "  background: transparent;"
+                            "}"
+                            "QToolButton:checked {"
+                            "  background: rgba(255, 255, 255, 36);"
+                            "  border-radius: 4px;"
+                            "}"
+                            "QToolButton:hover {"
+                            "  background: rgba(255, 255, 255, 18);"
+                            "  border-radius: 4px;"
+                            "}");
 
     auto* layout = new QHBoxLayout(toolbar_);
     layout->setContentsMargins(8, 6, 8, 6);
@@ -617,81 +587,43 @@ void CaptureEditorWindow::setupUi() {
         return action;
     };
 
-    rectangleAction_ = makeAction(
-        drawSymbolicIcon("rectangle"),
-        true,
-        [this]() { setActiveTool(activeTool_ == Tool::Rectangle ? Tool::None : Tool::Rectangle); }
-    );
-    ellipseAction_ = makeAction(
-        drawSymbolicIcon("ellipse"),
-        true,
-        [this]() { setActiveTool(activeTool_ == Tool::Ellipse ? Tool::None : Tool::Ellipse); }
-    );
-    arrowAction_ = makeAction(
-        drawSymbolicIcon("arrow"),
-        true,
-        [this]() { setActiveTool(activeTool_ == Tool::Arrow ? Tool::None : Tool::Arrow); }
-    );
-    pencilAction_ = makeAction(
-        drawSymbolicIcon("pen"),
-        true,
-        [this]() { setActiveTool(activeTool_ == Tool::Pencil ? Tool::None : Tool::Pencil); }
-    );
-    markerAction_ = makeAction(
-        drawSymbolicIcon("marker"),
-        true,
-        [this]() { setActiveTool(activeTool_ == Tool::Marker ? Tool::None : Tool::Marker); }
-    );
-    mosaicAction_ = makeAction(
-        drawSymbolicIcon("mosaic"),
-        true,
-        [this]() { setActiveTool(activeTool_ == Tool::Mosaic ? Tool::None : Tool::Mosaic); }
-    );
-    textAction_ = makeAction(
-        drawSymbolicIcon("text"),
-        true,
-        [this]() { setActiveTool(activeTool_ == Tool::Text ? Tool::None : Tool::Text); }
-    );
-    serialAction_ = makeAction(
-        drawSymbolicIcon("serial"),
-        true,
-        [this]() { setActiveTool(activeTool_ == Tool::Serial ? Tool::None : Tool::Serial); }
-    );
-    undoAction_ = makeAction(
-        themedIcon(this, "edit-undo", QStyle::SP_ArrowBack),
-        false,
-        [this]() { undo(); }
-    );
-    redoAction_ = makeAction(
-        themedIcon(this, "edit-redo", QStyle::SP_ArrowForward),
-        false,
-        [this]() { redo(); }
-    );
-    copyAction_ = makeAction(
-        themedIcon(this, "edit-copy", QStyle::SP_FileDialogListView),
-        false,
-        [this]() { emit copyRequested(compositedImage()); }
-    );
-    saveAction_ = makeAction(
-        themedIcon(this, "document-save", QStyle::SP_DialogSaveButton),
-        false,
-        [this]() { emit saveRequested(compositedImage()); }
-    );
-    pinAction_ = makeAction(
-        drawSymbolicIcon("pin"),
-        false,
-        [this]() { emit pinRequested(compositedImage()); }
-    );
-    ocrAction_ = makeAction(
-        themedIcon(this, "scanner", QStyle::SP_FileDialogContentsView),
-        false,
-        [this]() { emit ocrRequested(compositedImage()); }
-    );
-    closeAction_ = makeAction(
-        drawSymbolicIcon("close"),
-        false,
-        [this]() { close(); }
-    );
+    rectangleAction_ = makeAction(drawSymbolicIcon("rectangle"), true, [this]() {
+        setActiveTool(activeTool_ == Tool::Rectangle ? Tool::None : Tool::Rectangle);
+    });
+    ellipseAction_ = makeAction(drawSymbolicIcon("ellipse"), true, [this]() {
+        setActiveTool(activeTool_ == Tool::Ellipse ? Tool::None : Tool::Ellipse);
+    });
+    arrowAction_ = makeAction(drawSymbolicIcon("arrow"), true, [this]() {
+        setActiveTool(activeTool_ == Tool::Arrow ? Tool::None : Tool::Arrow);
+    });
+    pencilAction_ = makeAction(drawSymbolicIcon("pen"), true, [this]() {
+        setActiveTool(activeTool_ == Tool::Pencil ? Tool::None : Tool::Pencil);
+    });
+    markerAction_ = makeAction(drawSymbolicIcon("marker"), true, [this]() {
+        setActiveTool(activeTool_ == Tool::Marker ? Tool::None : Tool::Marker);
+    });
+    mosaicAction_ = makeAction(drawSymbolicIcon("mosaic"), true, [this]() {
+        setActiveTool(activeTool_ == Tool::Mosaic ? Tool::None : Tool::Mosaic);
+    });
+    textAction_ = makeAction(drawSymbolicIcon("text"), true, [this]() {
+        setActiveTool(activeTool_ == Tool::Text ? Tool::None : Tool::Text);
+    });
+    serialAction_ = makeAction(drawSymbolicIcon("serial"), true, [this]() {
+        setActiveTool(activeTool_ == Tool::Serial ? Tool::None : Tool::Serial);
+    });
+    undoAction_ = makeAction(themedIcon(this, "edit-undo", QStyle::SP_ArrowBack), false,
+                             [this]() { undo(); });
+    redoAction_ = makeAction(themedIcon(this, "edit-redo", QStyle::SP_ArrowForward), false,
+                             [this]() { redo(); });
+    copyAction_ = makeAction(themedIcon(this, "edit-copy", QStyle::SP_FileDialogListView), false,
+                             [this]() { emit copyRequested(compositedImage()); });
+    saveAction_ = makeAction(themedIcon(this, "document-save", QStyle::SP_DialogSaveButton), false,
+                             [this]() { emit saveRequested(compositedImage()); });
+    pinAction_ = makeAction(drawSymbolicIcon("pin"), false,
+                            [this]() { emit pinRequested(compositedImage()); });
+    ocrAction_ = makeAction(themedIcon(this, "scanner", QStyle::SP_FileDialogContentsView), false,
+                            [this]() { emit ocrRequested(compositedImage()); });
+    closeAction_ = makeAction(drawSymbolicIcon("close"), false, [this]() { close(); });
 
     layout->addWidget(createToolbarButton(toolbar_, rectangleAction_));
     layout->addWidget(createToolbarButton(toolbar_, ellipseAction_));
@@ -728,22 +660,20 @@ void CaptureEditorWindow::setupUi() {
     textInputPanel_ = new QWidget(this);
     textInputPanel_->hide();
     textInputPanel_->setObjectName("captureEditorTextInputPanel");
-    textInputPanel_->setStyleSheet(
-        "#captureEditorTextInputPanel {"
-        "  background: rgba(22, 22, 22, 236);"
-        "  border: 1px solid rgba(255, 255, 255, 70);"
-        "  border-radius: 8px;"
-        "}"
-        "#captureEditorTextInputPanel QToolButton {"
-        "  border: 0;"
-        "  background: transparent;"
-        "  color: rgb(220, 220, 220);"
-        "  border-radius: 4px;"
-        "}"
-        "#captureEditorTextInputPanel QToolButton:hover {"
-        "  background: rgba(255, 255, 255, 18);"
-        "}"
-    );
+    textInputPanel_->setStyleSheet("#captureEditorTextInputPanel {"
+                                   "  background: rgba(22, 22, 22, 236);"
+                                   "  border: 1px solid rgba(255, 255, 255, 70);"
+                                   "  border-radius: 8px;"
+                                   "}"
+                                   "#captureEditorTextInputPanel QToolButton {"
+                                   "  border: 0;"
+                                   "  background: transparent;"
+                                   "  color: rgb(220, 220, 220);"
+                                   "  border-radius: 4px;"
+                                   "}"
+                                   "#captureEditorTextInputPanel QToolButton:hover {"
+                                   "  background: rgba(255, 255, 255, 18);"
+                                   "}");
     auto* textInputLayout = new QHBoxLayout(textInputPanel_);
     textInputLayout->setContentsMargins(6, 4, 6, 4);
     textInputLayout->setSpacing(4);
@@ -762,15 +692,13 @@ void CaptureEditorWindow::setupUi() {
     textInput_->setFrame(false);
     textInput_->setClearButtonEnabled(false);
     textInput_->setAttribute(Qt::WA_DeleteOnClose, false);
-    textInput_->setStyleSheet(
-        "QLineEdit {"
-        "  background: transparent;"
-        "  color: rgb(255, 236, 120);"
-        "  border: 0;"
-        "  padding: 0 4px;"
-        "  selection-background-color: rgba(255, 236, 120, 72);"
-        "}"
-    );
+    textInput_->setStyleSheet("QLineEdit {"
+                              "  background: transparent;"
+                              "  color: rgb(255, 236, 120);"
+                              "  border: 0;"
+                              "  padding: 0 4px;"
+                              "  selection-background-color: rgba(255, 236, 120, 72);"
+                              "}");
     textInput_->installEventFilter(this);
     textInputLayout->addWidget(textInput_, 1);
 
@@ -799,63 +727,39 @@ void CaptureEditorWindow::refreshActionTooltips() {
         action->setStatusTip(tooltip);
     };
 
-    setTooltip(rectangleAction_, QString("%1 (%2)").arg(
-        text.toolRectangle,
-        joinShortcutLabels({shortcuts_.rectangle})
-    ));
-    setTooltip(ellipseAction_, QString("%1 (%2)").arg(
-        text.toolEllipse,
-        joinShortcutLabels({shortcuts_.ellipse})
-    ));
-    setTooltip(arrowAction_, QString("%1 (%2)").arg(
-        text.toolArrow,
-        joinShortcutLabels({shortcuts_.arrow})
-    ));
-    setTooltip(pencilAction_, QString("%1 (%2)").arg(
-        text.toolPen,
-        joinShortcutLabels({shortcuts_.pen})
-    ));
-    setTooltip(markerAction_, QString("%1 (%2)").arg(
-        text.toolMarker,
-        joinShortcutLabels({shortcuts_.marker})
-    ));
-    setTooltip(mosaicAction_, QString("%1 (%2)").arg(
-        text.toolMosaic,
-        joinShortcutLabels({shortcuts_.mosaic})
-    ));
-    setTooltip(textAction_, QString("%1 (%2)").arg(
-        text.toolText,
-        joinShortcutLabels({shortcuts_.text})
-    ));
-    setTooltip(serialAction_, QString("%1 (%2)").arg(
-        text.toolSerial,
-        joinShortcutLabels({shortcuts_.serial})
-    ));
-    setTooltip(undoAction_, QString("%1 (%2)").arg(
-        text.toolUndo,
-        joinShortcutLabels({shortcuts_.undo})
-    ));
-    setTooltip(redoAction_, QString("%1 (%2)").arg(
-        text.toolRedo,
-        joinShortcutLabels({shortcuts_.redo})
-    ));
+    setTooltip(
+        rectangleAction_,
+        QString("%1 (%2)").arg(text.toolRectangle, joinShortcutLabels({shortcuts_.rectangle})));
+    setTooltip(ellipseAction_,
+               QString("%1 (%2)").arg(text.toolEllipse, joinShortcutLabels({shortcuts_.ellipse})));
+    setTooltip(arrowAction_,
+               QString("%1 (%2)").arg(text.toolArrow, joinShortcutLabels({shortcuts_.arrow})));
+    setTooltip(pencilAction_,
+               QString("%1 (%2)").arg(text.toolPen, joinShortcutLabels({shortcuts_.pen})));
+    setTooltip(markerAction_,
+               QString("%1 (%2)").arg(text.toolMarker, joinShortcutLabels({shortcuts_.marker})));
+    setTooltip(mosaicAction_,
+               QString("%1 (%2)").arg(text.toolMosaic, joinShortcutLabels({shortcuts_.mosaic})));
+    setTooltip(textAction_,
+               QString("%1 (%2)").arg(text.toolText, joinShortcutLabels({shortcuts_.text})));
+    setTooltip(serialAction_,
+               QString("%1 (%2)").arg(text.toolSerial, joinShortcutLabels({shortcuts_.serial})));
+    setTooltip(undoAction_,
+               QString("%1 (%2)").arg(text.toolUndo, joinShortcutLabels({shortcuts_.undo})));
+    setTooltip(redoAction_,
+               QString("%1 (%2)").arg(text.toolRedo, joinShortcutLabels({shortcuts_.redo})));
     setTooltip(copyAction_, QString("%1 (%2)").arg(
-        text.actionCopyToClipboard,
-        joinShortcutLabels({shortcuts_.copy, shortcuts_.copyAndClose})
-    ));
-    setTooltip(saveAction_, QString("%1 (%2)").arg(
-        text.actionSaveToCaptureFolder,
-        joinShortcutLabels({shortcuts_.save, shortcuts_.saveAlt})
-    ));
-    setTooltip(pinAction_, QString("%1 (%2)").arg(
-        text.actionPinToDesktop,
-        joinShortcutLabels({shortcuts_.pin, shortcuts_.pinAlt})
-    ));
+                                text.actionCopyToClipboard,
+                                joinShortcutLabels({shortcuts_.copy, shortcuts_.copyAndClose})));
+    setTooltip(saveAction_,
+               QString("%1 (%2)").arg(text.actionSaveToCaptureFolder,
+                                      joinShortcutLabels({shortcuts_.save, shortcuts_.saveAlt})));
+    setTooltip(pinAction_,
+               QString("%1 (%2)").arg(text.actionPinToDesktop,
+                                      joinShortcutLabels({shortcuts_.pin, shortcuts_.pinAlt})));
     setTooltip(ocrAction_, text.actionExtractText);
-    setTooltip(closeAction_, QString("%1 (%2)").arg(
-        text.actionClose,
-        joinShortcutLabels({shortcuts_.close})
-    ));
+    setTooltip(closeAction_,
+               QString("%1 (%2)").arg(text.actionClose, joinShortcutLabels({shortcuts_.close})));
     if (moreButton_ != nullptr) {
         moreButton_->setToolTip(text.actionMore);
         moreButton_->setStatusTip(text.actionMore);
@@ -930,7 +834,8 @@ void CaptureEditorWindow::handlePointTool(const QPoint& widgetPoint) {
                 textAnnotationResizing_ = true;
             } else {
                 textAnnotationDragging_ = true;
-                textAnnotationDragOffset_ = imagePoint - textAnnotations_[annotationIndex].rect.topLeft();
+                textAnnotationDragOffset_ =
+                    imagePoint - textAnnotations_[annotationIndex].rect.topLeft();
             }
             update();
             break;
@@ -960,13 +865,8 @@ void CaptureEditorWindow::commitCurrentShape() {
     case Tool::Rectangle: {
         QPainter painter(&workingImage_);
         painter.setRenderHint(QPainter::Antialiasing, true);
-        painter.setPen(QPen(
-            activeStrokeColor(),
-            activeStrokeWidth(),
-            Qt::SolidLine,
-            Qt::RoundCap,
-            Qt::RoundJoin
-        ));
+        painter.setPen(QPen(activeStrokeColor(), activeStrokeWidth(), Qt::SolidLine, Qt::RoundCap,
+                            Qt::RoundJoin));
         painter.setBrush(Qt::NoBrush);
         painter.drawRect(QRect(imageStart, imageEnd).normalized());
         break;
@@ -974,13 +874,8 @@ void CaptureEditorWindow::commitCurrentShape() {
     case Tool::Ellipse: {
         QPainter painter(&workingImage_);
         painter.setRenderHint(QPainter::Antialiasing, true);
-        painter.setPen(QPen(
-            activeStrokeColor(),
-            activeStrokeWidth(),
-            Qt::SolidLine,
-            Qt::RoundCap,
-            Qt::RoundJoin
-        ));
+        painter.setPen(QPen(activeStrokeColor(), activeStrokeWidth(), Qt::SolidLine, Qt::RoundCap,
+                            Qt::RoundJoin));
         painter.setBrush(Qt::NoBrush);
         painter.drawEllipse(QRect(imageStart, imageEnd).normalized());
         break;
@@ -988,13 +883,8 @@ void CaptureEditorWindow::commitCurrentShape() {
     case Tool::Arrow: {
         QPainter painter(&workingImage_);
         painter.setRenderHint(QPainter::Antialiasing, true);
-        painter.setPen(QPen(
-            activeStrokeColor(),
-            activeStrokeWidth(),
-            Qt::SolidLine,
-            Qt::RoundCap,
-            Qt::RoundJoin
-        ));
+        painter.setPen(QPen(activeStrokeColor(), activeStrokeWidth(), Qt::SolidLine, Qt::RoundCap,
+                            Qt::RoundJoin));
         painter.setBrush(Qt::NoBrush);
         drawArrow(painter, imageStart, imageEnd);
         break;
@@ -1017,13 +907,8 @@ void CaptureEditorWindow::commitCurrentShape() {
 
 void CaptureEditorWindow::drawShapePreview(QPainter& painter) const {
     painter.save();
-    painter.setPen(QPen(
-        activeStrokeColor(),
-        activeStrokeWidth(),
-        Qt::SolidLine,
-        Qt::RoundCap,
-        Qt::RoundJoin
-    ));
+    painter.setPen(
+        QPen(activeStrokeColor(), activeStrokeWidth(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
     painter.setBrush(Qt::NoBrush);
 
     switch (activeTool_) {
@@ -1051,7 +936,8 @@ void CaptureEditorWindow::drawShapePreview(QPainter& painter) const {
     painter.restore();
 }
 
-void CaptureEditorWindow::drawArrow(QPainter& painter, const QPoint& start, const QPoint& end) const {
+void CaptureEditorWindow::drawArrow(QPainter& painter, const QPoint& start,
+                                    const QPoint& end) const {
     painter.drawLine(start, end);
 
     const QLineF line(start, end);
@@ -1061,14 +947,10 @@ void CaptureEditorWindow::drawArrow(QPainter& painter, const QPoint& start, cons
 
     constexpr double arrowSize = 14.0;
     const double angle = std::atan2(-line.dy(), line.dx());
-    const QPointF arrowP1 = end + QPointF(
-        std::sin(angle - kPi / 3.0) * arrowSize,
-        std::cos(angle - kPi / 3.0) * arrowSize
-    );
-    const QPointF arrowP2 = end + QPointF(
-        std::sin(angle - kPi + kPi / 3.0) * arrowSize,
-        std::cos(angle - kPi + kPi / 3.0) * arrowSize
-    );
+    const QPointF arrowP1 = end + QPointF(std::sin(angle - kPi / 3.0) * arrowSize,
+                                          std::cos(angle - kPi / 3.0) * arrowSize);
+    const QPointF arrowP2 = end + QPointF(std::sin(angle - kPi + kPi / 3.0) * arrowSize,
+                                          std::cos(angle - kPi + kPi / 3.0) * arrowSize);
 
     painter.drawLine(end, arrowP1.toPoint());
     painter.drawLine(end, arrowP2.toPoint());
@@ -1086,17 +968,13 @@ void CaptureEditorWindow::applyMosaic(const QRect& imageRect) {
     constexpr int blockSize = 12;
     for (int y = 0; y < boundedRect.height(); y += blockSize) {
         for (int x = 0; x < boundedRect.width(); x += blockSize) {
-            const QRect blockRect(
-                boundedRect.x() + x,
-                boundedRect.y() + y,
-                std::min(blockSize, boundedRect.width() - x),
-                std::min(blockSize, boundedRect.height() - y)
-            );
+            const QRect blockRect(boundedRect.x() + x, boundedRect.y() + y,
+                                  std::min(blockSize, boundedRect.width() - x),
+                                  std::min(blockSize, boundedRect.height() - y));
             const QRect localRect(x, y, blockRect.width(), blockRect.height());
             const QPoint samplePoint(
                 std::min(localRect.x() + localRect.width() / 2, source.width() - 1),
-                std::min(localRect.y() + localRect.height() / 2, source.height() - 1)
-            );
+                std::min(localRect.y() + localRect.height() / 2, source.height() - 1));
             painter.fillRect(blockRect, source.pixelColor(samplePoint));
         }
     }
@@ -1116,10 +994,8 @@ void CaptureEditorWindow::beginTextEntry(const QPoint& imagePoint, const QPoint&
     }
 
     pendingTextPixelSize_ = std::clamp(workingImage_.height() / 18, 16, 40);
-    textInputPanel_->resize(
-        std::clamp(imageViewportRect_.width() / 2, 220, 360),
-        std::clamp(pendingTextPixelSize_ + 18, 36, 60)
-    );
+    textInputPanel_->resize(std::clamp(imageViewportRect_.width() / 2, 220, 360),
+                            std::clamp(pendingTextPixelSize_ + 18, 36, 60));
     updateTextInputAppearance();
     QPoint topLeft = clampTextInputPanelTopLeft(widgetPoint + QPoint(10, 10));
 
@@ -1219,7 +1095,8 @@ void CaptureEditorWindow::updatePendingTextPointFromPanel() {
         return;
     }
 
-    pendingTextPoint_ = mapWidgetPointToImage(textInputPanel_->geometry().topLeft() + QPoint(10, 8));
+    pendingTextPoint_ =
+        mapWidgetPointToImage(textInputPanel_->geometry().topLeft() + QPoint(10, 8));
 }
 
 QPoint CaptureEditorWindow::clampTextInputPanelTopLeft(const QPoint& topLeft) const {
@@ -1230,8 +1107,7 @@ QPoint CaptureEditorWindow::clampTextInputPanelTopLeft(const QPoint& topLeft) co
     const QRect bounds = imageViewportRect_.adjusted(8, 8, -8, -8);
     return QPoint(
         std::clamp(topLeft.x(), bounds.left(), bounds.right() - textInputPanel_->width()),
-        std::clamp(topLeft.y(), bounds.top(), bounds.bottom() - textInputPanel_->height())
-    );
+        std::clamp(topLeft.y(), bounds.top(), bounds.bottom() - textInputPanel_->height()));
 }
 
 QImage CaptureEditorWindow::compositedImage() const {
@@ -1249,7 +1125,8 @@ QImage CaptureEditorWindow::compositedImage() const {
         font.setPixelSize(annotation.pixelSize);
         painter.setFont(font);
         painter.setPen(QColor(0, 0, 0, 170));
-        painter.drawText(annotation.rect.translated(1, 1), Qt::AlignLeft | Qt::AlignVCenter, annotation.text);
+        painter.drawText(annotation.rect.translated(1, 1), Qt::AlignLeft | Qt::AlignVCenter,
+                         annotation.text);
         painter.setPen(QColor(255, 236, 120));
         painter.drawText(annotation.rect, Qt::AlignLeft | Qt::AlignVCenter, annotation.text);
     }
@@ -1265,7 +1142,8 @@ void CaptureEditorWindow::drawTextAnnotations(QPainter& painter) const {
         font.setPixelSize(annotation.pixelSize);
         painter.setFont(font);
         painter.setPen(QColor(0, 0, 0, 170));
-        painter.drawText(widgetRect.translated(1, 1), Qt::AlignLeft | Qt::AlignVCenter, annotation.text);
+        painter.drawText(widgetRect.translated(1, 1), Qt::AlignLeft | Qt::AlignVCenter,
+                         annotation.text);
         painter.setPen(QColor(255, 236, 120));
         painter.drawText(widgetRect, Qt::AlignLeft | Qt::AlignVCenter, annotation.text);
 
@@ -1276,9 +1154,7 @@ void CaptureEditorWindow::drawTextAnnotations(QPainter& painter) const {
 }
 
 void CaptureEditorWindow::drawTextAnnotationSelection(
-    QPainter& painter,
-    const EditorSnapshot::TextAnnotation& annotation
-) const {
+    QPainter& painter, const EditorSnapshot::TextAnnotation& annotation) const {
     const QRect widgetRect = annotation.rect.translated(imageViewportRect_.topLeft());
     painter.setPen(QPen(QColor(255, 255, 255, 180), 1, Qt::DashLine));
     painter.setBrush(Qt::NoBrush);
@@ -1295,10 +1171,7 @@ int CaptureEditorWindow::hitTestTextAnnotation(const QPoint& imagePoint, bool* r
 
     for (int i = textAnnotations_.size() - 1; i >= 0; --i) {
         const QRect rect = textAnnotations_[i].rect.adjusted(-4, -4, 4, 4);
-        const QRect handleRect(
-            rect.bottomRight() - QPoint(10, 10),
-            QSize(20, 20)
-        );
+        const QRect handleRect(rect.bottomRight() - QPoint(10, 10), QSize(20, 20));
         if (handleRect.contains(imagePoint)) {
             if (resizeHandle != nullptr) {
                 *resizeHandle = true;
@@ -1312,11 +1185,8 @@ int CaptureEditorWindow::hitTestTextAnnotation(const QPoint& imagePoint, bool* r
     return -1;
 }
 
-QRect CaptureEditorWindow::normalizedTextRect(
-    const QString& text,
-    int pixelSize,
-    const QPoint& topLeft
-) const {
+QRect CaptureEditorWindow::normalizedTextRect(const QString& text, int pixelSize,
+                                              const QPoint& topLeft) const {
     QFont font = this->font();
     font.setBold(true);
     font.setPixelSize(pixelSize);
@@ -1344,23 +1214,14 @@ void CaptureEditorWindow::drawSerialMarker(const QPoint& imagePoint) {
     pushUndoSnapshot();
 
     const int diameter = std::clamp(workingImage_.height() / 14, 26, 42);
-    QRect markerRect(
-        imagePoint.x() - diameter / 2,
-        imagePoint.y() - diameter / 2,
-        diameter,
-        diameter
-    );
+    QRect markerRect(imagePoint.x() - diameter / 2, imagePoint.y() - diameter / 2, diameter,
+                     diameter);
     markerRect = markerRect.intersected(workingImage_.rect().adjusted(0, 0, -1, -1));
 
     QPainter painter(&workingImage_);
     painter.setRenderHint(QPainter::Antialiasing, true);
-    drawSerialBadge(
-        painter,
-        markerRect,
-        QString::number(nextSerialNumber_),
-        QColor(235, 68, 90, 236),
-        QColor(255, 255, 255, 240)
-    );
+    drawSerialBadge(painter, markerRect, QString::number(nextSerialNumber_),
+                    QColor(235, 68, 90, 236), QColor(255, 255, 255, 240));
     ++nextSerialNumber_;
 
     emit imageChanged(workingImage_);
@@ -1370,33 +1231,20 @@ void CaptureEditorWindow::drawSerialMarker(const QPoint& imagePoint) {
 
 void CaptureEditorWindow::drawSerialPreview(QPainter& painter) const {
     const int diameter = std::clamp(workingImage_.height() / 14, 26, 42);
-    QRect previewRect(
-        hoverPoint_.x() - diameter / 2,
-        hoverPoint_.y() - diameter / 2,
-        diameter,
-        diameter
-    );
+    QRect previewRect(hoverPoint_.x() - diameter / 2, hoverPoint_.y() - diameter / 2, diameter,
+                      diameter);
     previewRect = previewRect.intersected(imageViewportRect_.adjusted(0, 0, -1, -1));
     if (previewRect.isEmpty()) {
         return;
     }
 
-    drawSerialBadge(
-        painter,
-        previewRect,
-        QString::number(nextSerialNumber_),
-        QColor(235, 68, 90, 140),
-        QColor(255, 255, 255, 180)
-    );
+    drawSerialBadge(painter, previewRect, QString::number(nextSerialNumber_),
+                    QColor(235, 68, 90, 140), QColor(255, 255, 255, 180));
 }
 
-void CaptureEditorWindow::drawSerialBadge(
-    QPainter& painter,
-    const QRect& rect,
-    const QString& text,
-    const QColor& fillColor,
-    const QColor& outlineColor
-) const {
+void CaptureEditorWindow::drawSerialBadge(QPainter& painter, const QRect& rect, const QString& text,
+                                          const QColor& fillColor,
+                                          const QColor& outlineColor) const {
     if (rect.isEmpty()) {
         return;
     }
@@ -1455,8 +1303,8 @@ void CaptureEditorWindow::handleShortcut(QKeyEvent* event) {
         return;
     }
 
-    if (suppressNextReturnShortcut_
-        && (event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter)) {
+    if (suppressNextReturnShortcut_ &&
+        (event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter)) {
         suppressNextReturnShortcut_ = false;
         event->accept();
         return;
@@ -1480,14 +1328,14 @@ void CaptureEditorWindow::handleShortcut(QKeyEvent* event) {
         return true;
     };
 
-    if (toggleToolIfMatched(shortcuts_.rectangle, Tool::Rectangle)
-        || toggleToolIfMatched(shortcuts_.ellipse, Tool::Ellipse)
-        || toggleToolIfMatched(shortcuts_.arrow, Tool::Arrow)
-        || toggleToolIfMatched(shortcuts_.pen, Tool::Pencil)
-        || toggleToolIfMatched(shortcuts_.marker, Tool::Marker)
-        || toggleToolIfMatched(shortcuts_.mosaic, Tool::Mosaic)
-        || toggleToolIfMatched(shortcuts_.text, Tool::Text)
-        || toggleToolIfMatched(shortcuts_.serial, Tool::Serial)) {
+    if (toggleToolIfMatched(shortcuts_.rectangle, Tool::Rectangle) ||
+        toggleToolIfMatched(shortcuts_.ellipse, Tool::Ellipse) ||
+        toggleToolIfMatched(shortcuts_.arrow, Tool::Arrow) ||
+        toggleToolIfMatched(shortcuts_.pen, Tool::Pencil) ||
+        toggleToolIfMatched(shortcuts_.marker, Tool::Marker) ||
+        toggleToolIfMatched(shortcuts_.mosaic, Tool::Mosaic) ||
+        toggleToolIfMatched(shortcuts_.text, Tool::Text) ||
+        toggleToolIfMatched(shortcuts_.serial, Tool::Serial)) {
         return;
     }
 
@@ -1589,27 +1437,26 @@ QRect CaptureEditorWindow::normalizedDragRect() const {
 }
 
 QPoint CaptureEditorWindow::mapWidgetPointToImage(const QPoint& point) const {
-    if (workingImage_.isNull() || imageViewportRect_.width() <= 0 || imageViewportRect_.height() <= 0) {
+    if (workingImage_.isNull() || imageViewportRect_.width() <= 0 ||
+        imageViewportRect_.height() <= 0) {
         return {};
     }
 
     const QRect viewport = imageViewportRect();
-    const int localX = std::clamp(point.x() - viewport.left(), 0, std::max(0, viewport.width() - 1));
-    const int localY = std::clamp(point.y() - viewport.top(), 0, std::max(0, viewport.height() - 1));
+    const int localX =
+        std::clamp(point.x() - viewport.left(), 0, std::max(0, viewport.width() - 1));
+    const int localY =
+        std::clamp(point.y() - viewport.top(), 0, std::max(0, viewport.height() - 1));
 
-    const int x = std::clamp(
-        qRound((static_cast<double>(localX) / std::max(1, viewport.width() - 1))
-               * (workingImage_.width() - 1)),
-        0,
-        std::max(0, workingImage_.width() - 1)
-    );
-    const int y = std::clamp(
-        qRound((static_cast<double>(localY) / std::max(1, viewport.height() - 1))
-               * (workingImage_.height() - 1)),
-        0,
-        std::max(0, workingImage_.height() - 1)
-    );
+    const int x =
+        std::clamp(qRound((static_cast<double>(localX) / std::max(1, viewport.width() - 1)) *
+                          (workingImage_.width() - 1)),
+                   0, std::max(0, workingImage_.width() - 1));
+    const int y =
+        std::clamp(qRound((static_cast<double>(localY) / std::max(1, viewport.height() - 1)) *
+                          (workingImage_.height() - 1)),
+                   0, std::max(0, workingImage_.height() - 1));
     return {x, y};
 }
 
-}  // namespace cappy::features::editor
+} // namespace cappy::features::editor

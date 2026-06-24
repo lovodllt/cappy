@@ -11,22 +11,16 @@ namespace {
 
 QString bindingLabel(const cappy::platform::hotkey::GlobalHotkey& hotkey) {
     const QKeySequence sequence(static_cast<int>(hotkey.modifiers) | hotkey.key);
-    return QString("%1=%2")
-        .arg(
-            hotkey.displayName,
-            sequence.toString(QKeySequence::NativeText)
-        );
+    return QString("%1=%2").arg(hotkey.displayName, sequence.toString(QKeySequence::NativeText));
 }
 
-}  // namespace
+} // namespace
 
 GlobalHotkeyService::GlobalHotkeyService(QObject* parent)
-    : QObject(parent)
-    , backend_(cappy::platform::hotkey::createGlobalHotkeyBackend()) {
+    : QObject(parent), backend_(cappy::platform::hotkey::createGlobalHotkeyBackend()) {
     if (backend_ != nullptr) {
-        backend_->setActivationHandler([this](const QString& hotkeyId) {
-            emit hotkeyActivated(hotkeyId);
-        });
+        backend_->setActivationHandler(
+            [this](const QString& hotkeyId) { emit hotkeyActivated(hotkeyId); });
     }
 }
 
@@ -73,9 +67,8 @@ QString GlobalHotkeyService::backendSummary() const {
     }
 
     if (backend_->isSupported()) {
-        return enabled_
-            ? QString("%1 (ready)").arg(backend_->backendName())
-            : QString("%1 (disabled)").arg(backend_->backendName());
+        return enabled_ ? QString("%1 (ready)").arg(backend_->backendName())
+                        : QString("%1 (disabled)").arg(backend_->backendName());
     }
 
     return QString("%1 (unavailable: %2)")
@@ -118,4 +111,4 @@ void GlobalHotkeyService::reapplyBindings() {
     }
 }
 
-}  // namespace cappy::services::hotkey
+} // namespace cappy::services::hotkey

@@ -117,7 +117,8 @@ const Strings kEnglishStrings{
     .settingsOcrCloudPrompt = "OCR prompt",
     .settingsOcrTimeoutSeconds = "Timeout (seconds)",
     .settingsOcrLocalHint = "Used for the local command path. Default: tesseract + eng+chi_sim.",
-    .settingsOcrCloudHint = "Used for the cloud OCR path. Endpoint, model, key, and prompt are only required when cloud OCR is selected.",
+    .settingsOcrCloudHint = "Used for the cloud OCR path. Endpoint, model, key, and prompt are "
+                            "only required when cloud OCR is selected.",
     .settingsOcrApiKeyShow = "Show",
     .settingsOcrApiKeyHide = "Hide",
     .settingsCaptureBackend = "Capture backend",
@@ -191,7 +192,8 @@ const Strings kEnglishStrings{
     .statusCopiedHistory = "Copied history capture to clipboard.",
     .statusClosedAllPins = "Closed all pinned windows.",
     .statusNoPinnedWindowsToUpdate = "No pinned windows to update.",
-    .statusEnabledClickThroughTemplate = "Enabled click-through for %1 pinned window(s). Use Restore Pin Input to interact again.",
+    .statusEnabledClickThroughTemplate =
+        "Enabled click-through for %1 pinned window(s). Use Restore Pin Input to interact again.",
     .statusRestoredPinInputTemplate = "Restored pointer input for %1 pinned window(s).",
     .statusOpenedCaptureDirectoryTemplate = "Opened capture directory: %1",
     .statusFailedOpenCaptureDirectoryTemplate = "Failed to open capture directory: %1",
@@ -326,7 +328,8 @@ const Strings kChineseStrings{
     .settingsOcrCloudPrompt = "OCR 提示词",
     .settingsOcrTimeoutSeconds = "超时时间（秒）",
     .settingsOcrLocalHint = "用于本地命令链路。默认：tesseract + eng+chi_sim。",
-    .settingsOcrCloudHint = "用于云端 OCR 链路。仅在选择云端 OCR 时需要填写接口地址、模型、密钥和提示词。",
+    .settingsOcrCloudHint =
+        "用于云端 OCR 链路。仅在选择云端 OCR 时需要填写接口地址、模型、密钥和提示词。",
     .settingsOcrApiKeyShow = "显示",
     .settingsOcrApiKeyHide = "隐藏",
     .settingsCaptureBackend = "截图后端",
@@ -400,7 +403,8 @@ const Strings kChineseStrings{
     .statusCopiedHistory = "历史截图已复制到剪贴板。",
     .statusClosedAllPins = "已关闭所有贴图窗口。",
     .statusNoPinnedWindowsToUpdate = "没有可更新的贴图窗口。",
-    .statusEnabledClickThroughTemplate = "已为 %1 个贴图窗口开启穿透。需要交互时使用“恢复贴图交互”。",
+    .statusEnabledClickThroughTemplate =
+        "已为 %1 个贴图窗口开启穿透。需要交互时使用“恢复贴图交互”。",
     .statusRestoredPinInputTemplate = "已恢复 %1 个贴图窗口的鼠标交互。",
     .statusOpenedCaptureDirectoryTemplate = "已打开截图目录：%1",
     .statusFailedOpenCaptureDirectoryTemplate = "打开截图目录失败：%1",
@@ -428,7 +432,7 @@ const Strings kChineseStrings{
     .captureModeUnknown = "未知",
 };
 
-}  // namespace
+} // namespace
 
 AppLanguage appLanguageFromSettingsValue(const QString& value) {
     const QString normalized = value.trimmed().toLower();
@@ -446,9 +450,8 @@ AppLanguage resolvedAppLanguage(AppLanguage requested, const QLocale& locale) {
         return requested;
     }
 
-    return locale.language() == QLocale::Chinese
-        ? AppLanguage::SimplifiedChinese
-        : AppLanguage::English;
+    return locale.language() == QLocale::Chinese ? AppLanguage::SimplifiedChinese
+                                                 : AppLanguage::English;
 }
 
 AppLanguage resolvedAppLanguageFromSettings(const QString& value, const QLocale& locale) {
@@ -488,51 +491,95 @@ const Strings& strings(AppLanguage language) {
 
 QString shortcutLabel(AppLanguage language, const QString& id) {
     const Strings& text = strings(language);
-    if (id == "global.open_home") return text.actionOpenCappy;
-    if (id == "global.screenshot") return text.actionScreenshot;
-    if (id == "main.region_capture") return text.actionRegionCapture;
-    if (id == "main.fullscreen_capture") return text.actionFullscreenCapture;
-    if (id == "main.active_window_capture") return text.actionActiveWindow;
-    if (id == "main.window_fit_capture") return text.actionWindowFitCapture;
-    if (id == "main.pin_latest") return text.actionPinLastCapture;
-    if (id == "main.save_latest") return text.actionSaveLastCapture;
-    if (id == "main.open_capture_folder") return text.actionOpenCaptureFolder;
-    if (id == "main.settings") return text.actionSettings;
-    if (id == "main.hide_to_tray") return text.actionHideToTray;
-    if (id == "main.quit") return text.actionQuit;
-    if (id == "main.close_pins") return text.actionClosePins;
-    if (id == "main.restore_pin_input") return text.actionRestorePinInput;
-    if (id == "main.history_pin") return text.actionPinSelectedHistoryItem;
-    if (id == "main.history_copy") return text.actionCopySelectedHistoryItem;
-    if (id == "main.history_save") return text.actionSaveSelectedHistoryItem;
-    if (id == "main.history_remove") return text.actionRemoveSelectedHistoryItem;
-    if (id == "overlay.rectangle" || id == "editor.rectangle") return text.toolRectangle;
-    if (id == "overlay.ellipse" || id == "editor.ellipse") return text.toolEllipse;
-    if (id == "overlay.arrow" || id == "editor.arrow") return text.toolArrow;
-    if (id == "overlay.pen" || id == "editor.pen") return text.toolPen;
-    if (id == "overlay.marker" || id == "editor.marker") return text.toolMarker;
-    if (id == "overlay.mosaic" || id == "editor.mosaic") return text.toolMosaic;
-    if (id == "overlay.text" || id == "editor.text") return text.toolText;
-    if (id == "overlay.serial" || id == "editor.serial") return text.toolSerial;
-    if (id == "overlay.undo" || id == "editor.undo") return text.toolUndo;
-    if (id == "overlay.redo" || id == "editor.redo") return text.toolRedo;
-    if (id == "overlay.copy" || id == "editor.copy") return text.actionCopyToClipboard;
-    if (id == "overlay.quick_copy") return text.actionQuickCopy;
-    if (id == "editor.copy_and_close") return text.actionCopyAndClose;
-    if (id == "overlay.save") return text.actionSaveToFile;
-    if (id == "editor.save") return text.actionSaveToCaptureFolder;
-    if (id == "overlay.pin" || id == "editor.pin") return text.actionPinToDesktop;
-    if (id == "overlay.cancel") return text.actionCancel;
-    if (id == "editor.close" || id == "pin.close") return text.actionClose;
-    if (id == "pin.scale_up") return text.pinScaleUp;
-    if (id == "pin.scale_down") return text.pinScaleDown;
-    if (id == "pin.reset_scale_opacity") return text.pinResetScaleAndOpacity;
-    if (id == "pin.opacity_down") return text.pinOpacityDown;
-    if (id == "pin.opacity_up") return text.pinOpacityUp;
-    if (id == "pin.toggle_lock") return text.pinToggleLock;
-    if (id == "pin.toggle_click_through") return text.pinToggleClickThrough;
+    if (id == "global.open_home")
+        return text.actionOpenCappy;
+    if (id == "global.screenshot")
+        return text.actionScreenshot;
+    if (id == "main.region_capture")
+        return text.actionRegionCapture;
+    if (id == "main.fullscreen_capture")
+        return text.actionFullscreenCapture;
+    if (id == "main.active_window_capture")
+        return text.actionActiveWindow;
+    if (id == "main.window_fit_capture")
+        return text.actionWindowFitCapture;
+    if (id == "main.pin_latest")
+        return text.actionPinLastCapture;
+    if (id == "main.save_latest")
+        return text.actionSaveLastCapture;
+    if (id == "main.open_capture_folder")
+        return text.actionOpenCaptureFolder;
+    if (id == "main.settings")
+        return text.actionSettings;
+    if (id == "main.hide_to_tray")
+        return text.actionHideToTray;
+    if (id == "main.quit")
+        return text.actionQuit;
+    if (id == "main.close_pins")
+        return text.actionClosePins;
+    if (id == "main.restore_pin_input")
+        return text.actionRestorePinInput;
+    if (id == "main.history_pin")
+        return text.actionPinSelectedHistoryItem;
+    if (id == "main.history_copy")
+        return text.actionCopySelectedHistoryItem;
+    if (id == "main.history_save")
+        return text.actionSaveSelectedHistoryItem;
+    if (id == "main.history_remove")
+        return text.actionRemoveSelectedHistoryItem;
+    if (id == "overlay.rectangle" || id == "editor.rectangle")
+        return text.toolRectangle;
+    if (id == "overlay.ellipse" || id == "editor.ellipse")
+        return text.toolEllipse;
+    if (id == "overlay.arrow" || id == "editor.arrow")
+        return text.toolArrow;
+    if (id == "overlay.pen" || id == "editor.pen")
+        return text.toolPen;
+    if (id == "overlay.marker" || id == "editor.marker")
+        return text.toolMarker;
+    if (id == "overlay.mosaic" || id == "editor.mosaic")
+        return text.toolMosaic;
+    if (id == "overlay.text" || id == "editor.text")
+        return text.toolText;
+    if (id == "overlay.serial" || id == "editor.serial")
+        return text.toolSerial;
+    if (id == "overlay.undo" || id == "editor.undo")
+        return text.toolUndo;
+    if (id == "overlay.redo" || id == "editor.redo")
+        return text.toolRedo;
+    if (id == "overlay.copy" || id == "editor.copy")
+        return text.actionCopyToClipboard;
+    if (id == "overlay.quick_copy")
+        return text.actionQuickCopy;
+    if (id == "editor.copy_and_close")
+        return text.actionCopyAndClose;
+    if (id == "overlay.save")
+        return text.actionSaveToFile;
+    if (id == "editor.save")
+        return text.actionSaveToCaptureFolder;
+    if (id == "overlay.pin" || id == "editor.pin")
+        return text.actionPinToDesktop;
+    if (id == "overlay.cancel")
+        return text.actionCancel;
+    if (id == "editor.close" || id == "pin.close")
+        return text.actionClose;
+    if (id == "pin.scale_up")
+        return text.pinScaleUp;
+    if (id == "pin.scale_down")
+        return text.pinScaleDown;
+    if (id == "pin.reset_scale_opacity")
+        return text.pinResetScaleAndOpacity;
+    if (id == "pin.opacity_down")
+        return text.pinOpacityDown;
+    if (id == "pin.opacity_up")
+        return text.pinOpacityUp;
+    if (id == "pin.toggle_lock")
+        return text.pinToggleLock;
+    if (id == "pin.toggle_click_through")
+        return text.pinToggleClickThrough;
     if (id.endsWith("_alt")) {
-        return QString("%1 %2").arg(shortcutLabel(language, id.first(id.size() - 4)), isChinese(resolvedAppLanguage(language)) ? "备用" : "Alt");
+        return QString("%1 %2").arg(shortcutLabel(language, id.first(id.size() - 4)),
+                                    isChinese(resolvedAppLanguage(language)) ? "备用" : "Alt");
     }
     return id;
 }
@@ -562,20 +609,17 @@ QString historyCountLabel(AppLanguage language, int count) {
     return count == 1 ? "1 item" : QString("%1 items").arg(count);
 }
 
-QString historyItemDetailText(
-    AppLanguage language,
-    const QString& baseTitle,
-    const QString& modeLabel,
-    const QString& filePath
-) {
+QString historyItemDetailText(AppLanguage language, const QString& baseTitle,
+                              const QString& modeLabel, const QString& filePath) {
     const Strings& text = strings(language);
     if (filePath.isEmpty()) {
         return QString("%1\n%2: %3\n%4: %5")
-            .arg(baseTitle, text.historyModeLabel, modeLabel, text.historyStateLabel, text.historyClipboardOnly);
+            .arg(baseTitle, text.historyModeLabel, modeLabel, text.historyStateLabel,
+                 text.historyClipboardOnly);
     }
 
     return QString("%1\n%2: %3\n%4: %5")
         .arg(baseTitle, text.historyModeLabel, modeLabel, text.historySavedToLabel, filePath);
 }
 
-}  // namespace cappy::localization
+} // namespace cappy::localization

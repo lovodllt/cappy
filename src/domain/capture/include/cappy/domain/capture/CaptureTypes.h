@@ -45,4 +45,4 @@ struct CaptureResult {
     }
 };
 
-}  // namespace cappy::domain::capture
+} // namespace cappy::domain::capture

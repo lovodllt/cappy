@@ -36,9 +36,8 @@ void messageHandler(QtMsgType type, const QMessageLogContext&, const QString& me
     }
 
     QTextStream stream(g_logFile);
-    stream << QDateTime::currentDateTime().toString(Qt::ISODateWithMs)
-           << " [" << levelName(type) << "] "
-           << message << '\n';
+    stream << QDateTime::currentDateTime().toString(Qt::ISODateWithMs) << " [" << levelName(type)
+           << "] " << message << '\n';
     stream.flush();
 
     if (type == QtFatalMsg) {
@@ -46,7 +45,7 @@ void messageHandler(QtMsgType type, const QMessageLogContext&, const QString& me
     }
 }
 
-}  // namespace
+} // namespace
 
 QString AppLogger::initialize(const QString& logsDirectory) {
     QDir().mkpath(logsDirectory);

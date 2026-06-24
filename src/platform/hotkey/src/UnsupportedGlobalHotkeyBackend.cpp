@@ -3,8 +3,7 @@
 namespace cappy::platform::hotkey {
 
 UnsupportedGlobalHotkeyBackend::UnsupportedGlobalHotkeyBackend(QString reason)
-    : reason_(std::move(reason)) {
-}
+    : reason_(std::move(reason)) {}
 
 QString UnsupportedGlobalHotkeyBackend::backendName() const {
     return "unsupported-global-hotkey";
@@ -23,8 +22,7 @@ QString UnsupportedGlobalHotkeyBackend::lastError() const {
 }
 
 void UnsupportedGlobalHotkeyBackend::setActivationHandler(
-    std::function<void(const QString&)> handler
-) {
+    std::function<void(const QString&)> handler) {
     Q_UNUSED(handler);
 }
 
@@ -34,7 +32,6 @@ bool UnsupportedGlobalHotkeyBackend::registerHotkey(const GlobalHotkey& hotkey) 
     return false;
 }
 
-void UnsupportedGlobalHotkeyBackend::unregisterAll() {
-}
+void UnsupportedGlobalHotkeyBackend::unregisterAll() {}
 
-}  // namespace cappy::platform::hotkey
+} // namespace cappy::platform::hotkey

@@ -14,13 +14,13 @@ class AppController;
 class MainWindow;
 
 class AppBootstrap {
-public:
+  public:
     explicit AppBootstrap(QApplication& app);
     ~AppBootstrap();
 
     int run();
 
-private:
+  private:
     QStringList loadPlugins();
 
     QApplication& app_;
