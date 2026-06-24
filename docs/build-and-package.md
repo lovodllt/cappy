@@ -220,6 +220,7 @@ Additional verification completed on 2026-06-24:
 - Windows CI baseline now builds with MSVC on `windows-2022` and runs the packaging script
 - Windows CI now installs NSIS explicitly and prints the resolved Qt toolchain to simplify packaging diagnostics
 - Windows CI now uses Qt `6.8.3` because `win64_msvc2022_64` is only supported by the install action on Qt `6.8+`
+- Windows CI now installs `ninja` explicitly and resolves `windeployqt` from `QT_ROOT_DIR/bin`
 
 Important note:
 

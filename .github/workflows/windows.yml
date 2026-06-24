@@ -24,6 +24,7 @@ jobs:
         shell: pwsh
         run: |
           choco install nsis --no-progress -y
+          choco install ninja --no-progress -y
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
@@ -42,6 +43,9 @@ jobs:
         shell: pwsh
         run: |
           python --version
+          ninja --version
+          cmake --version
+          Write-Host "QT_ROOT_DIR=$env:QT_ROOT_DIR"
           qmake -query
           Get-Command windeployqt
           makensis /VERSION
@@ -55,8 +59,13 @@ jobs:
       - name: Locate Qt bin
         shell: pwsh
         run: |
-          $qmakePath = (Get-Command qmake).Source
-          $qtBinDir = Split-Path $qmakePath -Parent
+          if (-not $env:QT_ROOT_DIR) {
+            throw "QT_ROOT_DIR is not set by install-qt-action."
+          }
+          $qtBinDir = Join-Path $env:QT_ROOT_DIR "bin"
+          if (-not (Test-Path (Join-Path $qtBinDir "windeployqt.exe"))) {
+            throw "windeployqt.exe not found under $qtBinDir"
+          }
           "QT_BIN_DIR=$qtBinDir" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Package
