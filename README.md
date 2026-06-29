@@ -44,6 +44,12 @@ Out of scope for the first phase:
 - [`docs/roadmap.md`](docs/roadmap.md): staged delivery plan
 - [`docs/adr/0001-qt6-widgets-plugin-architecture.md`](docs/adr/0001-qt6-widgets-plugin-architecture.md): first architectural decision record
 
+## Export packages
+
+- Linux `.deb`: run `./scripts/package-linux.sh build-release`
+- Windows `.exe` on a Windows machine: run `./scripts/package-windows.ps1 -BuildDir build-win -QtBinDir "C:\Qt\6.8.3\msvc2022_64\bin"`
+- Download latest green Windows artifact from GitHub Actions: `./scripts/download-latest-windows-artifact.sh` with `GH_TOKEN` configured
+
 ## Toolchain baseline
 
 - C++20

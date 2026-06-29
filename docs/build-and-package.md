@@ -137,6 +137,32 @@ Current Windows packaging script:
 ./scripts/package-windows.ps1 -BuildDir build-win -QtBinDir "C:\Qt\6.8.3\msvc2022_64\bin"
 ```
 
+Recommended local export flow on a Windows machine:
+
+1. install Visual Studio 2022 with MSVC v143
+2. install CMake, Ninja, and NSIS
+3. install Qt `6.8.3` with the `msvc2022_64` desktop kit
+4. open `x64 Native Tools Command Prompt for VS 2022` or a PowerShell session with MSVC on `PATH`
+5. run:
+
+```powershell
+./scripts/package-windows.ps1 -BuildDir build-win -QtBinDir "C:\Qt\6.8.3\msvc2022_64\bin"
+```
+
+Expected outputs:
+
+- `Cappy-0.1.0-win64.exe` or similarly named NSIS installer
+- optional `.zip` package depending on the CPack generator output location
+
+If the goal is only to fetch the latest verified Windows installer from CI instead of rebuilding locally, use:
+
+```bash
+export GH_TOKEN=your_github_token
+./scripts/download-latest-windows-artifact.sh
+```
+
+This downloads and extracts the latest successful `cappy-windows-packages` artifact from the `main` branch into `dist/windows-artifact/`.
+
 The script performs:
 
 1. configure a Release build
